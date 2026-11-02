@@ -4,16 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Bludiště – generátor bludišť k tisku</title>
-<meta name="description" content="Generátor bludišť pro tisk na A4 a export do PDF.">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
-<a class="back" href="../">‹ Zpět na rozcestník</a>
-<header class="top">
+<header class="bar">
+  <a class="back" href="../">‹ Rozcestník</a>
   <h1>Bludiště</h1>
-  <p class="sub">Krásná bludiště k tisku na A4. Jedním klikem.</p>
+  <span class="sub">Bludiště k tisku na A4</span>
 </header>
 <main class="layout">
   <section class="card controls" aria-label="Nastavení">
@@ -28,39 +27,20 @@
       <input type="range" id="size" min="6" max="70" step="1">
     </div>
     <div class="group">
-      <label class="lbl">Orientace</label>
-      <div class="seg" id="orient"><button data-o="landscape">Na šířku</button><button data-o="portrait">Na výšku</button></div>
-    </div>
-    <div class="group">
-      <label class="lbl" for="thick">Tloušťka čáry <span class="val" id="thickVal"></span></label>
-      <input type="range" id="thick" min="0.2" max="2" step="0.1">
-    </div>
-    <div class="group row">
       <label class="lbl" for="seed">Seed</label>
       <input type="text" id="seed" inputmode="numeric" autocomplete="off">
     </div>
     <button class="primary" id="newMaze">Nové bludiště</button>
-    <div class="group toggles">
-      <label class="tg"><span>Zobrazit řešení</span><input type="checkbox" id="showSol"><i></i></label>
-      <label class="tg"><span>Řešení i v PDF</span><input type="checkbox" id="pdfSol"><i></i></label>
-      <label class="tg"><span>Ručně kreslený styl</span><input type="checkbox" id="hand"><i></i></label>
-      <label class="tg"><span>Ikonky (vlajka a hvězda)</span><input type="checkbox" id="icons"><i></i></label>
-      <label class="tg"><span>Seed a obtížnost v patičce</span><input type="checkbox" id="meta"><i></i></label>
-    </div>
-    <div class="group row">
-      <label class="lbl" for="title">Název v patičce</label>
-      <input type="text" id="title" maxlength="60">
-    </div>
+    <label class="tg"><span>Zobrazit řešení</span><input type="checkbox" id="showSol"><i></i></label>
     <div class="actions">
-      <button class="primary" id="pdf">Stáhnout PDF</button>
+      <button class="primary" id="pdf">Uložit PDF</button>
       <button class="ghost" id="print">Tisk</button>
     </div>
+    <p class="hint" id="info"></p>
   </section>
   <section class="stage" aria-label="Náhled">
     <div class="sheet" id="sheet"><div id="svgWrap"></div></div>
-    <p class="hint" id="info"></p>
   </section>
 </main>
-<footer class="foot">Vytvořeno pro Jiřího · běží čistě v prohlížeči</footer>
 </body>
 </html>

@@ -19,7 +19,7 @@ function mulberry32(a) {
   };
 }
 
-// ---------- Maze (iterative recursive backtracker) ----------
+// ---------- Maze (growing tree, mix nejnovější/náhodná buňka) ----------
 const N = 1, E = 2, S = 4, W = 8;
 const DIRS = [[N, 0, -1, S], [E, 1, 0, W], [S, 0, 1, N], [W, -1, 0, E]];
 function generateMaze(cols, rows, seed) {
@@ -28,13 +28,14 @@ function generateMaze(cols, rows, seed) {
   const seen = new Uint8Array(cols * rows);
   const stack = [0]; seen[0] = 1;
   while (stack.length) {
-    const c = stack[stack.length - 1], x = c % cols, y = (c / cols) | 0;
+    const idx = rnd() < 0.5 ? stack.length - 1 : (rnd() * stack.length) | 0; // growing tree: 50 % nejnovější, 50 % náhodná
+    const c = stack[idx], x = c % cols, y = (c / cols) | 0;
     const opts = [];
     for (const d of DIRS) {
       const nx = x + d[1], ny = y + d[2];
       if (nx >= 0 && ny >= 0 && nx < cols && ny < rows && !seen[ny * cols + nx]) opts.push(d);
     }
-    if (!opts.length) { stack.pop(); continue; }
+    if (!opts.length) { stack[idx] = stack[stack.length - 1]; stack.pop(); continue; }
     const d = opts[(rnd() * opts.length) | 0];
     const n = (y + d[2]) * cols + x + d[1];
     walls[c] &= ~d[0]; walls[n] &= ~d[3]; seen[n] = 1; stack.push(n);
@@ -75,14 +76,14 @@ function gridFor(size, orient) {
   return aw >= ah ? [a, b] : [b, a];
 }
 function buildScene(st) {
-  const [PW, PH] = pageSize(st.orient);
-  const [cols, rows] = gridFor(st.size, st.orient);
+  const [PW, PH] = pageSize('landscape');
+  const [cols, rows] = gridFor(st.size, 'landscape');
   const maze = generateMaze(cols, rows, st.seed);
   const top = 22, bottom = 22, side = 12;
   const cell = Math.min((PW - 2 * side) / cols, (PH - top - bottom) / rows);
   const ox = (PW - cell * cols) / 2, oy = top + ((PH - top - bottom) - cell * rows) / 2;
   const rnd = mulberry32(hashSeed(st.seed) ^ 0x9e3779b9);
-  const amp = st.hand ? Math.min(0.55, cell * 0.09) : 0;
+  const amp = 0;
   const jp = (gx, gy) => { // deterministic jitter per grid point so joints meet
     if (!amp) return [ox + gx * cell, oy + gy * cell];
     const r = mulberry32((gx * 73856093) ^ (gy * 19349663) ^ hashSeed(st.seed));
@@ -127,7 +128,7 @@ function buildScene(st) {
   const ah = Math.min(3, Math.max(1.6, cell * .5));
   deco.push([[ax1, oy - 12], [ax1, oy - 2]], [[ax1 - ah, oy - 2 - ah], [ax1, oy - 2], [ax1 + ah, oy - 2 - ah]]);
   deco.push([[ax2, oy - 2], [ax2, oy - 12]], [[ax2 - ah, oy - 12 + ah], [ax2, oy - 12], [ax2 + ah, oy - 12 + ah]]);
-  if (st.icons) {
+  if (false) {
     const fx = ax1 + 4.5, fy = oy - 13; // flag
     deco.push([[fx, fy + 9], [fx, fy]], [[fx, fy], [fx + 6, fy + 1.6], [fx, fy + 3.6]]);
     const sx = ax2 - 8, sy = oy - 8, R = 4, r = 1.7, star = []; // star
@@ -142,16 +143,15 @@ function buildScene(st) {
   return { PW, PH, cols, rows, cell, maze, lines, deco, solution, footerY: PH - 12, path };
 }
 
-function metaText(st, sc) {
-  const name = PRESET_NAMES[st.preset] || 'Vlastní';
-  return `${name} · ${sc.cols}×${sc.rows} · seed ${st.seed}`;
-}
+const THICK = 0.4; // mm, pevná tloušťka čáry
+function fmtDate(ts) { const d = new Date(ts || Date.now()), p = n => String(n).padStart(2, '0'); return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function footerText(st) { return `Bludiště · seed ${st.seed} · ${fmtDate(st.created)}`; }
 
 // ---------- SVG ----------
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function toD(pts) { return 'M' + pts.map(p => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('L'); }
 function renderSVG(st, sc, withSol) {
-  const t = st.thick;
+  const t = THICK;
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sc.PW} ${sc.PH}" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">`;
   s += `<rect width="${sc.PW}" height="${sc.PH}" fill="#fff"/>`;
   if (withSol && sc.solution) s += `<path d="${toD(sc.solution)}" fill="none" stroke="#ff3b30" stroke-opacity=".75" stroke-width="${Math.max(.5, sc.cell * .28)}" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -159,8 +159,7 @@ function renderSVG(st, sc, withSol) {
   s += `<path d="${sc.deco.map(toD).join('')}" fill="none" stroke="#1d1d1f" stroke-width="${Math.max(.4, t * .8)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const fy = sc.footerY;
   s += `<line x1="12" y1="${fy - 4}" x2="${sc.PW - 12}" y2="${fy - 4}" stroke="#d2d2d7" stroke-width=".3"/>`;
-  s += `<text x="12" y="${fy + 1.5}" font-size="4.2" font-weight="700" fill="#1d1d1f">${esc(st.title || 'Bludiště')}</text>`;
-  if (st.meta) s += `<text x="${sc.PW - 12}" y="${fy + 1.5}" font-size="2.8" text-anchor="end" fill="#86868b">${esc(metaText(st, sc))}</text>`;
+  s += `<text x="12" y="${fy + 1.5}" font-size="3.6" font-weight="600" fill="#1d1d1f">${esc(footerText(st))}</text>`;
   return s + '</svg>';
 }
 
@@ -179,31 +178,29 @@ async function loadFonts() {
 }
 function deaccent(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 async function makePDF(st, sc, jsPDFCtor, fonts) {
-  const doc = new jsPDFCtor({ orientation: st.orient === 'portrait' ? 'portrait' : 'landscape', unit: 'mm', format: 'a4', compress: true });
+  const doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
   let fam = 'helvetica', txt = deaccent;
   if (fonts) {
     doc.addFileToVFS('LS-R.ttf', fonts.r); doc.addFont('LS-R.ttf', 'LS', 'normal');
     doc.addFileToVFS('LS-B.ttf', fonts.b); doc.addFont('LS-B.ttf', 'LS', 'bold');
     fam = 'LS'; txt = s => s;
   }
-  doc.setProperties({ title: st.title || 'Bludiště', creator: 'Bludiště' });
+  doc.setProperties({ title: footerText(st), creator: 'Bludiště' });
   doc.setLineCap('round'); doc.setLineJoin('round');
   const poly = (pts) => {
     const d = []; for (let i = 1; i < pts.length; i++) d.push([pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]]);
     doc.lines(d, pts[0][0], pts[0][1], [1, 1], 'S', false);
   };
-  if (st.pdfSol && sc.solution) { doc.setDrawColor(255, 59, 48); doc.setLineWidth(Math.max(.5, sc.cell * .28)); poly(sc.solution); }
-  doc.setDrawColor(29, 29, 31); doc.setLineWidth(st.thick); sc.lines.forEach(poly);
-  doc.setLineWidth(Math.max(.4, st.thick * .8)); sc.deco.forEach(poly);
+  doc.setDrawColor(29, 29, 31); doc.setLineWidth(THICK); sc.lines.forEach(poly);
+  doc.setLineWidth(Math.max(.4, THICK * .8)); sc.deco.forEach(poly);
   const fy = sc.footerY;
   doc.setDrawColor(210, 210, 215); doc.setLineWidth(.3); doc.line(12, fy - 4, sc.PW - 12, fy - 4);
-  doc.setFont(fam, 'bold'); doc.setFontSize(12); doc.setTextColor(29, 29, 31);
-  doc.text(txt(st.title || 'Bludiště'), 12, fy + 1.5);
-  if (st.meta) { doc.setFont(fam, 'normal'); doc.setFontSize(8); doc.setTextColor(134, 134, 139); doc.text(txt(metaText(st, sc)), sc.PW - 12, fy + 1.5, { align: 'right' }); }
+  doc.setFont(fam, 'bold'); doc.setFontSize(10); doc.setTextColor(29, 29, 31);
+  doc.text(txt(footerText(st)), 12, fy + 1.5);
   return doc;
 }
 
-const API = { hashSeed, mulberry32, generateMaze, solveMaze, buildScene, renderSVG, makePDF, gridFor, PRESETS };
+const API = { footerText, hashSeed, mulberry32, generateMaze, solveMaze, buildScene, renderSVG, makePDF, gridFor, PRESETS };
 if (typeof module !== 'undefined' && module.exports) { module.exports = API; return; }
 root.Bludiste = API;
 
@@ -211,46 +208,33 @@ root.Bludiste = API;
 const $ = id => document.getElementById(id);
 const KEY = 'bludiste.settings.v1';
 const newSeed = () => String(Math.floor(Math.random() * 900000) + 100000);
-const DEF = { preset: 'medium', size: 24, orient: 'landscape', thick: 0.6, seed: newSeed(), showSol: false, pdfSol: false, hand: true, icons: true, meta: true, title: 'Bludiště' };
+const DEF = { preset: 'medium', size: 24, seed: newSeed(), created: Date.now(), showSol: false };
 let st = Object.assign({}, DEF);
-try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+try { const o = JSON.parse(localStorage.getItem(KEY) || '{}'); for (const k in DEF) if (k in o) st[k] = o[k]; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }; // ukládá jen aktuální klíče => staré volby zmizí
 let scene;
-const printStyle = document.createElement('style'); document.head.appendChild(printStyle);
-
 function sync() {
   document.querySelectorAll('#presets button').forEach(b => b.classList.toggle('on', b.dataset.p === st.preset));
-  document.querySelectorAll('#orient button').forEach(b => b.classList.toggle('on', b.dataset.o === st.orient));
-  $('size').value = st.size; $('thick').value = st.thick; $('seed').value = st.seed; $('title').value = st.title;
-  ['showSol', 'pdfSol', 'hand', 'icons', 'meta'].forEach(k => $(k).checked = !!st[k]);
-  $('thickVal').textContent = (+st.thick).toFixed(1) + ' mm';
+  $('size').value = st.size; $('seed').value = st.seed; $('showSol').checked = !!st.showSol;
 }
 function render() {
   scene = buildScene(st);
   $('sizeVal').textContent = scene.cols + ' × ' + scene.rows;
-  $('sheet').classList.toggle('portrait', st.orient === 'portrait');
   $('svgWrap').innerHTML = renderSVG(st, scene, st.showSol);
-  $('info').textContent = `${scene.cols * scene.rows} políček · délka řešení ${scene.path ? scene.path.length : '–'} kroků · A4 ${st.orient === 'portrait' ? 'na výšku' : 'na šířku'}`;
-  printStyle.textContent = `@media print{@page{size:A4 ${st.orient};margin:0}}`;
+  $('info').textContent = `${scene.cols * scene.rows} políček · řešení ${scene.path ? scene.path.length : '–'} kroků · A4 na šířku`;
   save();
 }
 function update(p) { Object.assign(st, p); sync(); render(); }
-
 document.querySelectorAll('#presets button').forEach(b => b.onclick = () => update({ preset: b.dataset.p, size: PRESETS[b.dataset.p] }));
-document.querySelectorAll('#orient button').forEach(b => b.onclick = () => update({ orient: b.dataset.o }));
 $('size').oninput = e => { const v = +e.target.value; const p = Object.keys(PRESETS).find(k => PRESETS[k] === v); update({ size: v, preset: p || 'custom' }); };
-$('thick').oninput = e => update({ thick: +e.target.value });
-$('seed').oninput = e => update({ seed: e.target.value || '1' });
-$('title').oninput = e => update({ title: e.target.value });
-['showSol', 'pdfSol', 'hand', 'icons', 'meta'].forEach(k => $(k).onchange = e => update({ [k]: e.target.checked }));
-$('newMaze').onclick = () => update({ seed: newSeed() });
-$('print').onclick = () => { if (st.showSol !== st.pdfSol) { $('svgWrap').innerHTML = renderSVG(st, scene, st.pdfSol); } window.print(); render(); };
+$('seed').oninput = e => update({ seed: e.target.value || '1', created: Date.now() });
+$('showSol').onchange = e => update({ showSol: e.target.checked });
+$('newMaze').onclick = () => update({ seed: newSeed(), created: Date.now() });
+$('print').onclick = () => { $('svgWrap').innerHTML = renderSVG(st, scene, false); window.print(); render(); };
 $('pdf').onclick = async () => {
   const btn = $('pdf'); btn.disabled = true; const o = btn.textContent; btn.textContent = 'Připravuji…';
-  try {
-    const doc = await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts());
-    doc.save(`bludiste-${st.seed}.pdf`);
-  } catch (e) { alert('Export PDF selhal: ' + e.message); }
+  try { (await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts())).save(`bludiste-${st.seed}.pdf`); }
+  catch (e) { alert('Export PDF selhal: ' + e.message); }
   btn.disabled = false; btn.textContent = o;
 };
 sync(); render();
