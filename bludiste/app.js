@@ -150,16 +150,24 @@ function footerText(st) { return `Bludiště · seed ${st.seed} · ${fmtDate(st.
 // ---------- SVG ----------
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function toD(pts) { return 'M' + pts.map(p => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('L'); }
-function renderSVG(st, sc, withSol) {
+function renderSVG(st, sc, withSol, preview) {
   const t = THICK;
-  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sc.PW} ${sc.PH}" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">`;
-  s += `<rect width="${sc.PW}" height="${sc.PH}" fill="#fff"/>`;
+  let vb = `0 0 ${sc.PW} ${sc.PH}`, ink = '#1d1d1f';
+  if (preview) { // náhled: jen bludiště, oříznuté na obsah, barva čar dle motivu
+    let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
+    for (const l of sc.lines.concat(sc.deco)) for (const [x, y] of l) { x1 = Math.min(x1, x); y1 = Math.min(y1, y); x2 = Math.max(x2, x); y2 = Math.max(y2, y); }
+    const m = 1; vb = `${x1 - m} ${y1 - m} ${x2 - x1 + 2 * m} ${y2 - y1 + 2 * m}`; ink = 'currentColor';
+  }
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">`;
+  if (!preview) s += `<rect width="${sc.PW}" height="${sc.PH}" fill="#fff"/>`;
   if (withSol && sc.solution) s += `<path d="${toD(sc.solution)}" fill="none" stroke="#ff3b30" stroke-opacity=".75" stroke-width="${Math.max(.5, sc.cell * .28)}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  s += `<path d="${sc.lines.map(toD).join('')}" fill="none" stroke="#1d1d1f" stroke-width="${t}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  s += `<path d="${sc.deco.map(toD).join('')}" fill="none" stroke="#1d1d1f" stroke-width="${Math.max(.4, t * .8)}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const fy = sc.footerY;
-  s += `<line x1="12" y1="${fy - 4}" x2="${sc.PW - 12}" y2="${fy - 4}" stroke="#d2d2d7" stroke-width=".3"/>`;
-  s += `<text x="12" y="${fy + 1.5}" font-size="3.6" font-weight="600" fill="#1d1d1f">${esc(footerText(st))}</text>`;
+  s += `<path d="${sc.lines.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${t}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s += `<path d="${sc.deco.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${Math.max(.4, t * .8)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (!preview) {
+    const fy = sc.footerY;
+    s += `<line x1="12" y1="${fy - 4}" x2="${sc.PW - 12}" y2="${fy - 4}" stroke="#d2d2d7" stroke-width=".3"/>`;
+    s += `<text x="12" y="${fy + 1.5}" font-size="3.6" font-weight="600" fill="#1d1d1f">${esc(footerText(st))}</text>`;
+  }
   return s + '</svg>';
 }
 
@@ -220,7 +228,8 @@ function sync() {
 function render() {
   scene = buildScene(st);
   $('sizeVal').textContent = scene.cols + ' × ' + scene.rows;
-  $('svgWrap').innerHTML = renderSVG(st, scene, st.showSol);
+  $('svgWrap').innerHTML = renderSVG(st, scene, st.showSol, true);
+  $('mfoot').textContent = footerText(st);
   $('info').textContent = `${scene.cols * scene.rows} políček · řešení ${scene.path ? scene.path.length : '–'} kroků · A4 na šířku`;
   save();
 }
@@ -230,7 +239,7 @@ $('size').oninput = e => { const v = +e.target.value; const p = Object.keys(PRES
 $('seed').oninput = e => update({ seed: e.target.value || '1', created: Date.now() });
 $('showSol').onchange = e => update({ showSol: e.target.checked });
 $('newMaze').onclick = () => update({ seed: newSeed(), created: Date.now() });
-$('print').onclick = () => { $('svgWrap').innerHTML = renderSVG(st, scene, false); window.print(); render(); };
+$('print').onclick = () => { $('svgWrap').innerHTML = renderSVG(st, scene, false); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
 $('pdf').onclick = async () => {
   const btn = $('pdf'); btn.disabled = true; const o = btn.textContent; btn.textContent = 'Připravuji…';
   try { (await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts())).save(`bludiste-${st.seed}.pdf`); }
