@@ -48,11 +48,13 @@ button:active{transform:scale(.97)}button:hover{filter:brightness(1.05)}
 .sol{display:none}.withsol .sol{display:flex}
 @media (max-width:860px){body{overflow:auto;height:auto}.layout{grid-template-columns:1fr}.stage{overflow:visible}.sheet{max-width:none}.sub{display:none}}
 @media print{
-  @page{size:A4;margin:0}
+  @page{size:A4;margin:12mm}
   html,body{height:auto;overflow:visible;background:#fff!important}
   .bar,.controls{display:none!important}
   .layout,.stage{display:block;padding:0;margin:0;max-width:none;overflow:visible}
-  .sheet{width:210mm;height:297mm;max-width:none;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;padding:16mm 18mm 12mm;color:#000}.withsol #sheet1{break-after:page;page-break-after:always}
+  .sheet{width:100%;height:250mm;max-width:none;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;padding:4mm 6mm 0;color:#000;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+  .sheet .grid{flex:1 1 auto;min-height:0;height:100%;width:100%}
+  .withsol #sheet1{break-after:page;page-break-after:always}
   .sheet::before{display:none}
   .sol{display:none}.withsol .sol{display:flex}
   .sheet *{color:#000!important}.foot{color:#666!important}
