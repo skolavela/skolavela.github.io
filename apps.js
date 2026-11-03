@@ -4,4 +4,6 @@ window.APPS = [
     desc: 'Generátor bludišť k tisku na A4. Volitelná obtížnost, export do PDF.' },
   { name: 'Tučné slabiky', url: 'slabiky/', icon: 'text', color: '#ff2d78',
     desc: 'Libovolný text po slabikách střídavě tučně a normálně – pro dyslektiky. Tisk a PDF.' },
+  { name: 'Osmisměrka', url: 'osmismerky/', icon: 'grid', color: '#5e5ce6',
+    desc: 'Osmisměrky na zvolené téma nebo z vlastních slov, pro 1. i 2. stupeň. Tisk s řešením.' },
 ];

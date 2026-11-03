@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Osmisměrka – generátor osmisměrek k tisku</title>
+<link rel="stylesheet" href="style.css?v=202611031120">
+<script src="topics.js?v=202611031120" defer></script>
+<script src="engine.js?v=202611031120" defer></script>
+<script src="app.js?v=202611031120" defer></script>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="../">‹ Rozcestník</a>
+  <h1><span class="logo">Ab</span>Osmisměrka</h1>
+  <span class="sub">Osmisměrky na zvolené téma k tisku na A4</span>
+</header>
+<main class="layout">
+  <section class="card controls" aria-label="Nastavení">
+    <div class="group">
+      <label class="lbl">Úroveň</label>
+      <div class="seg" id="lvl"><button data-v="1">1. stupeň</button><button data-v="2">2. stupeň</button></div>
+    </div>
+    <div class="group">
+      <label class="lbl" for="topic">Téma</label>
+      <select id="topic"></select>
+    </div>
+    <div class="group">
+      <label class="lbl" for="own">Vlastní slova <button class="link" id="clearOwn" type="button">Vymazat</button></label>
+      <textarea id="own" rows="2" placeholder="Nepovinné – slova oddělená čárkou nebo mezerou. Nahradí téma."></textarea>
+    </div>
+    <div class="group">
+      <label class="lbl" for="title">Nadpis</label>
+      <input type="text" id="title" autocomplete="off">
+    </div>
+    <div class="two">
+      <div class="group"><label class="lbl" for="size">Mřížka <span class="val" id="sizeVal"></span></label><input type="range" id="size" min="6" max="20" step="1"></div>
+      <div class="group"><label class="lbl" for="count">Slov <span class="val" id="countVal"></span></label><input type="range" id="count" min="3" max="30" step="1"></div>
+    </div>
+    <label class="tg"><span>Všechny směry (i pozpátku a šikmo)</span><input type="checkbox" id="all8"><i></i></label>
+    <label class="tg"><span>Ponechat diakritiku</span><input type="checkbox" id="dia"><i></i></label>
+    <label class="tg"><span>Přidat řešení (2. strana)</span><input type="checkbox" id="sol"><i></i></label>
+    <button class="ghost" id="regen" type="button">🔀 Nová osmisměrka</button>
+    <button class="primary" id="print" type="button">Vytisknout / uložit PDF</button>
+    <p class="hint" id="info"></p>
+  </section>
+  <section class="stage" aria-label="Náhled" id="stage">
+    <div class="sheet" id="sheet1"></div>
+    <div class="sheet sol" id="sheet2"></div>
+  </section>
+</main>
+</body>
+</html>
