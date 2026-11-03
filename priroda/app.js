@@ -6,7 +6,7 @@ var CATS = [
   { k: 'obojzivelnici', n: 'Obojživelníci', e: '🐸', c: '#0f9d8a', s: [] },
   { k: 'ryby', n: 'Ryby', e: '🐟', c: '#0a84c6', s: [['sladkovodni', 'Sladkovodní'], ['morske', 'Mořské']] },
   { k: 'hmyz', n: 'Hmyz', e: '🦋', c: '#7a5af5', s: [['motyli', 'Motýli'], ['brouci', 'Brouci'], ['ostatni', 'Ostatní']] },
-  { k: 'bezobratli', n: 'Další bezobratlí', e: '🐌', c: '#b0527a', s: [['pavoukovci', 'Pavoukovci'], ['mekkysi', 'Měkkýši'], ['korysi', 'Korýši'], ['ostatni', 'Ostatní']] },
+  { k: 'bezobratli', n: 'Bezobratlí', e: '🐌', c: '#b0527a', s: [['pavoukovci', 'Pavoukovci'], ['mekkysi', 'Měkkýši'], ['korysi', 'Korýši'], ['ostatni', 'Ostatní']] },
   { k: 'rostliny', n: 'Rostliny', e: '🌳', c: '#2e9e4f', s: [['listnate', 'Listnaté stromy'], ['jehlicnate', 'Jehličnany'], ['byliny', 'Byliny a květiny'], ['lecive', 'Léčivé'], ['jedovate', 'Jedovaté']] },
   { k: 'houby', n: 'Houby', e: '🍄', c: '#c2571a', s: [['jedle', 'Jedlé'], ['jedovate', 'Jedovaté'], ['nejedle', 'Nejedlé']] }];
 var CONTS = [['EU', 'Evropa'], ['AS', 'Asie'], ['AF', 'Afrika'], ['NA', 'Severní Amerika'], ['SA', 'Jižní Amerika'], ['AU', 'Austrálie a Oceánie'], ['AN', 'Antarktida'], ['OC', 'Oceány a moře']];
@@ -29,28 +29,37 @@ function match(x, ignoreLvl) {
 }
 function pool() { return SPECIES.filter(function (x) { return match(x); }); }
 function cnt(f) { return SPECIES.filter(function (x) { return (st.lvl === '2' || x.v === 1) && f(x); }).length; }
-function chip(on, color, data, label, n) {
-  return '<button class="chip' + (on ? ' on' : '') + '" ' + data + ' style="' + (on ? 'background:' + color : '') + '">' + label + (n !== undefined ? ' <span class="cnt">' + n + '</span>' : '') + '</button>';
+var CONT_EM = { EU: '🏰', AS: '🏯', AF: '🦒', NA: '🦅', SA: '🦜', AU: '🦘', AN: '🐧', OC: '🌊' };
+var openSubs = {};
+function druhu(n) { return n + (n === 1 ? ' druh' : n >= 2 && n <= 4 ? ' druhy' : ' druhů'); }
+function tile(on, data, em, name, n) {
+  return '<button class="tile' + (on ? ' on' : '') + '" ' + data + (n ? '' : ' disabled') + '><span class="em">' + em + '</span><span class="tx"><span class="nm">' + name + '</span><span class="ct">' + druhu(n) + '</span></span><span class="ck">' + (on ? '✓' : '') + '</span></button>';
 }
 function renderSetup() {
-  $('cats').innerHTML = CATS.map(function (c) { return chip(st.cats.indexOf(c.k) >= 0, c.c, 'data-k="' + c.k + '"', c.e + ' ' + c.n, cnt(function (x) { return x.k === c.k; })); }).join('');
-  var subs = CATS.filter(function (c) { return c.s.length && st.cats.indexOf(c.k) >= 0; });
-  $('subsWrap').hidden = !subs.length;
-  $('subs').innerHTML = subs.map(function (c) {
-    return '<div class="subrow chips sm"><b>' + c.e + ' ' + c.n + '</b>' + c.s.map(function (s) {
-      return chip(subOn(c.k, s[0]), c.c, 'data-sub="' + c.k + ':' + s[0] + '"', s[1], cnt(function (x) { return x.k === c.k && x.s.indexOf(s[0]) >= 0; }));
-    }).join('') + '</div>';
+  $('cats').innerHTML = CATS.map(function (c) { return tile(st.cats.indexOf(c.k) >= 0, 'data-k="' + c.k + '"', c.e, c.n, cnt(function (x) { return x.k === c.k; })); }).join('');
+  var groups = CATS.filter(function (c) { return c.s.length && st.cats.indexOf(c.k) >= 0; }).map(function (c) {
+    var subs = c.s.map(function (s) { return { s: s, n: cnt(function (x) { return x.k === c.k && x.s.indexOf(s[0]) >= 0; }) }; }).filter(function (o) { return o.n > 0; });
+    return { c: c, subs: subs };
+  }).filter(function (g) { return g.subs.length > 1; });
+  $('subsWrap').hidden = !groups.length;
+  $('subs').innerHTML = groups.map(function (g) {
+    var on = g.subs.filter(function (o) { return subOn(g.c.k, o.s[0]); }).length;
+    return '<details data-g="' + g.c.k + '"' + (openSubs[g.c.k] ? ' open' : '') + '><summary><span class="em">' + g.c.e + '</span><span class="nm">' + g.c.n + '</span><span class="st">' + (on === g.subs.length ? 'Vše' : on + ' z ' + g.subs.length) + '</span><span class="chev">›</span></summary><div class="sublist' + (g.subs.length % 3 !== 0 && g.subs.length % 2 === 0 ? ' c2' : '') + '">' +
+      g.subs.map(function (o) { return '<button class="pill' + (subOn(g.c.k, o.s[0]) ? ' on' : '') + '" data-sub="' + g.c.k + ':' + o.s[0] + '"><span>' + o.s[1] + '</span><span class="n">' + o.n + '</span></button>'; }).join('') + '</div></details>';
   }).join('');
-  $('conts').innerHTML = CONTS.map(function (c) { return chip(st.conts.indexOf(c[0]) >= 0, '#00a3a3', 'data-c="' + c[0] + '"', c[1], cnt(function (x) { return x.c.indexOf(c[0]) >= 0; })); }).join('');
+  Array.prototype.forEach.call($('subs').querySelectorAll('details'), function (d) { d.ontoggle = function () { openSubs[d.dataset.g] = d.open; }; });
+  $('conts').innerHTML = CONTS.map(function (c) { return tile(st.conts.indexOf(c[0]) >= 0, 'data-c="' + c[0] + '"', CONT_EM[c[0]], c[1], cnt(function (x) { return x.c.indexOf(c[0]) >= 0; })); }).join('');
+  $('allCats').textContent = st.cats.length ? 'Zrušit výběr' : 'Vybrat vše';
+  $('allConts').textContent = st.conts.length ? 'Zrušit výběr' : 'Vybrat vše';
   ['lvl', 'mode', 'len'].forEach(function (g) { Array.prototype.forEach.call($(g).children, function (b) { b.classList.toggle('on', b.dataset.v === st[g]); }); });
   var n = pool().length;
-  $('avail').innerHTML = n >= 4 ? 'Vybráno <span>' + n + '</span> druhů' : 'Vyberte víc skupin nebo světadílů (aspoň 4 druhy).';
+  $('avail').innerHTML = n >= 4 ? 'Vybráno <b>' + druhu(n) + '</b>' : 'Vyberte aspoň 4 druhy';
   $('start').disabled = n < 4;
   save();
 }
 function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
 $('setup').onclick = function (e) {
-  var b = e.target.closest('button'); if (!b) return;
+  var b = e.target.closest('button'); if (!b || b.id === 'start') return;
   if (b.dataset.k) toggle(st.cats, b.dataset.k);
   else if (b.dataset.sub) toggle(st.off, b.dataset.sub);
   else if (b.dataset.c) toggle(st.conts, b.dataset.c);
