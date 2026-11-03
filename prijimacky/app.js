@@ -112,7 +112,7 @@ function practice(sel){
   const s={sel,n:0,ok:0,per:{},q:null};setColor(st.subj);
   const next=()=>{s.q=draw(tById(PQ.pick(sel)));s.ans=null;s.done=false;show();};
   const show=()=>{
-    pill.hidden=false;pill.textContent=s.n?`${s.ok} z ${s.n}`:'Procvičování';
+    pill.hidden=false;pill.textContent=`Úloha ${s.n+1} · ${s.ok} správně`;
     const t=tById(s.q.topic);
     app.innerHTML=`<section class="card"><div class="ptop"><span class="tag">${t.emoji} ${t.name}</span><button class="link" id="end">Hotovo, ukázat shrnutí</button></div>
     <div id="qb"></div><div id="fb"></div>
@@ -121,7 +121,7 @@ function practice(sel){
     const finish=(skipped)=>{if(s.done)return;s.done=true;const r=markQ(s.q,qb,skipped?null:s.ans);const part=skipped?0:r.part;
       s.n++;s.ok+=r.ok?1:0;const pt=s.per[t.id]||(s.per[t.id]={n:0,ok:0});pt.n++;pt.ok+=part;rec(t.id,part);
       $('#fb').innerHTML=fbHtml(s.q,r,skipped);$('#skip').hidden=true;chk.disabled=false;chk.textContent='Další otázka →';chk.onclick=next;
-      pill.textContent=`${s.ok} z ${s.n}`;chk.focus({preventScroll:true});$('#fb').scrollIntoView({behavior:'smooth',block:'nearest'});};
+      pill.textContent=`Úloha ${s.n} · ${s.ok} správně`;chk.focus({preventScroll:true});$('#fb').scrollIntoView({behavior:'smooth',block:'nearest'});};
     renderQ(s.q,qb,{onAnswer:(v,ready)=>{s.ans=v;chk.disabled=!ready;if(s.q.t==='mc')finish(false);},onEnter:()=>{if(!chk.disabled)chk.click();}});
     chk.onclick=()=>finish(false);$('#skip').onclick=()=>finish(true);$('#end').onclick=()=>summary(s);
     window.scrollTo(0,0);
@@ -162,9 +162,9 @@ function test(){
   const n=len==='full'?S.fullN:12,mins=len==='full'?S.full:len==='short'?20:0;
   const T={subj,qs:buildTest(subj,n),ans:[],i:0,end:mins?Date.now()+mins*60000:0,start:Date.now(),hideT:false};
   setColor(subj);
-  const tick=()=>{if(!T.end){pill.textContent=`${T.ans.filter(a=>a!=null).length}/${T.qs.length}`;return;}
+  const tick=()=>{const done=`${T.ans.filter(a=>a!=null).length} z ${T.qs.length}`;if(!T.end){pill.textContent=done;return;}
     const left=Math.max(0,T.end-Date.now());const m=Math.floor(left/60000),s=Math.floor(left/1000)%60;
-    pill.textContent=T.hideT?'⏱️ zobrazit čas':`⏱️ ${m}:${String(s).padStart(2,'0')}`;
+    pill.textContent=done+' · '+(T.hideT?'⏱️ skrytý':`⏱️ ${m}:${String(s).padStart(2,'0')}`);
     if(left<=0){stopTimer();results(T,true);}};
   pill.hidden=false;pill.onclick=()=>{T.hideT=!T.hideT;tick();};
   stopTimer();timer=setInterval(tick,1000);tick();
