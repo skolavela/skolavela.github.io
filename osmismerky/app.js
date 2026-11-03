@@ -31,9 +31,19 @@ function svg(res, withSol) {
     h += '<text x="' + (x * c + c / 2) + '" y="' + (y * c + c / 2) + '" font-size="' + fs + '" text-anchor="middle" dominant-baseline="central">' + esc(res.g[y][x]) + '</text>';
   return h + '</svg>';
 }
+// zvolí počet sloupců a velikost písma tak, aby se nejdelší slovo vešlo na jeden řádek
+function fitWords(placed) {
+  var maxLen = placed.reduce(function (m, p) { return Math.max(m, Array.from(p.w).length); }, 4) + 2, gap = 3, best = null;
+  [3, 4, 2].forEach(function (cols) {
+    var colW = (100 - gap * (cols - 1)) / cols, f = Math.min(2.8, colW / (maxLen * 0.78));
+    var rows = Math.ceil(placed.length / cols); if (rows * f * 1.55 > 30) f = Math.min(f, 30 / (rows * 1.55));
+    if (!best || f > best.f + 0.05) best = { cols: cols, f: f };
+  });
+  return 'columns:' + best.cols + ';column-gap:' + gap + 'cqw;font-size:' + best.f.toFixed(2) + 'cqw';
+}
 function sheet(res, title, withSol) {
   return '<h2>' + esc(title) + (withSol ? ' – řešení' : '') + '</h2>' + svg(res, withSol) +
-    '<div class="words">' + res.placed.map(function (p) { return '<span>' + esc(p.w) + '</span>'; }).join('') + '</div>' +
+    '<div class="words" style="' + fitWords(res.placed) + '">' + res.placed.map(function (p) { return '<span>' + esc(p.w) + '</span>'; }).join('') + '</div>' +
     '<div class="foot">skolavela.app</div>';
 }
 function render() {

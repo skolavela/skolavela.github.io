@@ -41,8 +41,8 @@ button:active{transform:scale(.97)}button:hover{filter:brightness(1.05)}
 .sheet h2{margin:0 0 4cqw;font-size:5.2cqw;font-weight:700;text-align:center}
 .sheet .grid{width:100%;display:block;flex:none}
 .sheet .grid text{font-family:Lexend,Arial,sans-serif;font-weight:500}
-.words{margin-top:4cqw;columns:3;column-gap:4cqw;font-size:3cqw;line-height:1.6;font-weight:400;letter-spacing:.03em}
-.words span{display:block;break-inside:avoid}.words span::before{content:"☐ ";color:#555}
+.words{margin-top:3.5cqw;columns:3;column-gap:3cqw;font-size:2.8cqw;line-height:1.55;font-weight:400;letter-spacing:.03em}
+.words span{display:block;break-inside:avoid;white-space:nowrap;overflow:hidden}.words span::before{content:"☐ ";color:#555}
 .sol .words span::before{content:""}
 .foot{margin-top:auto;font-size:2cqw;color:#888;text-align:right;padding-top:2cqw}
 .sol{display:none}.withsol .sol{display:flex}
