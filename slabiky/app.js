@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 const KEY = 'slabiky-v1';
-const DEF = { title: 'Ukázkový text', text: 'Mladotice jsou malá vesnice. Děti tam chodí do školy a jsou snášenlivé a dobře informované.\nVe čtvrtek jsme viděli vlka, který překřikoval vítr. Pak jsme jeli autem do Brna.', size: 24, lh: 1.8, font: 'andika', mode: 'bold', upper: false, lvl: '1' };
+const DEF = { title: 'Ukázkový text', text: 'Mladotice jsou malá vesnice. Děti tam chodí do školy a jsou snášenlivé a dobře informované.\nVe čtvrtek jsme viděli vlka, který překřikoval vítr. Pak jsme jeli autem do Brna.', size: 24, lh: 1.8, mode: 'bold', upper: false, lvl: '1' };
 let st = Object.assign({}, DEF);
 try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -16,9 +16,9 @@ function render() {
   $('outTitle').textContent = st.title;
   $('outText').innerHTML = renderText(st.text);
   const out = $('out'); out.style.fontSize = st.size + 'px'; out.style.lineHeight = st.lh;
-  document.body.className = `f-${st.font} m-${st.mode}` + (st.upper ? ' up' : '');
+  document.body.className = `m-${st.mode}` + (st.upper ? ' up' : '');
   $('sizeVal').textContent = st.size + ' px'; $('lhVal').textContent = (+st.lh).toFixed(1).replace('.', ',');
-  for (const g of ['font', 'mode', 'lvl']) for (const b of $(g).children) b.classList.toggle('on', b.dataset.v === st[g]);
+  for (const g of ['mode', 'lvl']) for (const b of $(g).children) b.classList.toggle('on', b.dataset.v === st[g]);
   try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
 }
 $('title').value = st.title; $('src').value = st.text; $('size').value = st.size; $('lh').value = st.lh; $('upper').checked = st.upper;
@@ -28,7 +28,7 @@ $('size').oninput = e => { st.size = +e.target.value; render(); };
 $('lh').oninput = e => { st.lh = +e.target.value; render(); };
 $('upper').onchange = e => { st.upper = e.target.checked; render(); };
 $('clear').onclick = () => { st.text = ''; $('src').value = ''; render(); $('src').focus(); };
-for (const g of ['font', 'mode', 'lvl']) $(g).onclick = e => { if (e.target.dataset.v) { st[g] = e.target.dataset.v; render(); } };
+for (const g of ['mode', 'lvl']) $(g).onclick = e => { if (e.target.dataset.v) { st[g] = e.target.dataset.v; render(); } };
 let lastText = -1;
 $('rand').onclick = () => {
   const pool = TEXTS.map((t, i) => i).filter(i => String(TEXTS[i].l) === st.lvl && i !== lastText);
