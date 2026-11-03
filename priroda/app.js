@@ -71,7 +71,7 @@ $('setup').onclick = function (e) {
 ['lvl', 'mode', 'len'].forEach(function (g) { $(g).onclick = function (e) { if (e.target.dataset.v) { st[g] = e.target.dataset.v; renderSetup(); } }; });
 
 var game = null;
-function show(id) { ['setup', 'play', 'done'].forEach(function (x) { $(x).hidden = x !== id; }); $('score').hidden = id !== 'play' || st.mode !== 'quiz'; window.scrollTo(0, 0); }
+function show(id) { ['setup', 'play', 'done'].forEach(function (x) { $(x).hidden = x !== id; }); document.body.classList.toggle('playing', id === 'play'); $('score').hidden = id !== 'play' || st.mode !== 'quiz'; window.scrollTo(0, 0); }
 function start() {
   var deck = shuffle(pool().slice()); var len = +st.len; if (len) deck = deck.slice(0, len);
   game = { deck: deck, i: 0, ok: 0, missed: [] }; show('play'); question();
@@ -88,7 +88,7 @@ function question() {
   img.onerror = function () { $('ph').textContent = 'Fotku se nepodařilo načíst.'; };
   img.src = s.img;
   $('credit').innerHTML = 'Foto: <a href="' + esc(s.page) + '" target="_blank" rel="noopener">' + esc(s.a) + '</a>, ' + esc(s.lic) + ', Wikimedia Commons';
-  $('reveal').hidden = true; $('next').hidden = true;
+  $('play').classList.add('pending');
   preload(game.deck[game.i + 1]);
   if (st.mode === 'cards') {
     $('opts').innerHTML = '<button class="opt" id="flip" style="grid-column:1/-1">Ukázat název 👀</button>';
@@ -115,10 +115,10 @@ function question() {
 }
 function reveal(s, good) {
   var c = catOf(s.k);
-  $('reveal').innerHTML = (good === null ? '' : '<div style="font-size:22px">' + (good ? '🎉 Správně!' : '🙂 Skoro! Je to:') + '</div>') +
-    '<div class="nm">' + esc(s.n) + '</div>' + (st.lvl === '2' || good === null ? '<div class="la">' + esc(s.l) + '</div>' : '') +
+  $('reveal').innerHTML = '<div class="r1">' + (good === null ? '' : (good ? '🎉 Správně! ' : '🙂 Skoro! Je to: ')) + '<b>' + esc(s.n) + '</b>' +
+    (st.lvl === '2' || good === null ? ' <i>' + esc(s.l) + '</i>' : '') + '</div>' +
     '<div class="ct">' + c.e + ' ' + c.n + subName(s) + ' · ' + s.c.map(contName).join(', ') + '</div>';
-  $('reveal').hidden = false; $('next').hidden = false;
+  $('play').classList.remove('pending');
   $('next').textContent = game.i + 1 < game.deck.length ? 'Další →' : 'Výsledek 🏁';
   $('next').focus({ preventScroll: true });
 }
