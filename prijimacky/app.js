@@ -40,36 +40,39 @@ function home(){
   stopTimer();pill.hidden=true;setColor(st.subj);
   const ts=topics(st.subj);const sel=st.sel[st.subj]=(st.sel[st.subj]||ts.map(t=>t.id)).filter(id=>tById(id));
   const tested=ts.filter(t=>st.p[t.id]&&st.p[t.id].n);
-  app.innerHTML=`
-  <div class="intro"><h2>Ahoj! Na co se dnes podíváš?</h2><p>Procvičuj ve svém tempu. Chyby tu nikdo nepočítá proti tobě – jsou to stopy, které ukazují, co si zopakovat.</p></div>
-  <div class="seg" id="subj">${Object.entries(SUBJ).map(([k,v])=>`<button data-v="${k}" class="${k===st.subj?'on':''}">${k==='cj'?'📖':'📏'} ${v.name}</button>`).join('')}</div>
-  <div class="sh"><span>Témata a tvoje mapa pokroku</span><button class="tb" id="all">${sel.length===ts.length?'Zrušit výběr':'Vybrat vše'}</button></div>
+  if(st.mode==='slot'){st.mode='prac';st.by='slot';}const byS=st.by==='slot';
+  const topicsHtml=()=>`  <div class="sh"><span>Témata a tvoje mapa pokroku</span><button class="tb" id="all">${sel.length===ts.length?'Zrušit výběr':'Vybrat vše'}</button></div>
   <div class="topics">${ts.map(t=>{const p=st.p[t.id];const pc=p&&p.n?Math.round(100*p.ok/p.n):null;
     return `<button class="tile ${sel.includes(t.id)?'on':''}" data-id="${t.id}"><span class="em">${t.emoji}</span><span class="tx"><span class="nm">${t.name}</span>
     <span class="meter"><i style="width:${pc||0}%"></i></span><span class="meta">${p&&p.n?`${pc} % bodů z ${p.n} ${p.n===1?'úlohy':'úloh'}`:'zatím neprocvičeno'} · ${t.slots.length} ${plural(t.slots.length,'typ','typy','typů')} úloh</span></span></button>`}).join('')}</div>
   <p class="meta" style="margin:-6px 4px 0">Pokrok se ukládá jen na tomto zařízení.</p>
   ${tested.length?`<p class="note">💡 ${nextStep(ts)}</p>`:''}
+`;
+  app.innerHTML=`
+  <div class="intro"><h2>Ahoj! Na co se dnes podíváš?</h2><p>Procvičuj ve svém tempu. Chyby tu nikdo nepočítá proti tobě – jsou to stopy, které ukazují, co si zopakovat.</p></div>
+  <div class="seg" id="subj">${Object.entries(SUBJ).map(([k,v])=>`<button data-v="${k}" class="${k===st.subj?'on':''}">${k==='cj'?'📖':'📏'} ${v.name}</button>`).join('')}</div>
   <div class="sh"><span>Režim</span></div>
   <div class="modes">
-   <button class="mode ${st.mode==='prac'?'on':''}" data-m="prac"><b>🌱 Procvičování</b><span>Vybraná témata, hned vidíš vysvětlení. Skončíš, kdy chceš.</span></button>
-   <button class="mode ${st.mode==='slot'?'on':''}" data-m="slot"><b>🎯 Úlohy jako u přijímaček</b><span>Vyber si konkrétní úlohu testu (např. úlohu 6) a trénuj ji s body.</span></button>
-   <button class="mode ${st.mode==='test'?'on':''}" data-m="test"><b>⏱️ Cvičný test</b><span>${PQ.BP[st.subj]?'Stejné pořadí úloh a bodování jako u jednotné přijímací zkoušky (50 bodů).':'Mix témat jako u přijímaček, vyhodnocení na konci.'}</span></button>
+   <button class="mode ${st.mode==='prac'?'on':''}" data-m="prac"><b>🌱 Procvičování</b><span>Úlohy jako u přijímaček s body, nápovědou a vysvětlením. Skončíš, kdy chceš.</span></button>
+   <button class="mode ${st.mode==='test'?'on':''}" data-m="test"><b>⏱️ Cvičný test</b><span>Stejné pořadí úloh a bodování jako u jednotné přijímací zkoušky (50 bodů).</span></button>
   </div>
-  ${st.mode==='slot'&&PQ.BP[st.subj]?`<div class="slots">${slotList(st.subj).map(k=>{const sl=PQ.SLOTS[k];const p=st.p['slot:'+k];const pc=p&&p.n?Math.round(100*p.ok/p.n):null;return `<button class="slotb ${st.slot===k?'on':''}" data-k="${k}"><span class="sn">${sl.label||''}</span><span class="tx"><span class="nm">${esc(sl.name)}</span><span class="meta">${sl.pts?bodu(sl.pts)+' · ':''}${pc!=null?pc+' % bodů':'zatím nezkoušeno'}</span></span></button>`;}).join('')}</div>`:''}
+  ${st.mode==='prac'?`<div class="seg" id="by"><button data-b="topic" class="${byS?'':'on'}">Podle tématu</button><button data-b="slot" class="${byS?'on':''}">Podle čísla úlohy</button></div>`:''}
+  ${st.mode==='prac'&&!byS?topicsHtml():''}
+  ${byS?`<div class="slots">${slotList(st.subj).map(k=>{const sl=PQ.SLOTS[k];const p=st.p['slot:'+k];const pc=p&&p.n?Math.round(100*p.ok/p.n):null;return `<button class="slotb ${st.slot===k?'on':''}" data-k="${k}"><span class="sn">${sl.label||''}</span><span class="tx"><span class="nm">${esc(sl.name)}</span><span class="meta">${sl.pts?bodu(sl.pts)+' · ':''}${pc!=null?pc+' % bodů':'zatím nezkoušeno'}</span></span></button>`;}).join('')}</div>`:''}
   <div id="testopts" ${st.mode==='test'?'':'hidden'} class="seg">
    <button data-l="short" class="${st.len==='short'?'on':''}">Krátký · ${PQ.BP[st.subj]?PQ.BP[st.subj].mins.short:20} min</button>
    <button data-l="full" class="${st.len==='full'?'on':''}">Celý · ${SUBJ[st.subj].full} min</button>
    <button data-l="free" class="${st.len==='free'?'on':''}">Bez limitu</button>
   </div>
-  <button class="primary" id="go" ${(st.mode==='prac'&&!sel.length)||(st.mode==='slot'&&!(st.slot&&PQ.SLOTS[st.slot]&&PQ.SLOTS[st.slot].subj===st.subj))?'disabled':''}>${st.mode==='prac'?'Začít procvičovat':st.mode==='slot'?'Trénovat vybranou úlohu':'Spustit test'}</button>
+  <button class="primary" id="go" ${(st.mode==='prac'&&!byS&&!sel.length)||(st.mode==='prac'&&byS&&!(st.slot&&PQ.SLOTS[st.slot]&&PQ.SLOTS[st.slot].subj===st.subj))?'disabled':''}>${st.mode==='prac'?(byS?'Trénovat vybranou úlohu':'Začít procvičovat'):'Spustit test'}</button>
   ${Object.keys(st.p).length?'<button class="link center" id="reset">Vymazat uložený pokrok</button>':''}`;
   app.querySelectorAll('#subj button').forEach(b=>b.onclick=()=>{st.subj=b.dataset.v;save();home();});
   app.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{const i=sel.indexOf(b.dataset.id);i<0?sel.push(b.dataset.id):sel.splice(i,1);save();home();});
-  $('#all').onclick=()=>{st.sel[st.subj]=sel.length===ts.length?[]:ts.map(t=>t.id);save();home();};
+  app.querySelectorAll('#by button').forEach(b=>b.onclick=()=>{st.by=b.dataset.b;save();home();});const al=$('#all');if(al)al.onclick=()=>{st.sel[st.subj]=sel.length===ts.length?[]:ts.map(t=>t.id);save();home();};
   app.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{st.mode=b.dataset.m;save();home();});
   app.querySelectorAll('#testopts button').forEach(b=>b.onclick=()=>{st.len=b.dataset.l;save();home();});
   app.querySelectorAll('.slotb').forEach(b=>b.onclick=()=>{st.slot=b.dataset.k;save();home();const g=$('#go');if(g)g.scrollIntoView({block:'center'});});
-  $('#go').onclick=()=>{if(st.mode==='slot'){gcEvent('prijimacky-slot-'+st.slot,'Přijímačky: úloha '+PQ.SLOTS[st.slot].name);slotPractice(st.slot);return;}if(st.mode==='prac'){gcEvent('prijimacky-practice-'+st.subj,'Přijímačky: procvičování '+SUBJ[st.subj].name);sel.forEach(id=>gcEvent('prijimacky-practice-topic-'+id,'Přijímačky: téma '+tById(id).name));practice(sel.slice());}else{gcEvent('prijimacky-test-start-'+st.subj+'-'+st.len,'Přijímačky: start testu '+SUBJ[st.subj].name+' ('+st.len+')');PQ.BP[st.subj]?examTest():test();}};
+  $('#go').onclick=()=>{if(st.mode==='prac'&&byS){gcEvent('prijimacky-slot-'+st.slot,'Přijímačky: úloha '+PQ.SLOTS[st.slot].name);slotPractice(st.slot);return;}if(st.mode==='prac'){gcEvent('prijimacky-practice-'+st.subj,'Přijímačky: procvičování '+SUBJ[st.subj].name);sel.forEach(id=>gcEvent('prijimacky-practice-topic-'+id,'Přijímačky: téma '+tById(id).name));practice(sel.slice());}else{gcEvent('prijimacky-test-start-'+st.subj+'-'+st.len,'Přijímačky: start testu '+SUBJ[st.subj].name+' ('+st.len+')');PQ.BP[st.subj]?examTest():test();}};
   const r=$('#reset');if(r)r.onclick=()=>{if(confirm('Opravdu smazat uložený pokrok na tomto zařízení?')){st.p={};st.hist=[];save();home();}};
   window.scrollTo(0,0);
 }
