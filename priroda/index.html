@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Poznáváme přírodu – kvíz pro děti</title>
-<link rel="stylesheet" href="style.css?v=202611031150">
-<script src="data.js?v=202611031150" defer></script>
-<script src="app.js?v=202611031150" defer></script>
+<link rel="stylesheet" href="style.css?v=202611031215">
+<script src="data.js?v=202611031215" defer></script>
+<script src="app.js?v=202611031215" defer></script>
 </head>
 <body>
 <header class="bar">
@@ -17,7 +17,9 @@
 <main class="wrap">
   <section class="card" id="setup">
     <h2>Co budeme poznávat?</h2>
-    <div class="chips" id="cats"></div>
+    <div class="sect"><label class="lbl">Skupiny <button class="link" data-all="cats">Vše / nic</button></label><div class="chips" id="cats"></div></div>
+    <div class="sect" id="subsWrap"><label class="lbl">Podskupiny</label><div class="subs" id="subs"></div></div>
+    <div class="sect"><label class="lbl">Světadíly <button class="link" data-all="conts">Vše / nic</button></label><div class="chips sm" id="conts"></div></div>
     <div class="row">
       <div class="group"><label class="lbl">Úroveň</label>
         <div class="seg" id="lvl"><button data-v="1">1. stupeň</button><button data-v="2">2. stupeň</button></div></div>
@@ -26,13 +28,13 @@
     </div>
     <div class="group"><label class="lbl">Počet otázek</label>
       <div class="seg" id="len"><button data-v="10">10</button><button data-v="20">20</button><button data-v="0">Všechny</button></div></div>
-    <p class="hint" id="avail"></p>
+    <p class="count" id="avail"></p>
     <button class="primary big" id="start">Začít ▶</button>
   </section>
   <section class="card play" id="play" hidden>
     <div class="prog"><div id="bar"></div></div>
     <div class="ptop"><span id="qnum"></span><button class="link" id="quit">Ukončit</button></div>
-    <figure class="photo" id="photoWrap"><img id="photo" alt="Fotografie – poznáš, co to je?"><div class="ph" id="ph">Načítám fotku…</div></figure>
+    <figure class="photo" id="photoWrap"><img class="bg" id="photoBg" alt="" aria-hidden="true"><img class="main" id="photo" alt="Fotografie – poznáš, co to je?"><div class="ph" id="ph">Načítám fotku…</div></figure>
     <p class="credit" id="credit"></p>
     <div class="opts" id="opts"></div>
     <div class="reveal" id="reveal" hidden></div>

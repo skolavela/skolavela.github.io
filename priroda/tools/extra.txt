@@ -1,0 +1,7 @@
+ptaci|vodni|EU,AS|Chroicocephalus ridibundus|1|racek chechtavý
+obojzivelnici||NA|Aquarana catesbeiana|2|skokan volský
+rostliny|jedovate|EU|Atropa bella-donna|2|rulík zlomocný
+rostliny|lecive|EU|Mentha × piperita|1|máta peprná
+rostliny|byliny|AS|Rafflesia arnoldii|2|raflézie Arnoldova
+rostliny|jedovate|EU|Aconitum napellus|2|oměj šalamounek
+bezobratli|korysi|OC|Pagurus bernhardus|2|poustevníček skvrnitý

@@ -1,0 +1,492 @@
+# kategorie|podskupiny|světadíly|latinsky|úroveň|český název (volitelně, jinak z cs.wikipedia)
+rostliny|listnate|EU|Quercus robur|1|dub letní
+rostliny|listnate|EU|Fagus sylvatica|1|buk lesní
+rostliny|listnate|EU|Betula pendula|1|bříza bělokorá
+rostliny|jehlicnate|EU|Picea abies|1|smrk ztepilý
+rostliny|jehlicnate|EU|Pinus sylvestris|1|borovice lesní
+rostliny|listnate,lecive|EU|Tilia cordata|1|lípa srdčitá
+rostliny|listnate|EU|Acer platanoides|1|javor mléč
+rostliny|listnate,jedovate|EU|Aesculus hippocastanum|1|jírovec maďal
+rostliny|jehlicnate|EU|Abies alba|1|jedle bělokorá
+rostliny|listnate|EU|Salix caprea|1|vrba jíva
+rostliny|jehlicnate|EU|Larix decidua|2|modřín opadavý
+rostliny|listnate|EU|Carpinus betulus|2|habr obecný
+rostliny|listnate|EU|Fraxinus excelsior|2|jasan ztepilý
+rostliny|listnate|EU|Alnus glutinosa|2|olše lepkavá
+rostliny|listnate|EU|Sorbus aucuparia|2|jeřáb ptačí
+rostliny|listnate|EU|Populus tremula|2|topol osika
+rostliny|jehlicnate,jedovate|EU|Taxus baccata|2|tis červený
+rostliny|listnate|EU|Robinia pseudoacacia|2|akát
+rostliny|listnate|EU|Ulmus minor|2|jilm habrolistý
+rostliny|listnate|EU|Acer pseudoplatanus|2|javor klen
+rostliny|byliny|EU|Bellis perennis|1|sedmikráska chudobka
+rostliny|byliny,lecive|EU|Taraxacum officinale|1|pampeliška (smetánka)
+rostliny|byliny|EU|Leucanthemum vulgare|1|kopretina bílá
+rostliny|byliny|EU|Papaver rhoeas|1|mák vlčí
+rostliny|byliny|EU|Centaurea cyanus|1|chrpa modrá
+rostliny|byliny|EU|Galanthus nivalis|1|sněženka podsněžník
+rostliny|byliny,jedovate|EU|Convallaria majalis|1|konvalinka vonná
+rostliny|byliny|EU|Myosotis sylvatica|1|pomněnka lesní
+rostliny|byliny,lecive|EU|Tussilago farfara|1|podběl lékařský
+rostliny|byliny,lecive|EU|Urtica dioica|1|kopřiva dvoudomá
+rostliny|byliny|EU|Leucojum vernum|2|bledule jarní
+rostliny|byliny,jedovate|EU|Anemone nemorosa|2|sasanka hajní
+rostliny|byliny,lecive|EU|Primula veris|2|prvosenka jarní
+rostliny|byliny,jedovate|EU|Caltha palustris|2|blatouch bahenní
+rostliny|byliny|EU|Campanula rotundifolia|2|zvonek okrouhlolistý
+rostliny|byliny|EU|Trifolium pratense|2|jetel luční
+rostliny|byliny,lecive|EU|Achillea millefolium|2|řebříček obecný
+rostliny|byliny,lecive|EU|Matricaria chamomilla|2|heřmánek pravý
+rostliny|byliny,lecive|EU|Plantago lanceolata|2|jitrocel kopinatý
+rostliny|byliny,jedovate|EU|Ranunculus acris|2|pryskyřník prudký
+rostliny|byliny,lecive|EU|Pulmonaria officinalis|2|plicník lékařský
+rostliny|byliny,jedovate|EU|Ficaria verna|2|orsej jarní
+houby|jedle|EU|Boletus edulis|1|hřib smrkový
+houby|jedovate|EU|Amanita muscaria|1|muchomůrka červená
+houby|jedle|EU|Macrolepiota procera|1|bedla vysoká
+houby|jedle|EU|Cantharellus cibarius|1|liška obecná
+houby|jedovate|EU|Amanita phalloides|1|muchomůrka zelená
+houby|jedle|EU|Armillaria mellea|1|václavka obecná
+houby|jedle|EU|Pleurotus ostreatus|2|hlíva ústřičná
+houby|jedle|EU|Suillus luteus|2|klouzek obecný
+houby|jedle|EU|Neoboletus luridiformis|2|hřib kovář
+houby|jedle|EU|Amanita rubescens|2|muchomůrka růžovka
+houby|jedle|EU|Lycoperdon perlatum|2|pýchavka obecná
+houby|jedle|EU|Coprinus comatus|2|hnojník obecný
+houby|nejedle|EU|Cerioporus squamosus|2|choroš šupinatý
+houby|nejedle|EU|Trametes versicolor|2|outkovka pestrá
+houby|jedle|EU|Leccinum scabrum|2|kozák březový
+houby|jedle|EU|Lactarius deliciosus|2|ryzec pravý
+ptaci|pevci|EU|Turdus merula|1|kos černý
+ptaci|pevci|EU|Parus major|1|sýkora koňadra
+ptaci|pevci|EU|Passer domesticus|1|vrabec domácí
+ptaci|vodni|EU|Ciconia ciconia|1|čáp bílý
+ptaci|vodni|EU|Cygnus olor|1|labuť velká
+ptaci|vodni|EU|Anas platyrhynchos|1|kachna divoká
+ptaci|pevci|EU|Pica pica|1|straka obecná
+ptaci|pevci|EU|Erithacus rubecula|1|červenka obecná
+ptaci|ostatni|EU|Columba palumbus|1|holub hřivnáč
+ptaci|pevci|EU|Hirundo rustica|1|vlaštovka obecná
+ptaci|ostatni|EU|Cuculus canorus|1|kukačka obecná
+ptaci|dravci|EU|Tyto alba|1|sova pálená
+ptaci|ostatni|EU|Dendrocopos major|2|strakapoud velký
+ptaci|pevci|EU|Cyanistes caeruleus|2|sýkora modřinka
+ptaci|pevci|EU|Fringilla coelebs|2|pěnkava obecná
+ptaci|vodni|EU|Alcedo atthis|2|ledňáček říční
+ptaci|dravci|EU|Buteo buteo|2|káně lesní
+ptaci|dravci|EU|Falco tinnunculus|2|poštolka obecná
+ptaci|vodni|EU|Ardea cinerea|2|volavka popelavá
+ptaci|pevci|EU|Sturnus vulgaris|2|špaček obecný
+ptaci|pevci|EU|Carduelis carduelis|2|stehlík obecný
+ptaci|pevci|EU|Sitta europaea|2|brhlík lesní
+ptaci|pevci|EU|Pyrrhula pyrrhula|2|hýl obecný
+ptaci|pevci|EU|Garrulus glandarius|2|sojka obecná
+ptaci|dravci|EU|Bubo bubo|2|výr velký
+ptaci|ostatni|EU|Upupa epops|2|dudek chocholatý
+savci|selmy|EU|Vulpes vulpes|1|liška obecná
+savci|ostatni|EU|Erinaceus europaeus|1|ježek západní
+savci|hlodavci|EU|Sciurus vulgaris|1|veverka obecná
+savci|hlodavci|EU|Lepus europaeus|1|zajíc polní
+savci|kopytnici|EU|Capreolus capreolus|1|srnec obecný
+savci|kopytnici|EU|Cervus elaphus|1|jelen evropský
+savci|kopytnici|EU|Sus scrofa|1|prase divoké
+savci|ostatni|EU|Talpa europaea|1|krtek obecný
+savci|selmy|EU|Ursus arctos|1|medvěd hnědý
+savci|selmy|EU|Canis lupus|1|vlk obecný
+savci|selmy|EU|Meles meles|2|jezevec lesní
+savci|selmy|EU|Lynx lynx|2|rys ostrovid
+savci|selmy|EU|Lutra lutra|2|vydra říční
+savci|hlodavci|EU|Castor fiber|2|bobr evropský
+savci|selmy|EU|Martes martes|2|kuna lesní
+savci|selmy|EU|Mustela nivalis|2|lasice kolčava
+savci|hlodavci|EU|Glis glis|2|plch velký
+savci|ostatni|EU|Myotis myotis|2|netopýr velký
+savci|hlodavci|EU|Apodemus sylvaticus|2|myšice křovinná
+savci|kopytnici|EU|Dama dama|2|daněk evropský
+savci|kopytnici|EU|Ovis gmelini musimon|2|muflon
+savci|selmy|EU|Mustela putorius|2|tchoř tmavý
+hmyz|ostatni|EU|Apis mellifera|1|včela medonosná
+hmyz|brouci|EU|Coccinella septempunctata|1|slunéčko sedmitečné
+hmyz|motyli|EU|Aglais io|1|babočka paví oko
+hmyz|ostatni|EU|Bombus terrestris|1|čmelák zemní
+hmyz|ostatni|EU|Formica rufa|1|mravenec lesní
+hmyz|brouci|EU|Lucanus cervus|1|roháč obecný
+hmyz|motyli|EU|Apatura iris|2|batolec duhový
+hmyz|motyli|EU|Papilio machaon|1|otakárek fenyklový
+hmyz|ostatni|EU|Pyrrhocoris apterus|1|ruměnice pospolná
+hmyz|brouci|EU|Melolontha melolontha|1|chroust obecný
+hmyz|motyli|EU|Vanessa atalanta|2|babočka admirál
+hmyz|motyli|EU|Pieris brassicae|2|bělásek zelný
+hmyz|motyli|EU|Gonepteryx rhamni|2|žluťásek řešetlákový
+hmyz|ostatni|EU|Vespula vulgaris|2|vosa obecná
+hmyz|ostatni|EU|Vespa crabro|2|sršeň obecná
+hmyz|ostatni|EU|Mantis religiosa|2|kudlanka nábožná
+hmyz|ostatni|EU|Tettigonia viridissima|2|kobylka zelená
+hmyz|ostatni|EU|Aeshna cyanea|2|šídlo modré
+hmyz|ostatni|EU|Calopteryx splendens|2|motýlice lesklá
+hmyz|brouci|EU|Rosalia alpina|2|tesařík alpský
+hmyz|brouci|EU|Carabus auratus|2|střevlík zlatitý
+hmyz|brouci|EU|Cetonia aurata|2|zlatohlávek zlatý
+obojzivelnici||EU|Rana temporaria|1|skokan hnědý
+obojzivelnici||EU|Bufo bufo|1|ropucha obecná
+obojzivelnici||EU|Hyla arborea|1|rosnička zelená
+obojzivelnici||EU|Salamandra salamandra|1|mlok skvrnitý
+plazi||EU|Natrix natrix|1|užovka obojková
+plazi||EU|Vipera berus|1|zmije obecná
+plazi||EU|Lacerta agilis|1|ještěrka obecná
+plazi||EU|Anguis fragilis|1|slepýš křehký
+obojzivelnici||EU|Lissotriton vulgaris|2|čolek obecný
+obojzivelnici||EU|Bombina bombina|2|kuňka obecná
+obojzivelnici||EU|Pelobates fuscus|2|blatnice skvrnitá
+obojzivelnici||EU|Pelophylax esculentus|2|skokan zelený
+plazi||EU|Coronella austriaca|2|užovka hladká
+plazi||EU|Podarcis muralis|2|ještěrka zední
+obojzivelnici||EU|Ichthyosaura alpestris|2|čolek horský
+plazi||EU|Emys orbicularis|2|želva bahenní
+savci|selmy|AF|Panthera leo|1|
+savci|selmy|AS|Panthera tigris|1|
+savci|selmy|AF,AS|Panthera pardus|1|
+savci|selmy|SA,NA|Panthera onca|2|
+savci|selmy|AF,AS|Acinonyx jubatus|1|
+savci|selmy|AS|Panthera uncia|2|
+savci|selmy|NA,EU,AS|Ursus maritimus|1|
+savci|selmy|AS|Ailuropoda melanoleuca|1|
+savci|selmy|AS|Ailurus fulgens|2|
+savci|selmy|AF|Crocuta crocuta|1|
+savci|selmy|AF|Lycaon pictus|2|
+savci|selmy|AF|Suricata suricatta|1|
+savci|selmy|NA|Procyon lotor|1|
+savci|selmy|NA|Mephitis mephitis|2|
+savci|selmy|AF,AS|Vulpes zerda|2|
+savci|selmy|NA,EU,AS|Vulpes lagopus|2|
+savci|selmy|NA,EU,AS|Gulo gulo|2|
+savci|selmy|NA,SA|Puma concolor|2|
+savci|selmy|NA|Canis latrans|2|
+savci|selmy|AS|Panthera tigris altaica|2|
+savci|kopytnici|AF|Loxodonta africana|1|
+savci|kopytnici|AS|Elephas maximus|1|
+savci|kopytnici|AF|Giraffa camelopardalis|1|
+savci|kopytnici|AF|Equus quagga|1|
+savci|kopytnici|AF|Hippopotamus amphibius|1|
+savci|kopytnici|AF|Diceros bicornis|2|
+savci|kopytnici|AF|Ceratotherium simum|1|
+savci|kopytnici|AS|Rhinoceros unicornis|2|
+savci|kopytnici|AS,AF|Camelus dromedarius|1|
+savci|kopytnici|AS|Camelus bactrianus|1|
+savci|kopytnici|SA|Lama glama|1|
+savci|kopytnici|SA|Vicugna pacos|2|
+savci|kopytnici|NA|Bison bison|1|
+savci|kopytnici|EU|Bison bonasus|2|
+savci|kopytnici|NA,EU,AS|Alces alces|1|
+savci|kopytnici|NA,EU,AS|Rangifer tarandus|1|
+savci|kopytnici|EU|Capra ibex|2|
+savci|kopytnici|EU|Rupicapra rupicapra|2|
+savci|kopytnici|AF|Okapia johnstoni|2|
+savci|kopytnici|AF|Connochaetes taurinus|2|
+savci|kopytnici|AF|Syncerus caffer|2|
+savci|kopytnici|AS|Bos mutus|2|
+savci|kopytnici|AF|Phacochoerus africanus|2|
+savci|kopytnici|SA,AS|Tapirus terrestris|2|
+savci|kopytnici|AS|Equus ferus przewalskii|2|
+savci|kopytnici|AF|Aepyceros melampus|2|
+savci|kopytnici|AF|Oryx gazella|2|
+savci|kopytnici|NA,EU,AS|Ovibos moschatus|2|
+savci|hlodavci|SA|Hydrochoerus hydrochaeris|1|
+savci|hlodavci|EU,AS|Cricetus cricetus|2|
+savci|hlodavci|AS|Mesocricetus auratus|1|
+savci|hlodavci|SA|Cavia porcellus|1|
+savci|hlodavci|EU|Marmota marmota|2|
+savci|hlodavci|AF,AS|Hystrix cristata|2|
+savci|hlodavci|NA|Castor canadensis|2|
+savci|hlodavci|NA|Cynomys ludovicianus|2|
+savci|hlodavci|SA|Chinchilla lanigera|2|
+savci|hlodavci|EU,AS|Oryctolagus cuniculus|1|
+savci|hlodavci|EU,AS|Rattus norvegicus|1|
+savci|hlodavci|EU,AS|Mus musculus|1|
+savci|hlodavci|EU,AS|Spermophilus citellus|2|
+savci|primati|AF|Gorilla gorilla|1|
+savci|primati|AF|Pan troglodytes|1|
+savci|primati|AS|Pongo pygmaeus|1|
+savci|primati|AF|Pan paniscus|2|
+savci|primati|AF|Lemur catta|1|
+savci|primati|AF|Papio anubis|2|
+savci|primati|AF|Mandrillus sphinx|2|
+savci|primati|AS|Macaca fuscata|2|
+savci|primati|AS|Nasalis larvatus|2|
+savci|primati|SA|Saimiri sciureus|2|
+savci|primati|SA|Alouatta caraya|2|
+savci|primati|AS|Hylobates lar|2|
+savci|morsti|OC|Balaenoptera musculus|1|
+savci|morsti|OC|Megaptera novaeangliae|1|
+savci|morsti|OC|Orcinus orca|1|
+savci|morsti|OC|Tursiops truncatus|1|
+savci|morsti|OC|Physeter macrocephalus|2|
+savci|morsti|OC,AN|Hydrurga leptonyx|2|
+savci|morsti|OC|Monodon monoceros|2|
+savci|morsti|OC|Delphinapterus leucas|2|
+savci|morsti|OC,EU|Phoca vitulina|1|
+savci|morsti|OC,NA,EU|Odobenus rosmarus|1|
+savci|morsti|OC,NA|Zalophus californianus|2|
+savci|morsti|OC,NA|Enhydra lutris|2|
+savci|morsti|NA,SA|Trichechus manatus|2|
+savci|ostatni|AU|Macropus giganteus|1|
+savci|ostatni|AU|Phascolarctos cinereus|1|
+savci|ostatni|AU|Ornithorhynchus anatinus|1|
+savci|ostatni|AU|Tachyglossus aculeatus|2|
+savci|ostatni|AU|Vombatus ursinus|2|
+savci|ostatni|AU|Sarcophilus harrisii|2|
+savci|ostatni|SA|Myrmecophaga tridactyla|1|
+savci|ostatni|SA|Bradypus variegatus|1|
+savci|ostatni|NA,SA|Dasypus novemcinctus|2|
+savci|ostatni|AF|Orycteropus afer|2|
+savci|ostatni|AS,AU|Pteropus vampyrus|2|
+savci|ostatni|NA|Didelphis virginiana|2|
+savci|ostatni|AF,AS|Manis tricuspis|2|
+ptaci|dravci|NA|Haliaeetus leucocephalus|1|
+ptaci|dravci|EU,AS,NA|Aquila chrysaetos|1|
+ptaci|dravci|EU,AS,AF,NA,SA,AU|Falco peregrinus|2|
+ptaci|dravci|SA|Vultur gryphus|2|
+ptaci|dravci|SA|Harpia harpyja|2|
+ptaci|dravci|AF|Sagittarius serpentarius|2|
+ptaci|dravci|EU,AS,NA|Bubo scandiacus|1|
+ptaci|dravci|EU,AS|Strix aluco|2|
+ptaci|dravci|EU|Athene noctua|2|
+ptaci|dravci|EU,AS,AF|Gyps fulvus|2|
+ptaci|dravci|EU,AS|Milvus milvus|2|
+ptaci|dravci|EU,AS,NA|Pandion haliaetus|2|
+ptaci|vodni|AN|Aptenodytes forsteri|1|
+ptaci|vodni|AN|Pygoscelis adeliae|2|
+ptaci|vodni|AF|Spheniscus demersus|2|
+ptaci|vodni|AF,EU,AS|Phoenicopterus roseus|1|
+ptaci|vodni|EU,AF|Pelecanus onocrotalus|1|
+ptaci|vodni|OC,AN|Diomedea exulans|2|
+ptaci|vodni|EU,OC|Fratercula arctica|1|
+ptaci|vodni|EU,AS|Larus ridibundus|2|
+ptaci|vodni|EU,AS|Grus grus|2|
+ptaci|vodni|EU,AS|Fulica atra|2|
+ptaci|vodni|EU,AS|Podiceps cristatus|2|
+ptaci|vodni|EU,AS,AF|Phalacrocorax carbo|2|
+ptaci|vodni|AS|Aix galericulata|2|
+ptaci|vodni|EU,AS|Anser anser|2|
+ptaci|vodni|AF|Balaeniceps rex|2|
+ptaci|vodni|AF,AS,EU|Platalea leucorodia|2|
+ptaci|pevci|EU,AS|Corvus corax|2|
+ptaci|pevci|EU,AS|Luscinia megarhynchos|2|
+ptaci|pevci|EU,AS|Alauda arvensis|2|
+ptaci|pevci|EU|Oriolus oriolus|2|
+ptaci|pevci|NA|Cardinalis cardinalis|2|
+ptaci|pevci|EU,AS|Bombycilla garrulus|2|
+ptaci|pevci|AU|Menura novaehollandiae|2|
+ptaci|pevci|EU,AS|Corvus frugilegus|2|
+ptaci|pevci|AS|Serinus canaria|2|
+ptaci|ostatni|AF|Struthio camelus|1|
+ptaci|ostatni|AU|Dromaius novaehollandiae|1|
+ptaci|ostatni|AU|Casuarius casuarius|2|
+ptaci|ostatni|AU|Apteryx mantelli|2|
+ptaci|ostatni|SA|Ramphastos toco|1|
+ptaci|ostatni|SA|Ara macao|1|
+ptaci|ostatni|AU|Cacatua galerita|2|
+ptaci|ostatni|AU|Melopsittacus undulatus|1|
+ptaci|ostatni|AS|Pavo cristatus|1|
+ptaci|ostatni|NA,SA|Archilochus colubris|2|
+ptaci|ostatni|AS|Buceros bicornis|2|
+ptaci|ostatni|EU,AS|Phasianus colchicus|2|
+ptaci|ostatni|AF|Bucorvus leadbeateri|2|
+ptaci|ostatni|EU,AS|Merops apiaster|2|
+ptaci|ostatni|EU,AS,AF|Coracias garrulus|2|
+ptaci|ostatni|EU,AS|Tetrao urogallus|2|
+ptaci|ostatni|AU|Dacelo novaeguineae|2|
+plazi||AF|Crocodylus niloticus|1|
+plazi||NA|Alligator mississippiensis|2|
+plazi||AS|Gavialis gangeticus|2|
+plazi||AS|Varanus komodoensis|1|
+plazi||AS|Ophiophagus hannah|1|
+plazi||SA|Boa constrictor|1|
+plazi||SA|Eunectes murinus|2|
+plazi||AS|Python bivittatus|2|
+plazi||NA|Crotalus atrox|2|
+plazi||AF|Chamaeleo calyptratus|1|
+plazi||SA,NA|Iguana iguana|1|
+plazi||SA|Chelonoidis niger|1|
+plazi||OC|Chelonia mydas|1|
+plazi||OC|Dermochelys coriacea|2|
+plazi||AU|Moloch horridus|2|
+plazi||AU|Chlamydosaurus kingii|2|
+plazi||AS|Gekko gecko|2|
+plazi||EU|Testudo hermanni|2|
+plazi||AU|Sphenodon punctatus|2|
+plazi||NA|Heloderma suspectum|2|
+plazi||EU|Zamenis longissimus|2|
+plazi||AF|Dendroaspis polylepis|2|
+obojzivelnici||NA|Ambystoma mexicanum|1|
+obojzivelnici||SA|Dendrobates tinctorius|2|
+obojzivelnici||SA,NA|Agalychnis callidryas|1|
+obojzivelnici||SA,AU|Rhinella marina|2|
+obojzivelnici||AS|Andrias davidianus|2|
+obojzivelnici||EU|Triturus cristatus|2|
+obojzivelnici||EU|Proteus anguinus|2|
+obojzivelnici||NA|Lithobates catesbeianus|2|
+obojzivelnici||EU|Bufotes viridis|2|
+ryby|sladkovodni|EU,AS|Cyprinus carpio|1|
+ryby|sladkovodni|EU|Salmo trutta|1|
+ryby|sladkovodni|EU,AS,NA|Esox lucius|1|
+ryby|sladkovodni|EU,AS|Perca fluviatilis|1|
+ryby|sladkovodni|EU,AS|Sander lucioperca|2|
+ryby|sladkovodni|EU|Silurus glanis|1|
+ryby|sladkovodni|EU,AS|Carassius gibelio|2|
+ryby|sladkovodni|EU|Anguilla anguilla|2|
+ryby|sladkovodni|EU,NA|Salmo salar|2|
+ryby|sladkovodni|AS|Carassius auratus|1|
+ryby|sladkovodni|SA|Pygocentrus nattereri|1|
+ryby|sladkovodni|SA|Pterophyllum scalare|2|
+ryby|sladkovodni|SA|Poecilia reticulata|2|
+ryby|sladkovodni|AS|Betta splendens|2|
+ryby|sladkovodni|EU,AS|Acipenser ruthenus|2|
+ryby|sladkovodni|EU,AS|Tinca tinca|2|
+ryby|morske|OC|Carcharodon carcharias|1|
+ryby|morske|OC|Rhincodon typus|1|
+ryby|morske|OC|Sphyrna mokarran|2|
+ryby|morske|OC|Manta birostris|2|
+ryby|morske|OC|Amphiprion ocellaris|1|
+ryby|morske|OC|Hippocampus hippocampus|1|
+ryby|morske|OC|Thunnus thynnus|2|
+ryby|morske|OC|Gadus morhua|2|
+ryby|morske|OC|Clupea harengus|2|
+ryby|morske|OC|Diodon holocanthus|2|
+ryby|morske|OC|Mola mola|2|
+ryby|morske|OC|Pterois volitans|2|
+ryby|morske|OC|Xiphias gladius|2|
+ryby|morske|OC|Paracanthurus hepatus|2|
+ryby|morske|OC|Dasyatis pastinaca|2|
+hmyz|motyli|NA,SA|Danaus plexippus|1|
+hmyz|motyli|SA|Morpho menelaus|2|
+hmyz|motyli|AS,AU|Attacus atlas|2|
+hmyz|motyli|EU|Parnassius apollo|2|
+hmyz|motyli|EU,AS|Macroglossum stellatarum|2|
+hmyz|motyli|EU,AS|Bombyx mori|2|
+hmyz|motyli|EU,AS|Aglais urticae|2|
+hmyz|motyli|EU,AS|Zygaena filipendulae|2|
+hmyz|brouci|AF|Goliathus goliatus|2|
+hmyz|brouci|SA|Dynastes hercules|2|
+hmyz|brouci|AF|Scarabaeus sacer|2|
+hmyz|brouci|NA,EU|Leptinotarsa decemlineata|1|
+hmyz|brouci|EU,AS|Lampyris noctiluca|1|
+hmyz|brouci|EU|Geotrupes stercorarius|2|
+hmyz|brouci|EU|Oryctes nasicornis|2|
+hmyz|ostatni|EU,AS,AF|Musca domestica|1|
+hmyz|ostatni|AF,AS|Schistocerca gregaria|2|
+hmyz|ostatni|AU,AS|Phyllium giganteum|2|
+hmyz|ostatni|EU|Gryllus campestris|1|
+hmyz|ostatni|EU,AS|Cicada orni|2|
+hmyz|ostatni|EU,AS,AF|Anax imperator|2|
+hmyz|ostatni|EU,NA|Gerris lacustris|2|
+bezobratli|pavoukovci|EU|Araneus diadematus|1|
+bezobratli|pavoukovci|SA|Theraphosa blondi|2|
+bezobratli|pavoukovci|EU,AS|Argiope bruennichi|2|
+bezobratli|pavoukovci|AF|Pandinus imperator|2|
+bezobratli|pavoukovci|EU|Ixodes ricinus|1|
+bezobratli|mekkysi|EU|Helix pomatia|1|
+bezobratli|mekkysi|OC|Octopus vulgaris|1|
+bezobratli|mekkysi|OC|Sepia officinalis|2|
+bezobratli|mekkysi|EU|Arion vulgaris|2|
+bezobratli|mekkysi|OC|Nautilus pompilius|2|
+bezobratli|korysi|EU|Astacus astacus|1|
+bezobratli|korysi|OC|Homarus gammarus|2|
+bezobratli|korysi|OC|Cancer pagurus|2|
+bezobratli|korysi|OC|Pagurus bernhardus|2|
+bezobratli|korysi|EU|Porcellio scaber|2|
+bezobratli|ostatni|EU|Lumbricus terrestris|1|
+bezobratli|ostatni|OC|Asterias rubens|1|
+bezobratli|ostatni|OC|Aurelia aurita|1|
+bezobratli|ostatni|OC|Paracentrotus lividus|2|
+bezobratli|ostatni|EU|Hirudo medicinalis|2|
+rostliny|listnate|EU|Castanea sativa|2|
+rostliny|listnate|EU|Juglans regia|1|
+rostliny|listnate|EU,AS|Malus domestica|1|
+rostliny|listnate|EU|Prunus avium|1|
+rostliny|listnate|AS|Ginkgo biloba|2|
+rostliny|listnate|AF|Adansonia digitata|2|
+rostliny|listnate|AU|Eucalyptus globulus|2|
+rostliny|listnate|AS|Magnolia × soulangeana|2|
+rostliny|listnate|EU|Platanus × hispanica|2|
+rostliny|listnate|EU,AS|Sambucus nigra|1|
+rostliny|listnate|AS,AF|Phoenix dactylifera|2|
+rostliny|listnate|AS,OC|Cocos nucifera|1|
+rostliny|listnate|EU|Olea europaea|2|
+rostliny|listnate|AS|Musa acuminata|2|
+rostliny|listnate|NA|Acer saccharum|2|
+rostliny|listnate|AS|Prunus serrulata|2|
+rostliny|jehlicnate|NA|Sequoiadendron giganteum|2|
+rostliny|jehlicnate|NA|Sequoia sempervirens|2|
+rostliny|jehlicnate|EU|Pinus cembra|2|
+rostliny|jehlicnate|EU|Juniperus communis|1|
+rostliny|jehlicnate|EU|Pinus mugo|1|
+rostliny|jehlicnate|AS|Cedrus libani|2|
+rostliny|jehlicnate|NA|Pseudotsuga menziesii|2|
+rostliny|jehlicnate|SA|Araucaria araucana|2|
+rostliny|jehlicnate|NA|Thuja occidentalis|2|
+rostliny|byliny|AF|Aloe vera|2|
+rostliny|byliny,lecive|EU|Lavandula angustifolia|1|
+rostliny|byliny|NA|Helianthus annuus|1|
+rostliny|byliny|AS|Nelumbo nucifera|2|
+rostliny|byliny|SA|Victoria amazonica|2|
+rostliny|byliny|AS|Rafflesia arnoldii|2|
+rostliny|byliny|NA|Dionaea muscipula|1|
+rostliny|byliny|EU|Drosera rotundifolia|2|
+rostliny|byliny|NA|Carnegiea gigantea|2|
+rostliny|byliny|AS|Tulipa gesneriana|1|
+rostliny|byliny|SA|Phalaenopsis amabilis|2|
+rostliny|byliny|EU|Nymphaea alba|2|
+rostliny|byliny|EU|Leontopodium nivale|2|
+rostliny|byliny|EU|Gentiana acaulis|2|
+rostliny|byliny|EU|Cypripedium calceolus|2|
+rostliny|byliny|EU|Iris pseudacorus|2|
+rostliny|byliny|SA|Ananas comosus|2|
+rostliny|byliny|EU|Fragaria vesca|1|
+rostliny|byliny|AS|Bambusa vulgaris|2|
+rostliny|byliny|EU|Pteridium aquilinum|2|
+rostliny|byliny|EU|Equisetum arvense|2|
+rostliny|byliny|EU|Hedera helix|2|
+rostliny|byliny|EU|Viscum album|2|
+rostliny|byliny|EU|Galium odoratum|2|
+rostliny|lecive|EU|Hypericum perforatum|2|
+rostliny|lecive|EU|Salvia officinalis|2|
+rostliny|lecive|EU|Mentha × piperita|1|
+rostliny|lecive|EU|Thymus serpyllum|2|
+rostliny|lecive|EU|Calendula officinalis|2|
+rostliny|lecive|EU|Melissa officinalis|2|
+rostliny|lecive|EU|Arnica montana|2|
+rostliny|lecive|EU|Valeriana officinalis|2|
+rostliny|jedovate|EU|Atropa belladonna|2|
+rostliny|jedovate|EU|Aconitum napellus|2|
+rostliny|jedovate|EU|Digitalis purpurea|2|
+rostliny|jedovate|EU|Colchicum autumnale|2|
+rostliny|jedovate|EU|Conium maculatum|2|
+rostliny|jedovate|EU|Heracleum mantegazzianum|2|
+rostliny|jedovate|EU|Daphne mezereum|2|
+rostliny|jedovate|EU|Paris quadrifolia|2|
+rostliny|jedovate|EU|Datura stramonium|2|
+houby|jedle|EU|Boletus reticulatus|2|
+houby|jedle|EU|Morchella esculenta|2|
+houby|jedle|EU|Agaricus campestris|1|
+houby|jedle|EU|Russula cyanoxantha|2|
+houby|jedle|EU|Imleria badia|1|
+houby|jedle|EU|Leccinum aurantiacum|1|
+houby|jedle|EU|Hydnum repandum|2|
+houby|jedle|EU|Craterellus cornucopioides|2|
+houby|jedle|EU|Sparassis crispa|2|
+houby|jedle|EU|Laetiporus sulphureus|2|
+houby|jedle|EU,AS|Auricularia auricula-judae|2|
+houby|jedle|AS|Lentinula edodes|2|
+houby|jedovate|EU|Amanita pantherina|2|
+houby|jedovate|EU|Amanita virosa|2|
+houby|jedovate|EU|Rubroboletus satanas|2|
+houby|jedovate|EU|Gyromitra esculenta|2|
+houby|jedovate|EU|Hypholoma fasciculare|2|
+houby|jedovate|EU|Cortinarius rubellus|2|
+houby|jedovate|EU|Inocybe erubescens|2|
+houby|nejedle|EU|Fomes fomentarius|2|
+houby|nejedle|EU|Ganoderma applanatum|2|
+houby|nejedle|EU|Tylopilus felleus|2|
+houby|nejedle|EU|Clathrus archeri|2|
+houby|nejedle|EU|Xylaria hypoxylon|2|
