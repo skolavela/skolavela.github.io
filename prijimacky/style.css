@@ -133,3 +133,4 @@ svg.fig circle{fill:#1d1d1f}svg.fig circle.thin{fill:none;stroke:#8e8e93;stroke-
 .card{overflow-wrap:break-word;min-width:0}.passage,.sq,.fb{overflow-wrap:anywhere}
 .fld{min-width:0;max-width:100%}.fld input{width:100%}.flds{min-width:0}
 p.fb{margin:10px 0}.fld{flex:1 1 220px}
+svg.fig .top{fill:rgba(94,92,230,.16);stroke:#1d1d1f;stroke-width:1.4}svg.fig .dash{stroke-dasharray:4 4;stroke:#8e8e93}svg.fig .face{fill:#fff;stroke:#1d1d1f;stroke-width:1.2}svg.fig .face.on{fill:rgba(94,92,230,.18)}.mrow svg.fig{max-width:240px}

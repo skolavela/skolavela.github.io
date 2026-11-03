@@ -6,9 +6,9 @@ const SUBJ={cj:{name:'Čeština',color:'#ff375f',full:60,fullN:30},ma:{name:'Mat
 const KEY='prijimacky:v1';
 let st=load();function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
-st.p=st.p||{};st.sel=st.sel||{};st.subj=st.subj||'cj';st.mode=st.mode||'prac';st.len=st.len||'short';
+st.p=st.p||{};if(!st.v2){st.p={};st.sel={};st.v2=1;}st.sel=st.sel||{};st.subj=st.subj||'cj';st.mode=st.mode||'prac';st.len=st.len||'short';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ORDER=['pravopis','chyby','text','razeni','zasoba','tvaroslovi','skladba','lit'];
+const ORDER=PQ.topics.map(t=>t.id);
 const topics=s=>PQ.topics.filter(t=>t.subj===s).sort((a,b)=>(ORDER.indexOf(a.id)+1||99)-(ORDER.indexOf(b.id)+1||99));
 const tById=id=>PQ.topics.find(t=>t.id===id);
 const L='ABCDEFGH';
@@ -38,7 +38,7 @@ function slotList(subj){const bp=PQ.BP[subj];if(!bp)return [];const seen=[];bp.f
 /* ---------- úvod ---------- */
 function home(){
   stopTimer();pill.hidden=true;setColor(st.subj);
-  const ts=topics(st.subj);const sel=st.sel[st.subj]||(st.sel[st.subj]=ts.map(t=>t.id));
+  const ts=topics(st.subj);const sel=st.sel[st.subj]=(st.sel[st.subj]||ts.map(t=>t.id)).filter(id=>tById(id));
   const tested=ts.filter(t=>st.p[t.id]&&st.p[t.id].n);
   app.innerHTML=`
   <div class="intro"><h2>Ahoj! Na co se dnes podíváš?</h2><p>Procvičuj ve svém tempu. Chyby tu nikdo nepočítá proti tobě – jsou to stopy, které ukazují, co si zopakovat.</p></div>
@@ -46,7 +46,7 @@ function home(){
   <div class="sh"><span>Témata a tvoje mapa pokroku</span><button class="tb" id="all">${sel.length===ts.length?'Zrušit výběr':'Vybrat vše'}</button></div>
   <div class="topics">${ts.map(t=>{const p=st.p[t.id];const pc=p&&p.n?Math.round(100*p.ok/p.n):null;
     return `<button class="tile ${sel.includes(t.id)?'on':''}" data-id="${t.id}"><span class="em">${t.emoji}</span><span class="tx"><span class="nm">${t.name}</span>
-    <span class="meter"><i style="width:${pc||0}%"></i></span><span class="meta">${p&&p.n?`${pc} % z ${p.n} ${p.n===1?'otázky':'otázek'}`:'zatím neprocvičeno'}</span></span></button>`}).join('')}</div>
+    <span class="meter"><i style="width:${pc||0}%"></i></span><span class="meta">${p&&p.n?`${pc} % bodů z ${p.n} ${p.n===1?'úlohy':'úloh'}`:'zatím neprocvičeno'} · ${t.slots.length} ${plural(t.slots.length,'typ','typy','typů')} úloh</span></span></button>`}).join('')}</div>
   <p class="meta" style="margin:-6px 4px 0">Pokrok se ukládá jen na tomto zařízení.</p>
   ${tested.length?`<p class="note">💡 ${nextStep(ts)}</p>`:''}
   <div class="sh"><span>Režim</span></div>
@@ -134,34 +134,34 @@ function fbHtml(q,r,skipped){
 }
 
 /* ---------- procvičování ---------- */
+function pickTask(sel){ // úloha z vybraných okruhů; u smíšené matematiky držíme podíl grafických úloh jako u CERMAT
+  const pool=[];sel.forEach(id=>tById(id).slots.forEach(k=>pool.push([k,id])));
+  const mixed=st.subj==='ma'&&sel.length>1;const wantFig=Math.random()<PQ.FIGSHARE;let out,pk;
+  for(let i=0;i<40;i++){pk=PQ.pick(pool);out=[].concat(PQ.SLOTS[pk[0]].gen());if(!mixed||PQ.isFig(out[0])===wantFig)break;}
+  const shared=out.length>1?`1–${out.length}`:'';out.forEach((t,i)=>{t.no=i+1;t.slot=pk[0];t.topic=pk[1];t.sname=t.sname||PQ.SLOTS[pk[0]].name;if(shared)t.shared=shared;t.subs.forEach((x,k)=>x.id=t.subs.length>1?`${t.no}.${k+1}`:`${t.no}`);});
+  return out;}
 function practice(sel){
-  const s={sel,n:0,ok:0,per:{},q:null};setColor(st.subj);
-  const next=()=>{s.q=draw(tById(PQ.pick(sel)));s.ans=null;s.done=false;show();};
-  const show=()=>{
-    pill.hidden=false;pill.textContent=`Úloha ${s.n+1} · ${s.ok} správně`;
-    const t=tById(s.q.topic);
-    app.innerHTML=`<section class="card"><div class="ptop"><span class="tag">${t.emoji} ${t.name}</span><button class="link" id="end">Hotovo, ukázat shrnutí</button></div>
-    <div id="qb"></div><div id="fb"></div>
-    <div class="actions"><button class="ghost" id="skip">Nevím – ukaž řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div></section>`;
-    const qb=$('#qb'),chk=$('#chk');
-    const finish=(skipped)=>{if(s.done)return;s.done=true;const r=markQ(s.q,qb,skipped?null:s.ans);const part=skipped?0:r.part;
-      s.n++;s.ok+=r.ok?1:0;const pt=s.per[t.id]||(s.per[t.id]={n:0,ok:0});pt.n++;pt.ok+=part;rec(t.id,part);
-      $('#fb').innerHTML=fbHtml(s.q,r,skipped);$('#skip').hidden=true;chk.disabled=false;chk.textContent='Další otázka →';chk.onclick=next;
-      pill.textContent=`Úloha ${s.n} · ${s.ok} správně`;chk.focus({preventScroll:true});$('#fb').scrollIntoView({behavior:'smooth',block:'nearest'});};
-    renderQ(s.q,qb,{onAnswer:(v,ready)=>{s.ans=v;chk.disabled=!ready;if(s.q.t==='mc')finish(false);},onEnter:()=>{if(!chk.disabled)chk.click();}});
-    chk.onclick=()=>finish(false);$('#skip').onclick=()=>finish(true);$('#end').onclick=()=>summary(s);
-    window.scrollTo(0,0);
-  };
+  const s={sel,pts:0,max:0,n:0,queue:[],per:{}};setColor(st.subj);
+  const next=()=>{if(!s.queue.length)s.queue=pickTask(sel);s.t=s.queue.shift();s.ans={};s.done=false;show();};
+  const show=()=>{const t=s.t,tp=tById(t.topic);pill.hidden=false;pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;
+    app.innerHTML=`<section class="card"><div class="ptop"><span class="tag">${tp.emoji} ${tp.name}</span><button class="link" id="end">Hotovo, ukázat shrnutí</button></div><div id="tb"></div>
+    <div id="hb"></div><div class="actions"><button class="ghost" id="skip">Nevím – ukaž řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div>
+    ${PQ.HINTS[t.slot]?'<button class="link center" id="hint">💡 Nápověda</button>':''}</section>`;
+    const tb=$('#tb'),chk=$('#chk');renderTask(t,tb,s.ans,a=>{chk.disabled=!taskDone(t,a);});
+    const h=$('#hint');if(h)h.onclick=()=>{$('#hb').innerHTML=`<p class="tnote">💡 ${PQ.HINTS[t.slot]}</p>`;h.remove();};
+    const finish=sk=>{if(s.done)return;s.done=true;const R=markTask(t,tb,s.ans,sk);s.pts+=R.pts;s.max+=R.max;s.n++;rec(t.topic,R.pts/R.max);
+      const pt=s.per[t.topic]||(s.per[t.topic]={n:0,ok:0});pt.n++;pt.ok+=R.pts/R.max;
+      $('#skip').hidden=true;const hh=$('#hint');if(hh)hh.remove();chk.disabled=false;chk.textContent=s.queue.length?'Další úloha k textu →':'Další úloha →';chk.onclick=next;
+      pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;const f=tb.querySelector('.sfb .fb');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});};
+    chk.onclick=()=>finish(false);$('#skip').onclick=()=>finish(true);$('#end').onclick=()=>summary(s);window.scrollTo(0,0);};
   next();
 }
 function summary(s){
-  pill.hidden=true;
-  const rows=Object.entries(s.per).map(([id,p])=>({t:tById(id),p}));
+  pill.hidden=true;const rows=Object.entries(s.per).map(([id,p])=>({t:tById(id),p}));
   app.innerHTML=`<section class="card"><h2 class="center">Dobrá práce! 🌟</h2>
-  ${s.n?`<p class="big" style="color:var(--sub)">${s.ok} / ${s.n}</p><p class="mut center">Dnes jsi zkusil(a) ${s.n} ${s.n<5?'otázky':'otázek'}. Každá z nich tě posunula dál.</p>
-  <div class="bars">${rows.map(r=>bar(r.t.name,r.p)).join('')}</div>`:'<p class="mut center">Tentokrát bez otázek – nevadí, příště!</p>'}
-  ${reflect()}
-  <div class="row"><button class="ghost" id="home">Zpět na úvod</button><button class="primary" id="again">Pokračovat</button></div></section>`;
+  ${s.n?`<p class="big" style="color:var(--sub)">${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b</p><p class="mut center">Dnes jsi zkusil(a) ${s.n} ${plural(s.n,'úlohu','úlohy','úloh')}. Každá tě posunula dál.</p>
+  <div class="bars">${rows.map(r=>bar(r.t.name,r.p)).join('')}</div>`:'<p class="mut center">Tentokrát bez úloh – nevadí, příště!</p>'}
+  ${reflect()}<div class="row"><button class="ghost" id="home">Zpět na úvod</button><button class="primary" id="again">Pokračovat</button></div></section>`;
   $('#home').onclick=home;$('#again').onclick=()=>practice(s.sel);bindReflect();window.scrollTo(0,0);
 }
 const bar=(name,p)=>{const pc=p.n?Math.round(100*p.ok/p.n):0;return `<div class="b"><span>${name}</span><span class="meta">${pc} %</span><span class="meter"><i style="width:${pc}%"></i></span></div>`;};
@@ -306,9 +306,9 @@ function slotPractice(key){
   const next=()=>{if(!s.queue.length)fill();s.t=s.queue.shift();s.ans={};s.done=false;show();};
   const show=()=>{pill.hidden=false;pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;
     app.innerHTML=`<section class="card"><div class="ptop"><span class="tag">🎯 ${esc(sl.name)}</span><button class="link" id="end">Hotovo</button></div><div id="tb"></div>
-    <div class="actions"><button class="ghost" id="skip">Nevím – ukaž řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div></section>`;
+    <div id="hb"></div><div class="actions"><button class="ghost" id="skip">Nevím – ukaž řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div>${PQ.HINTS[key]?'<button class="link center" id="hint">💡 Nápověda</button>':''}</section>`;
     const tb=$('#tb'),chk=$('#chk');
-    renderTask(s.t,tb,s.ans,a=>{chk.disabled=!taskDone(s.t,a);});
+    renderTask(s.t,tb,s.ans,a=>{chk.disabled=!taskDone(s.t,a);});const h=$('#hint');if(h)h.onclick=()=>{$('#hb').innerHTML=`<p class="tnote">💡 ${PQ.HINTS[key]}</p>`;h.remove();};
     const finish=sk=>{if(s.done)return;s.done=true;const R=markTask(s.t,tb,s.ans,sk);s.pts+=R.pts;s.max+=R.max;s.n++;rec('slot:'+key,R.pts/R.max);
       $('#skip').hidden=true;chk.disabled=false;chk.textContent=s.queue.length?'Další úloha k textu →':'Další úloha →';chk.onclick=next;
       pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;tb.querySelector('.sfb .fb').scrollIntoView({behavior:'smooth',block:'nearest'});};

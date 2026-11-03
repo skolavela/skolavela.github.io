@@ -1,6 +1,6 @@
 // node test.js – kontrola všech dat
 const vm=require('vm'),fs=require('fs');const ctx={console,Math};vm.createContext(ctx);
-for(const f of ['core.js','data-cj.js','data-cj2.js','data-ma.js','exam.js','ex-ma.js'].concat(fs.existsSync(__dirname+'/ex-cj.js')?['ex-cj.js']:[]))vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
+for(const f of ['core.js','exam.js','ex-ma.js','ex-cj.js','topics.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
 const PQ=ctx.PQ;let err=0;const bad=(m,it)=>{err++;console.error('CHYBA:',m,JSON.stringify(it).slice(0,200));};
 function val(it,tp){
   if(!it||!it.q||typeof it.q!=='string')return bad(tp+': chybí zadání',it);
@@ -37,7 +37,7 @@ for(const t of PQ.topics){t.items.forEach(it=>val(it,t.id));
   for(const g of t.gens){for(let i=0;i<500;i++){let it;try{it=g();}catch(e){bad(t.id+': generátor vyhodil '+e.message,{});break;}val(it,t.id+' gen'+t.gens.indexOf(g));}}
   const perTopic=t.items.length+(t.gens.length?` + ${t.gens.length} gen.`:'');tot+=t.items.length;
   console.log((t.subj+' / '+t.name).padEnd(34),String(t.items.length).padStart(4),t.gens.length);
-  if(t.items.length+t.gens.length*10<({chyby:30,razeni:25}[t.id]||40))console.warn('  ⚠ málo otázek');}
+}
 // parsování
 const tests=[['3,5',3.5],['3/4',0.75],['−2',-2],[' 12 cm',12],['1 000',1000]];
 for(const [s,v] of tests)if(Math.abs(PQ.parseNum(s)-v)>1e-9){err++;console.error('parseNum',s);}
@@ -72,4 +72,12 @@ for(const subj in PQ.BP){for(const len of ['full','short']){for(let i=0;i<50;i++
 [['(3a-1)^2','9a^2-6a+1',true],['2x(x+1)','2x^2+2x',true],['x/4','0,25x',true],['3x-2','3x+2',false]].forEach(([a,b,v])=>{if(PQ.sameExpr(a,b)!==v){err++;console.error('sameExpr',a,b);}});
 if(PQ.checkField({k:'frac',a:[3,4]},'6/8').ok||!PQ.checkField({k:'frac',a:[3,4]},'3/4').ok||PQ.checkField({k:'frac',a:[3,4]},'0,75').ok){err++;console.error('frac');}
 if(PQ.checkField({k:'expr',a:'(x-3)(x+3)',form:'prod'},'x^2-9').ok||!PQ.checkField({k:'expr',a:'(x-3)(x+3)',form:'prod'},'(x+3)(x−3)').ok){err++;console.error('prod');}
+// okruhy: každý slot existuje, má nápovědu; podíl grafických úloh ve smíšené matematice
+for(const t of PQ.topics){if(!t.slots||!t.slots.length)bad('okruh bez úloh '+t.id,t);t.slots.forEach(k=>{if(!PQ.SLOTS[k])bad('okruh '+t.id+': chybí slot '+k,{});if(!PQ.HINTS[k])bad('chybí nápověda '+k,{});});
+  console.log(`Okruh ${t.subj}/${t.id}: ${t.slots.length} typů úloh (${t.slots.join(', ')})`);}
+const used=new Set(PQ.topics.flatMap(t=>t.slots));Object.keys(PQ.SLOTS).forEach(k=>{if(!used.has(k))bad('slot není v žádném okruhu '+k,{});});
+{const ma=PQ.topics.filter(t=>t.subj==='ma');let fig=0,N=3000;for(let i=0;i<N;i++){const want=Math.random()<PQ.FIGSHARE;let out;for(let j=0;j<40;j++){const t=PQ.pick(ma);out=[].concat(PQ.SLOTS[PQ.pick(t.slots)].gen());if(PQ.isFig(out[0])===want)break;}if(PQ.isFig(out[0]))fig++;}
+ const sh=fig/N;console.log(`Smíšená MA: grafických úloh ${(100*sh).toFixed(1)} % (cíl ${PQ.FIGSHARE*100} % jako CERMAT)`);if(Math.abs(sh-PQ.FIGSHARE)>0.05)bad('podíl grafických úloh mimo cíl',{});
+ const geo=PQ.topics.find(t=>t.id==='rovina');let g=0;for(let i=0;i<500;i++)if(PQ.isFig([].concat(PQ.SLOTS[PQ.pick(geo.slots)].gen())[0]))g++;console.log(`Geometrie v rovině: grafických ${(g/5).toFixed(0)} %`);
+ let tf=0;for(let i=0;i<200;i++)tf+=PQ.buildExam('ma','full').filter(PQ.isFig).length;console.log(`Test MA: grafických úloh ${(tf/200/16*100).toFixed(0)} %`);}
 console.log(`Pevných otázek: ${tot}; slotů CERMAT: ${Object.keys(PQ.SLOTS).length}; chyb: ${err}`);process.exit(err?1:0);

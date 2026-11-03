@@ -142,7 +142,8 @@ slot('ma9','Konstrukce: počet řešení a postup',()=>{
     txt=`Bod A má od přímky p vzdálenost ${d} cm. Sestrojte všechny body X, které leží na přímce p a mají od bodu A vzdálenost ${r} cm.`;
     e1=`Body X jsou průsečíky přímky p s kružnicí se středem A a poloměrem ${r} cm. ${n===2?`${r} > ${d}: 2 průsečíky.`:n===1?`${r} = ${d}: kružnice se přímky dotkne, 1 bod.`:`${r} < ${d}: žádný průsečík.`}`;
     o=[`na kružnici se středem A a poloměrem ${r} cm`,`na přímce rovnoběžné s p ve vzdálenosti ${r} cm`,`na kolmici k přímce p vedené bodem A`,`na ose úhlu, který svírá p s kolmicí z A`];q2='Kromě přímky p musí bod X ležet…';e2='Vzdálenost od bodu A = kružnice se středem A.';}
-  const ix=PQ.shuffle([0,1,2,3]);
+  const sk=t===2?svg(`<line x1="20" y1="150" x2="300" y2="150"/><text x="290" y="168">p</text>${dot([160,70])}${lbl([160,70],'A',6,-6)}<line class="dash" x1="160" y1="70" x2="160" y2="150"/>${lbl([160,110],'?',6,4)}`,180):svg(`<line x1="40" y1="150" x2="280" y2="150"/>${dot([40,150])}${dot([280,150])}${lbl([40,150],'A',-14,14)}${lbl([280,150],'B',6,14)}<line class="dash" x1="10" y1="60" x2="310" y2="60"/>${t===1?'<circle class="thin" cx="160" cy="150" r="120"/>':''}<text class="sm" x="12" y="54">náčrt – ${t===1?'Thaletova kružnice a rovnoběžka':'rovnoběžka s AB'}</text>`,180);
+  txt+=sk;const ix=PQ.shuffle([0,1,2,3]);
   return PQ.T('Konstrukce',[S.fields('Kolik řešení úloha má?',[{k:'num',a:n}],1,e1),S.mc(q2,ix.map(i=>o[i]),ix.indexOf(0),2,e2)],
     {src:{h:`<p>${txt}</p>`},note:'Zjednodušení: u přijímaček tuto úlohu skutečně rýsuješ (a musíš narýsovat všechna řešení). Tady si ověříš úvahu, která za konstrukcí stojí – rýsování si zkus na papír.'});});
 
@@ -187,17 +188,20 @@ slot('ma12','Procenta (A–E)',()=>{
 const TRI=[[5,12,13],[8,6,10],[6,8,10],[9,12,15],[12,5,13],[8,15,17],[12,9,15]];
 slot('ma13','Obsah trojúhelníku/kosočtverce (A–E)',()=>{
   const k=pick([1,1,2]);if(Math.random()<0.6){const [h0,b0,l0]=pick(TRI);const h=h0*k,half=b0*k,l=l0*k,base=2*half,P=base+2*l,A=half*h;
-    return PQ.T('Geometrie',[PQ.mcE(`Rovnoramenný trojúhelník má obvod ${P} cm a základnu dlouhou ${base} cm. Jaký je jeho obsah?`,A,[base*h,base*l/2,l*h,A+half],2,`Rameno: (${P} − ${base}) : 2 = ${l} cm. Výška k základně (Pythagorova věta): √(${l}² − ${half}²) = ${h} cm. Obsah: ${base} · ${h} : 2 = ${A} cm².`,{fmt:x=>fmt(x)+' cm²'})]);}
+    const T0=fit([[0,0],[base,0],[half,h]],320,170,24);const A_=T0([0,0]),B_=T0([base,0]),C_=T0([half,h]);const fig=svg(`${tri([A_,B_,C_])}${lbl([(A_[0]+B_[0])/2,A_[1]],base+' cm',-14,16)}${lbl(C_,'?',-4,-8)}`,190);
+    return PQ.T('Geometrie',[PQ.mcE(`Rovnoramenný trojúhelník (viz obrázek) má obvod ${P} cm a základnu dlouhou ${base} cm. Jaký je jeho obsah?${fig}`,A,[base*h,base*l/2,l*h,A+half],2,`Rameno: (${P} − ${base}) : 2 = ${l} cm. Výška k základně (Pythagorova věta): √(${l}² − ${half}²) = ${h} cm. Obsah: ${base} · ${h} : 2 = ${A} cm².`,{fmt:x=>fmt(x)+' cm²'})]);}
   const [p,q,s]=pick([[3,4,5],[6,8,10],[5,12,13],[8,15,17]]).map(x=>x*k);const d1=2*q,d2=2*p,A=d1*d2/2;
-  return PQ.T('Geometrie',[PQ.mcE(`Kosočtverec má obvod ${4*s} cm a jednu úhlopříčku dlouhou ${d1} cm. Jaký je jeho obsah?`,A,[d1*d2,s*d1,A+d1,s*s],2,`Strana ${s} cm, polovina známé úhlopříčky ${q} cm, polovina druhé: √(${s}² − ${q}²) = ${p} cm, druhá úhlopříčka ${d2} cm. Obsah: ${d1} · ${d2} : 2 = ${A} cm².`,{fmt:x=>fmt(x)+' cm²'})]);});
+  const Rt=fit([[0,0],[q,p],[2*q,0],[q,-p]],320,170,24);const R0=Rt([0,0]),R1=Rt([q,p]),R2=Rt([2*q,0]),R3=Rt([q,-p]);const rf=svg(`${tri([R0,R1,R2,R3])}${ln(R0,R2,'dash')}${lbl([(R0[0]+R2[0])/2,R0[1]],d1+' cm',-14,-6)}${lbl([(R0[0]+R1[0])/2,(R0[1]+R1[1])/2],'a',-14,-2)}`,180);
+  return PQ.T('Geometrie',[PQ.mcE(`Kosočtverec (viz obrázek) má obvod ${4*s} cm a jednu úhlopříčku dlouhou ${d1} cm. Jaký je jeho obsah?${rf}`,A,[d1*d2,s*d1,A+d1,s*s],2,`Strana ${s} cm, polovina známé úhlopříčky ${q} cm, polovina druhé: √(${s}² − ${q}²) = ${p} cm, druhá úhlopříčka ${d2} cm. Obsah: ${d1} · ${d2} : 2 = ${A} cm².`,{fmt:x=>fmt(x)+' cm²'})]);});
 slot('ma14','Povrch těles (A–E)',()=>{
-  if(Math.random()<0.5){const a=ri(10,20),b=ri(3,9),c=ri(2,8);return PQ.T('Tělesa',[PQ.mcE(`Kvádr s rozměry ${a} cm, ${b} cm a ${c} cm rozřízneme rovinou kolmou k nejdelší hraně na dva menší kvádry. O kolik cm² je součet povrchů obou menších kvádrů větší než povrch původního kvádru?`,2*b*c,[b*c,4*b*c,2*a*b,2*(a*b+b*c+a*c)],2,`Řezem vzniknou dvě nové stěny, každá ${b} cm × ${c} cm: 2 · ${b} · ${c} = ${2*b*c} cm².`,{fmt:x=>fmt(x)+' cm²'})]);}
-  const a=ri(3,12),n=pick([2,3]);return PQ.T('Tělesa',[PQ.mcE(`Ze ${n===2?'dvou':'tří'} stejných krychlí s hranou ${a} cm slepíme stěnami kvádr (krychle jsou v řadě za sebou). O kolik cm² je povrch kvádru menší než součet povrchů všech krychlí?`,2*(n-1)*a*a,[(n-1)*a*a,6*n*a*a-2*a*a,2*n*a*a,4*(n-1)*a*a],2,`Každým slepením zmizí 2 stěny po ${a*a} cm². Slepení jsou ${n-1}: ${2*(n-1)} · ${a*a} = ${2*(n-1)*a*a} cm².`,{fmt:x=>fmt(x)+' cm²'})]);});
+  if(Math.random()<0.5){const a=ri(10,20),b=ri(3,9),c=ri(2,8);return PQ.T('Tělesa',[PQ.mcE(`${cuboid(a,b,c,a+' cm',b+' cm',c+' cm')}Kvádr s rozměry ${a} cm, ${b} cm a ${c} cm rozřízneme rovinou kolmou k nejdelší hraně na dva menší kvádry. O kolik cm² je součet povrchů obou menších kvádrů větší než povrch původního kvádru?`,2*b*c,[b*c,4*b*c,2*a*b,2*(a*b+b*c+a*c)],2,`Řezem vzniknou dvě nové stěny, každá ${b} cm × ${c} cm: 2 · ${b} · ${c} = ${2*b*c} cm².`,{fmt:x=>fmt(x)+' cm²'})]);}
+  const a=ri(3,12),n=pick([2,3]);return PQ.T('Tělesa',[PQ.mcE(`${cuboid(n,1,1,'','','')}Ze ${n===2?'dvou':'tří'} stejných krychlí s hranou ${a} cm slepíme stěnami kvádr (krychle jsou v řadě za sebou). O kolik cm² je povrch kvádru menší než součet povrchů všech krychlí?`,2*(n-1)*a*a,[(n-1)*a*a,6*n*a*a-2*a*a,2*n*a*a,4*(n-1)*a*a],2,`Každým slepením zmizí 2 stěny po ${a*a} cm². Slepení jsou ${n-1}: ${2*(n-1)} · ${a*a} = ${2*(n-1)*a*a} cm².`,{fmt:x=>fmt(x)+' cm²'})]);});
 
 /* 15 – přiřazovací svazek (3 podúlohy, 6 možností, 2 b za každou) */
 slot('ma15','Přiřazování výsledků – objemy',()=>{
   let r,a,b,c,h,e,p,q,v;do{a=ri(3,8);b=ri(2,5);h=ri(2,6);e=ri(2,6);p=ri(3,8);q=ri(2,6);v=ri(3,9);r=[a*b*h,e*e*e,p*q*v/2];}while(new Set(r).size<3||(p*q)%2);
   const items=[`Akvárium tvaru kvádru má dno ${a} dm × ${b} dm a voda v něm sahá do výšky ${h} dm. Kolik litrů vody obsahuje?`,`Krychle má povrch ${6*e*e} cm². Kolik cm³ je její objem?`,`Hranol má podstavu tvaru pravoúhlého trojúhelníku s odvěsnami ${p} cm a ${q} cm a výšku ${v} cm. Kolik cm³ je jeho objem?`];
+  items[0]=cuboid(a,b,h+1,a+' dm',b+' dm','')+items[0];
   const dis=new Set();[r[0]*2,e*e*6,p*q*v,r[2]+v,e*e*4,(a+b)*h].forEach(x=>{if(!r.includes(x))dis.add(x);});const o=PQ.shuffle(r.concat([...dis].slice(0,3)));
   return PQ.T('Přiřazování',[S.match('Přiřaďte ke každé úloze (15.1–15.3) správný výsledek (A–F).',items,o.map(String),r.map(x=>o.indexOf(x)),6,`15.1: ${a} · ${b} · ${h} = ${r[0]} dm³ = ${r[0]} l. 15.2: stěna má ${e*e} cm², hrana ${e} cm, objem ${e}³ = ${r[1]} cm³. 15.3: podstava ${p} · ${q} : 2 = ${p*q/2} cm², objem ${p*q/2} · ${v} = ${r[2]} cm³.`)],
     {note:'Každá možnost se dá použít nejvýše jednou; tři zbudou. Za každé správné přiřazení 2 body.'});});
@@ -216,6 +220,51 @@ slot('ma16','Vzor a posloupnost',()=>{
     S.fields(`Kolik kuliček je v krabici po ${t2}. sekundě?`,[{k:'num',a:hist[t2]}],1,`Za každých 12 sekund přibude 12 · ${a} + 4 · ${b} − 3 · ${c} = ${12*a+4*b-3*c} kuliček. Po ${t2}. sekundě: ${hist[t2]}.`),
     S.fields(`Po které sekundě bude v krabici poprvé více než ${M} kuliček?`,[{k:'num',a:first}],2,`Za 12 s přibude ${12*a+4*b-3*c}; počty po sekundách stoupají nerovnoměrně. Poprvé přes ${M}: po ${first}. sekundě (${hist[first]} kuliček).`)],
     {src:{h:`<p>Na začátku je v krabici ${s0} kuliček. Robot Alfa přidá každou sekundu ${a} ${kul(a)}. Robot Beta přidá každou třetí sekundu (po 3., 6., 9. … sekundě) ${b} ${kul(b)}. Robot Gama každou čtvrtou sekundu (po 4., 8., 12. … sekundě) ${c} ${kul(c)} odebere.</p>`}});});
+
+
+/* ===== grafické úlohy navíc (procvičování) ===== */
+const tri=(pts,cls)=>`<polygon${cls?` class="${cls}"`:''} points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>`;
+const rightMark=(p,u,v)=>{const a=[p[0]+u[0]*10,p[1]+u[1]*10],b=[a[0]+v[0]*10,a[1]+v[1]*10],c=[p[0]+v[0]*10,p[1]+v[1]*10];return `<polyline class="thin" fill="none" points="${[a,b,c].map(q=>q.join(',')).join(' ')}"/>`;};
+function cuboid(a,b,c,la,lb,lc){const s=Math.min(150/(a+b*0.5),120/(c+b*0.5));const A=a*s,B=b*s*0.5,C=c*s;const x0=40,y0=170;
+  const f=[[x0,y0],[x0+A,y0],[x0+A,y0-C],[x0,y0-C]],o=[B,-B];const bk=f.map(p=>[p[0]+o[0],p[1]+o[1]]);
+  return svg(`${tri(f)}<polygon class="top" points="${[f[3],f[2],bk[2],bk[3]].map(p=>p.join(',')).join(' ')}"/><polygon class="top" points="${[f[1],bk[1],bk[2],f[2]].map(p=>p.join(',')).join(' ')}"/>${ln(f[0],bk[0],'dash')}${ln(bk[0],bk[1],'dash')}${ln(bk[0],bk[3],'dash')}${lbl([x0+A/2,y0],la,-10,16)}${lbl([x0+A,y0],lb,B/2+2,-B/2+12)}${lbl([x0,y0-C/2],lc,-36,4)}`,200);}
+slot('maPyth','Pythagorova věta v obrázku',()=>{let a,b,c;do{const [a0,b0,c0]=pick(TRI.concat([[3,4,5],[7,24,25]]));const k=pick([1,1,2,0.5]);a=a0*k;b=b0*k;c=c0*k;}while(c*c-(b+1)*(b+1)<=1);
+  if(Math.random()<0.5){const T=fit([[0,0],[b,0],[0,a]],320,190,26);const P0=T([0,0]),P1=T([b,0]),P2=T([0,a]);
+    const fig=svg(`${tri([P0,P1,P2])}${rightMark(P0,[1,0],[0,-1])}${lbl([(P0[0]+P1[0])/2,P0[1]],fmt(b)+' m',-14,16)}${lbl([P0[0],(P0[1]+P2[1])/2],'?',-16,4)}${lbl([(P1[0]+P2[0])/2,(P1[1]+P2[1])/2],fmt(c)+' m',8,-4)}`,200);
+    return PQ.T('Pythagorova věta',[S.fields('Do jaké výšky (v m) žebřík dosáhne?',[{k:'num',a:a,tol:0.001}],1,`Žebřík je přepona: výška = √(${fmt(c)}² − ${fmt(b)}²) = √${fmt(r2(c*c-b*b))} = ${fmt(a)} m.`),
+      S.fields('Žebřík posuneme tak, že jeho pata bude o 1 m dál od zdi. O kolik metrů níž (zaokrouhleno na desetiny) teď sahá? ',[{k:'num',a:r2(Math.round((a-Math.sqrt(c*c-(b+1)*(b+1)))*10)/10),tol:0.051}],2,`Nová výška: √(${fmt(c)}² − ${fmt(b+1)}²) ≈ ${fmt(Math.round(Math.sqrt(c*c-(b+1)*(b+1))*100)/100)} m. Rozdíl ≈ ${fmt(Math.round((a-Math.sqrt(c*c-(b+1)*(b+1)))*10)/10)} m.`,{work:[`původní výška: √(${fmt(c)}² − ${fmt(b)}²) = ${fmt(a)} m`,`nová výška: √(${fmt(c)}² − ${fmt(b+1)}²)`,'rozdíl obou výšek, zaokrouhlit na desetiny']})],
+      {src:{h:`<p>Žebřík dlouhý ${fmt(c)} m je opřený o svislou zeď, jeho pata je ${fmt(b)} m od zdi (viz obrázek).</p>${fig}<p class="meta">Obrázek je jen ilustrační.</p>`}});}
+  const T=fit([[0,0],[2*b,0],[b,a]],320,180,26);const A=T([0,0]),B=T([2*b,0]),C=T([b,a]),D=T([b,0]);
+  const fig=svg(`${tri([A,B,C])}${ln(C,D,'dash')}${rightMark(D,[1,0],[0,-1])}${lbl(A,'A',-14,14)}${lbl(B,'B',6,14)}${lbl(C,'C',-4,-8)}${lbl(D,'D',-4,16)}${lbl([(A[0]+C[0])/2,(A[1]+C[1])/2],fmt(c)+' cm',-58,0)}${lbl([(A[0]+D[0])/2,A[1]],fmt(b)+' cm',-14,16)}`,200);
+  return PQ.T('Pythagorova věta',[S.fields('Jak dlouhá je výška CD (v cm)?',[{k:'num',a:a,tol:0.001}],1,`Trojúhelník ADC je pravoúhlý: |CD| = √(${fmt(c)}² − ${fmt(b)}²) = ${fmt(a)} cm.`),
+    S.fields('Jaký je obsah trojúhelníku ABC (v cm²)?',[{k:'num',a:r2(b*a),tol:0.001}],2,`Základna ${fmt(2*b)} cm, výška ${fmt(a)} cm: ${fmt(2*b)} · ${fmt(a)} : 2 = ${fmt(r2(a*b))} cm².`,{work:[`|AB| = 2 · ${fmt(b)} = ${fmt(2*b)} cm`,`|CD| = √(${fmt(c)}² − ${fmt(b)}²) = ${fmt(a)} cm`,`S = ${fmt(2*b)} · ${fmt(a)} : 2 = ${fmt(r2(a*b))} cm²`]})],
+    {src:{h:`<p>Trojúhelník ABC je rovnoramenný se základnou AB, |AC| = |BC| = ${fmt(c)} cm, |AD| = ${fmt(b)} cm, D je pata výšky z vrcholu C.</p>${fig}<p class="meta">Obrázek je jen ilustrační.</p>`}});},{fig:1});
+slot('maNet','Síť a povrch tělesa',()=>{let a,b,c;do{a=ri(2,7);b=ri(2,6);c=ri(1,5);}while(a===b&&b===c);const S0=2*(a*b+b*c+a*c),V=a*b*c;
+  const u=Math.min(26,280/(2*a+2*c),200/(2*c+b)),x0=10,y0=10;const R=(x,y,w,h,f)=>`<rect x="${x0+x*u}" y="${y0+y*u}" width="${w*u}" height="${h*u}" class="${f||'face'}"/>`;
+  // síť kvádru: pás c,a,c,a vodorovně (výška b), nad a pod druhým dílem stěny a×c
+  const net=R(0,c,c,b)+R(c,c,a,b,'face on')+R(c+a,c,c,b)+R(2*c+a,c,a,b)+R(c,0,a,c)+R(c,c+b,a,c);
+  const fig=`<svg class="fig" viewBox="0 0 ${x0*2+(2*a+2*c)*u} ${y0*2+(2*c+b)*u+14}" role="img" aria-label="Síť kvádru">${net}<text class="sm" x="${x0+(c+a/2)*u-8}" y="${y0+(c+b)*u+14}">${a} cm</text><text class="sm" x="${x0+(c+a)*u+4}" y="${y0+(c+b/2)*u+4}">${b} cm</text><text class="sm" x="${x0+(c+a/2)*u-8}" y="${y0+(2*c+b)*u+14}">${c} cm</text></svg>`;
+  return PQ.T('Tělesa',[S.fields('Jaký je povrch kvádru (v cm²)?',[{k:'num',a:S0}],1,`Stěny: 2 · (${a}·${b} + ${b}·${c} + ${a}·${c}) = ${S0} cm².`),
+    S.fields('Jaký je objem kvádru (v cm³)?',[{k:'num',a:V}],1,`${a} · ${b} · ${c} = ${V} cm³.`),
+    S.fields(`Kvádr obarvíme a rozřežeme na krychličky s hranou 1 cm. Kolik krychliček nebude mít obarvenou žádnou stěnu?`,[{k:'num',a:Math.max(0,a-2)*Math.max(0,b-2)*Math.max(0,c-2)}],2,`Neobarvené jsou jen vnitřní krychličky: (${a} − 2) · (${b} − 2) · (${c} − 2) = ${Math.max(0,a-2)*Math.max(0,b-2)*Math.max(0,c-2)} (záporný či nulový činitel znamená 0).`)],
+    {src:{h:`<p>Na obrázku je síť kvádru s rozměry ${a} cm, ${b} cm a ${c} cm (zvýrazněná je jedna stěna ${a} cm × ${b} cm).</p>${fig}`}});},{fig:1});
+slot('maBar','Sloupcový graf',()=>{const m=['leden','únor','březen','duben','květen'];let v;do{v=m.map(()=>ri(4,24)*5);}while(v.reduce((a,b)=>a+b,0)%5||new Set(v).size<5);
+  const mx=Math.max(...v),avg=r2(v.reduce((a,b)=>a+b,0)/5);const i=ri(0,3),j=i+1;const pc=r2(100*(v[j]-v[i])/v[i]);
+  let g='';for(let k=0;k<=mx;k+=20){const y=170-k*140/mx;g+=`<line class="grid" x1="34" x2="310" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="sm" x="4" y="${(y+4).toFixed(1)}">${k}</text>`;}
+  v.forEach((x,k)=>{const h=x*140/mx;g+=`<rect x="${48+k*52}" y="${(170-h).toFixed(1)}" width="34" height="${h.toFixed(1)}" rx="4" fill="#5e5ce6"/><text class="sm" x="${48+k*52}" y="186">${m[k]}</text>`;});
+  const fig=`<svg class="fig" viewBox="0 0 320 196" role="img" aria-label="Sloupcový graf">${g}</svg>`;
+  const good=Number.isInteger(pc*10);
+  return PQ.T('Graf',[S.fields('Kolik kol se v průměru prodalo za jeden měsíc?',[{k:'num',a:avg,tol:0.001}],1,`(${v.join(' + ')}) : 5 = ${fmt(avg)}.`),
+    S.fields(`O kolik procent se v měsíci ${m[j]} prodalo ${v[j]>=v[i]?'více':'méně'} kol než v měsíci ${m[i]}? (zaokrouhlete na celá procenta)`,[{k:'num',a:Math.round(Math.abs(pc)),tol:0.5}],2,`Rozdíl ${Math.abs(v[j]-v[i])} kol vztáhneme k měsíci ${m[i]} (${v[i]} kol): ${Math.abs(v[j]-v[i])} : ${v[i]} · 100 ≈ ${Math.round(Math.abs(pc))} %.`,{work:[`rozdíl: ${Math.abs(v[j]-v[i])}`,`základ = ${m[i]}: ${v[i]}`,`${Math.abs(v[j]-v[i])} : ${v[i]} · 100 ≈ ${Math.round(Math.abs(pc))} %`]})],
+    {src:{h:`<p>Graf ukazuje, kolik kol prodal obchod v jednotlivých měsících (odečítej s přesností na 5 kusů – každá hodnota je násobkem 5).</p>${fig}<p class="meta">Hodnoty: ${v.map((x,k)=>m[k]+' '+x).join(', ')}.</p>`}});},{fig:1});
+slot('maLine','Číselná osa a zlomky',()=>{let n,x,y;do{n=pick([3,4,5,6,8]);x=ri(1,2*n-1);y=ri(1,2*n-1);}while(x>=y||y-x<2);
+  const P=t=>30+t*260/(2*n);let g=`<line class="axis" x1="20" x2="300" y1="60" y2="60"/>`;for(let k=0;k<=2*n;k++){const big=k%n===0;g+=`<line x1="${P(k)}" x2="${P(k)}" y1="${big?50:54}" y2="${big?70:66}"/>`+(big?`<text x="${P(k)-4}" y="88">${k/n}</text>`:'');}
+  g+=`<circle cx="${P(x)}" cy="60" r="5" fill="#ff375f"/><text x="${P(x)-4}" y="40">X</text><circle cx="${P(y)}" cy="60" r="5" fill="#5e5ce6"/><text x="${P(y)-4}" y="40">Y</text>`;
+  const fig=`<svg class="fig" viewBox="0 0 320 100" role="img" aria-label="Číselná osa">${g}</svg>`;const X=fr(x,n),Y=fr(y,n),Dd=fr(y-x,n),M=fr(x+y,2*n);
+  return PQ.T('Číselná osa',[S.fields('Které číslo odpovídá bodu X?',[frF(X)],1,`Jednotka je rozdělena na ${n} dílů, X je na ${x}. dílku: ${FF(fr(x,n))}.`),
+    S.fields('Jaká je vzdálenost bodů X a Y?',[frF(Dd)],1,`${y} − ${x} = ${y-x} dílků po ${F(1,n)}: ${FF(Dd)}.`),
+    S.fields('Které číslo leží přesně uprostřed mezi X a Y?',[frF(M)],1,`(${FF(X)} + ${FF(Y)}) : 2 = ${FF(M)}.`)],
+    {src:{h:`<p>Na číselné ose jsou vyznačeny body X a Y. Výsledky zapište zlomkem v základním tvaru (nebo celým číslem).</p>${fig}`}});},{fig:1});
 
 PQ.BP.ma={full:['ma1','ma2','ma3','ma4','ma5','ma6','ma7','ma8','ma9','ma10','ma11','ma12','ma13','ma14','ma15','ma16'],short:['ma1','ma2','ma4','ma6','ma8','ma11','ma12','ma16'],mins:{full:70,short:35}};
 })(typeof window!=='undefined'?window:globalThis);
