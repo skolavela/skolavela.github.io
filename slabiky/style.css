@@ -62,5 +62,5 @@ button:active{transform:scale(.97)}button.primary:hover{filter:brightness(1.06)}
 
 }
 .rrow{display:flex;gap:8px;align-items:center}.rrow .seg{flex:1}
-.dice{flex:none;border:0;cursor:pointer;width:40px;height:32px;border-radius:10px;font-size:18px;background:linear-gradient(135deg,#34c759,#00c7be);box-shadow:0 4px 12px rgba(52,199,89,.35);transition:transform .2s}
+.dice{flex:none;touch-action:manipulation;-webkit-appearance:none;border:0;cursor:pointer;width:40px;height:32px;border-radius:10px;font-size:18px;background:linear-gradient(135deg,#34c759,#00c7be);box-shadow:0 4px 12px rgba(52,199,89,.35);transition:transform .2s}
 .dice:hover{transform:rotate(-12deg) scale(1.05)}

@@ -19,7 +19,7 @@ function render() {
   document.body.className = `f-${st.font} m-${st.mode}` + (st.upper ? ' up' : '');
   $('sizeVal').textContent = st.size + ' px'; $('lhVal').textContent = (+st.lh).toFixed(1).replace('.', ',');
   for (const g of ['font', 'mode', 'lvl']) for (const b of $(g).children) b.classList.toggle('on', b.dataset.v === st[g]);
-  localStorage.setItem(KEY, JSON.stringify(st));
+  try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
 }
 $('title').value = st.title; $('src').value = st.text; $('size').value = st.size; $('lh').value = st.lh; $('upper').checked = st.upper;
 $('title').oninput = e => { st.title = e.target.value; render(); };
@@ -34,6 +34,7 @@ $('rand').onclick = () => {
   const pool = TEXTS.map((t, i) => i).filter(i => String(TEXTS[i].l) === st.lvl && i !== lastText);
   lastText = pool[Math.floor(Math.random() * pool.length)];
   const t = TEXTS[lastText]; st.title = t.t; st.text = t.x; $('title').value = t.t; $('src').value = t.x; render();
+  if (window.matchMedia && matchMedia('(max-width:860px)').matches) $('sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 $('print').onclick = () => window.print();
 render();
