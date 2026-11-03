@@ -36,7 +36,7 @@ button:active{transform:scale(.97)}button:hover{filter:brightness(1.05)}
 .tg input:checked+i{background:#34c759}.tg input:checked+i::after{transform:translateX(18px)}
 .hint{color:var(--mut);font-size:12px;margin:0;line-height:1.4}.hint b{color:#c2410c}
 .stage{min-height:0;min-width:0;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:20px;padding:2px}
-.sheet{background:#fff;border:1px solid var(--bd);border-radius:24px;box-shadow:0 20px 50px rgba(60,60,200,.12);position:relative;overflow:hidden;width:100%;max-width:calc((100vh - 120px) / 1.414);aspect-ratio:210/297;flex:none;padding:6% 7% 5%;display:flex;flex-direction:column;color:#000;font-family:Lexend,-apple-system,Arial,sans-serif;container-type:inline-size}
+.sheet{background:#fff;border:1px solid var(--bd);border-radius:24px;box-shadow:0 20px 50px rgba(60,60,200,.12);position:relative;overflow:hidden;width:100%;max-width:calc((100vh - 165px) / 1.414);aspect-ratio:210/297;flex:none;padding:6% 7% 5%;display:flex;flex-direction:column;color:#000;font-family:Lexend,-apple-system,Arial,sans-serif;container-type:inline-size}
 .sheet::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#00c7be,#5e5ce6,#af52de,#ff2d78,#ffcc00)}
 .sheet h2{margin:0 0 4cqw;font-size:5.2cqw;font-weight:700;text-align:center}
 .sheet .grid{width:100%;display:block;flex:none}
