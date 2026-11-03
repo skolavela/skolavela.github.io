@@ -23,8 +23,19 @@
     }
     return out;
   }
+  // časté předpony: pokud hranice předpony leží uvnitř skupiny souhlásek, dělí se na ní (na-cvi-čo-vat, před-sta-va)
+  const PREF = ['před', 'pod', 'nad', 'roz', 'bez', 'nej', 'při', 'pře', 'pro', 'od', 'vy', 'do', 'po', 'na', 'za', 'ná', 'ne'];
+  function prefixLen(u) {
+    const lw = u.map(x => x.c).join('');
+    for (const p of PREF) if (lw.startsWith(p) && lw.length > p.length + 1) {
+      let n = 0, len = 0; while (len < p.length) len += u[n++].c.length;
+      if (len === p.length) return n;
+    }
+    return 0;
+  }
   function syllabify(word) {
     const u = units(word);
+    const pl = prefixLen(u);
     const nuc = [];
     u.forEach((x, i) => { if (x.v || x.syl) nuc.push(i); });
     if (nuc.length < 2) return [word];
@@ -39,6 +50,7 @@
         const onset2 = LIQ.includes(last) && !'rlřjmn'.includes(prev);
         cut = n === 2 ? (onset2 ? a + 1 : a + 2) : (onset2 ? b - 2 : b - 1);
       }
+      if (pl && pl > a && pl < b && (n >= 2 || 'dz'.includes(u[pl - 1].c) && !u[pl - 1].v)) cut = pl;
       cuts.push(cut);
     }
     const res = []; let start = 0;

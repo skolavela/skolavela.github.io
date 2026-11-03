@@ -6,6 +6,7 @@
 <title>Tučné slabiky – text po slabikách pro dyslektiky</title>
 <link rel="stylesheet" href="style.css">
 <script src="syllab.js" defer></script>
+<script src="texts.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
@@ -19,6 +20,13 @@
     <div class="group">
       <label class="lbl" for="title">Nadpis (nepovinný)</label>
       <input type="text" id="title" placeholder="např. O pejskovi a kočičce" autocomplete="off">
+    </div>
+    <div class="group rnd">
+      <label class="lbl">Náhodný text</label>
+      <div class="rrow">
+        <div class="seg" id="lvl"><button data-v="1">Krátký</button><button data-v="2">Střední</button><button data-v="3">Delší</button></div>
+        <button class="dice" id="rand" type="button" title="Náhodný text">🎲</button>
+      </div>
     </div>
     <div class="group grow">
       <label class="lbl" for="src">Text <button class="link" id="clear" type="button">Vymazat</button></label>
