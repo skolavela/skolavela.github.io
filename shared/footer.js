@@ -1,5 +1,5 @@
 // Společná patička všech aplikací. Odkaz na zpětnou vazbu se nastavuje jen tady.
-window.FEEDBACK_URL = '#';
+window.FEEDBACK_URL = 'https://tally.so/r/Qo1aeY';
 (function () {
   var me = document.currentScript, note = me && me.getAttribute('data-note');
   var css = '.sv-foot{flex:none;text-align:center;font:12px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#6e6e73;padding:8px 16px calc(8px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;align-items:center}.sv-foot .sv-note{flex-basis:100%}' +
