@@ -6,4 +6,6 @@ window.APPS = [
     desc: 'Libovolný text po slabikách střídavě tučně a normálně – pro dyslektiky. Tisk a PDF.' },
   { name: 'Osmisměrka', url: 'osmismerky/', icon: 'grid', color: '#5e5ce6',
     desc: 'Osmisměrky na zvolené téma nebo z vlastních slov, pro 1. i 2. stupeň. Tisk s řešením.' },
+  { name: 'Poznáváme přírodu', url: 'priroda/', icon: 'leaf', color: '#34a853',
+    desc: 'Kvíz a kartičky: poznej stromy, květiny, houby, ptáky, savce a další podle fotek.' },
 ];
