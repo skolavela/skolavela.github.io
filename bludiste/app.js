@@ -1,3 +1,4 @@
+function gcEvent(name, title) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: title || name, event: true }); } catch (e) {} }
 /* Bludiště – generátor bludišť k tisku na A4. Čisté JS, bez build kroku. */
 (function (root) {
 'use strict';
@@ -238,10 +239,10 @@ document.querySelectorAll('#presets button').forEach(b => b.onclick = () => upda
 $('size').oninput = e => { const v = +e.target.value; const p = Object.keys(PRESETS).find(k => PRESETS[k] === v); update({ size: v, preset: p || 'custom' }); };
 $('seed').oninput = e => update({ seed: e.target.value || '1', created: Date.now() });
 $('showSol').onchange = e => update({ showSol: e.target.checked });
-$('newMaze').onclick = () => update({ seed: newSeed(), created: Date.now() });
-$('print').onclick = () => { $('svgWrap').innerHTML = renderSVG(st, scene, false); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
+$('newMaze').onclick = () => (gcEvent('bludiste-generate', 'Bludiště: nové bludiště'), update)({ seed: newSeed(), created: Date.now() });
+$('print').onclick = () => { gcEvent('bludiste-print', 'Bludiště: tisk'); $('svgWrap').innerHTML = renderSVG(st, scene, false); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
 $('pdf').onclick = async () => {
-  const btn = $('pdf'); btn.disabled = true; const o = btn.textContent; btn.textContent = 'Připravuji…';
+  gcEvent('bludiste-pdf', 'Bludiště: export PDF'); const btn = $('pdf'); btn.disabled = true; const o = btn.textContent; btn.textContent = 'Připravuji…';
   try { (await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts())).save(`bludiste-${st.seed}.pdf`); }
   catch (e) { alert('Export PDF selhal: ' + e.message); }
   btn.disabled = false; btn.textContent = o;

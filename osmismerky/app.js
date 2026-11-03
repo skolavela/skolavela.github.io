@@ -1,3 +1,4 @@
+function gcEvent(name, title) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: title || name, event: true }); } catch (e) {} }
 var $ = function (id) { return document.getElementById(id); };
 var KEY = 'osmismerky-v1';
 var LV = { '1': { size: 10, count: 10, all8: false }, '2': { size: 15, count: 18, all8: true } };
@@ -92,6 +93,6 @@ $('title').oninput = function (e) { st.title = e.target.value; render(); };
 $('size').oninput = function (e) { st.size = +e.target.value; render(); };
 $('count').oninput = function (e) { st.count = +e.target.value; render(); };
 ['all8', 'dia', 'sol'].forEach(function (k) { $(k).onchange = function (e) { st[k] = e.target.checked; render(); }; });
-$('regen').onclick = function () { st.seed = Math.floor(Math.random() * 1e9) + 1; render(); };
-$('print').onclick = function () { window.print(); };
+$('regen').onclick = function () { gcEvent('osmismerky-generate', 'Osmisměrka: nová osmisměrka'); st.seed = Math.floor(Math.random() * 1e9) + 1; render(); };
+$('print').onclick = function () { gcEvent('osmismerky-print', 'Osmisměrka: tisk'); window.print(); };
 sync(); render();

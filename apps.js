@@ -8,4 +8,6 @@ window.APPS = [
     desc: 'Osmisměrky na zvolené téma nebo z vlastních slov, pro 1. i 2. stupeň. Tisk s řešením.' },
   { name: 'Poznáváme přírodu', url: 'priroda/', icon: 'leaf', color: '#34a853',
     desc: 'Kvíz a kartičky: poznej stromy, květiny, houby, ptáky, savce a další podle fotek.' },
+  { name: 'Přijímačky', url: 'prijimacky/', icon: 'cap', color: '#ff375f',
+    desc: 'Procvičování na jednotné přijímačky z češtiny a matematiky. Témata, cvičné testy na čas, vysvětlení.' },
 ];

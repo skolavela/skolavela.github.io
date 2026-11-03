@@ -1,3 +1,4 @@
+function gcEvent(name, title) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: title || name, event: true }); } catch (e) {} }
 const $ = id => document.getElementById(id);
 const KEY = 'slabiky-v1';
 const DEF = { title: 'Ukázkový text', text: 'Mladotice jsou malá vesnice. Děti tam chodí do školy a jsou snášenlivé a dobře informované.\nVe čtvrtek jsme viděli vlka, který překřikoval vítr. Pak jsme jeli autem do Brna.', size: 24, lh: 1.8, mode: 'bold', upper: false, lvl: '1' };
@@ -23,7 +24,8 @@ function render() {
 }
 $('title').value = st.title; $('src').value = st.text; $('size').value = st.size; $('lh').value = st.lh; $('upper').checked = st.upper;
 $('title').oninput = e => { st.title = e.target.value; render(); };
-$('src').oninput = e => { st.text = e.target.value; render(); };
+let gcConv = 0;
+$('src').oninput = e => { st.text = e.target.value; render(); clearTimeout(gcConv); gcConv = setTimeout(() => gcEvent('slabiky-convert', 'Slabiky: převod textu'), 3000); };
 $('size').oninput = e => { st.size = +e.target.value; render(); };
 $('lh').oninput = e => { st.lh = +e.target.value; render(); };
 $('upper').onchange = e => { st.upper = e.target.checked; render(); };
@@ -33,8 +35,9 @@ let lastText = -1;
 $('rand').onclick = () => {
   const pool = TEXTS.map((t, i) => i).filter(i => String(TEXTS[i].l) === st.lvl && i !== lastText);
   lastText = pool[Math.floor(Math.random() * pool.length)];
+  gcEvent('slabiky-random-text', 'Slabiky: náhodný text');
   const t = TEXTS[lastText]; st.title = t.t; st.text = t.x; $('title').value = t.t; $('src').value = t.x; render();
   if (window.matchMedia && matchMedia('(max-width:860px)').matches) $('sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
-$('print').onclick = () => window.print();
+$('print').onclick = () => { gcEvent('slabiky-print', 'Slabiky: tisk'); window.print(); };
 render();

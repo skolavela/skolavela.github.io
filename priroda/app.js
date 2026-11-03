@@ -1,3 +1,4 @@
+function gcEvent(name, title) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: title || name, event: true }); } catch (e) {} }
 var $ = function (id) { return document.getElementById(id); };
 var CATS = [
   { k: 'savci', n: 'Savci', e: '🦁', c: '#d9822b', s: [['selmy', 'Šelmy'], ['kopytnici', 'Kopytníci'], ['hlodavci', 'Hlodavci a zajíci'], ['primati', 'Primáti'], ['morsti', 'Mořští savci'], ['ostatni', 'Ostatní']] },
@@ -73,6 +74,7 @@ $('setup').onclick = function (e) {
 var game = null;
 function show(id) { ['setup', 'play', 'done'].forEach(function (x) { $(x).hidden = x !== id; }); document.body.classList.toggle('playing', id === 'play'); $('score').hidden = id !== 'play' || st.mode !== 'quiz'; window.scrollTo(0, 0); }
 function start() {
+  gcEvent('priroda-start-' + (st.mode || 'quiz'), 'Příroda: start ' + (st.mode || 'quiz'));
   var deck = shuffle(pool().slice()); var len = +st.len; if (len) deck = deck.slice(0, len);
   game = { deck: deck, i: 0, ok: 0, missed: [] }; show('play'); question();
 }
