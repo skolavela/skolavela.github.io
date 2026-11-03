@@ -15,9 +15,9 @@ function words() {
 }
 function autoTitle() { return st.own.trim() ? 'Osmisměrka' : 'Osmisměrka – ' + (TOPICS[st.topic] || TOPICS[0]).n.toLowerCase(); }
 
-function svg(res, withSol) {
+function svg(res, withSol, sizeMM) {
   var n = res.size, c = 10, W = n * c, h = '';
-  h += '<svg class="grid" viewBox="-0.6 -0.6 ' + (W + 1.2) + ' ' + (W + 1.2) + '" xmlns="http://www.w3.org/2000/svg">';
+  h += '<svg class="grid" viewBox="-0.6 -0.6 ' + (W + 1.2) + ' ' + (W + 1.2) + '"' + (sizeMM ? ' width="' + sizeMM + 'mm" height="' + sizeMM + 'mm"' : '') + ' xmlns="http://www.w3.org/2000/svg">';
   h += '<rect x="0" y="0" width="' + W + '" height="' + W + '" fill="#fff" stroke="#000" stroke-width="0.9"/>';
   for (var i = 1; i < n; i++) h += '<line x1="' + i * c + '" y1="0" x2="' + i * c + '" y2="' + W + '" stroke="#000" stroke-width="0.3"/><line x1="0" y1="' + i * c + '" x2="' + W + '" y2="' + i * c + '" stroke="#000" stroke-width="0.3"/>';
   if (withSol) res.placed.forEach(function (p) {
@@ -46,11 +46,34 @@ function sheet(res, title, withSol) {
     '<div class="words" style="' + fitWords(res.placed) + '">' + res.placed.map(function (p) { return '<span>' + esc(p.w) + '</span>'; }).join('') + '</div>' +
     '<div class="foot">skolavela.app</div>';
 }
+// Tisková sestava: pevné rozměry v mm, bez měření a bez CSS sloupců (spolehlivé i v Safari).
+function printPage(res, title, withSol) {
+  var words = res.placed.map(function (p) { return p.w; });
+  var maxLen = words.reduce(function (m, w) { return Math.max(m, Array.from(w).length); }, 3);
+  var cols = maxLen > 15 ? 2 : maxLen > 11 ? 3 : 4;
+  var colW = 184 / cols;                                   // mm
+  var pt = Math.min(12, colW / ((maxLen + 2) * 0.27));     // ~0.27 mm šířky znaku na 1 pt (velká písmena Lexend)
+  pt = Math.max(7, Math.floor(pt * 2) / 2);
+  var rows = Math.ceil(words.length / cols);
+  var listH = rows * pt * 0.3528 * 1.6;                    // mm
+  var avail = 273 - 14 - 8 - 8 - listH - 6;                // A4 273 mm bez okrajů − nadpis − mezera − patička − rezerva
+  var size = Math.max(90, Math.min(184, avail));
+  var t = '<table class="pw" style="font-size:' + pt + 'pt">';
+  for (var r = 0; r < rows; r++) {
+    t += '<tr>';
+    for (var c = 0; c < cols; c++) { var w = words[c * rows + r]; t += '<td style="width:' + colW.toFixed(1) + 'mm">' + (w ? (withSol ? '' : '☐ ') + esc(w) : '') + '</td>'; }
+    t += '</tr>';
+  }
+  t += '</table>';
+  return '<div class="pp' + (withSol ? ' psol' : '') + '"><h1>' + esc(title) + (withSol ? ' – řešení' : '') + '</h1>' +
+    '<div class="pg">' + svg(res, withSol, size.toFixed(1)) + '</div>' + t + '<div class="pf">skolavela.app</div></div>';
+}
 function render() {
   var res = Osm.generate({ words: words(), size: st.size, count: st.count, all8: st.all8, keepDia: st.dia, seed: st.seed });
   var title = st.title.trim() || autoTitle();
   $('sheet1').innerHTML = sheet(res, title, false);
   $('sheet2').innerHTML = sheet(res, title, true);
+  $('printout').innerHTML = printPage(res, title, false) + (st.sol ? printPage(res, title, true) : '');
   document.body.classList.toggle('withsol', st.sol);
   $('title').placeholder = autoTitle();
   $('sizeVal').textContent = st.size + ' × ' + st.size; $('countVal').textContent = st.count;

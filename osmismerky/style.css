@@ -47,15 +47,17 @@ button:active{transform:scale(.97)}button:hover{filter:brightness(1.05)}
 .foot{margin-top:auto;font-size:2cqw;color:#888;text-align:right;padding-top:2cqw}
 .sol{display:none}.withsol .sol{display:flex}
 @media (max-width:860px){body{overflow:auto;height:auto}.layout{grid-template-columns:1fr}.stage{overflow:visible}.sheet{max-width:none}.sub{display:none}}
+#printout{display:none}
 @media print{
   @page{size:A4;margin:12mm}
-  html,body{height:auto;overflow:visible;background:#fff!important}
-  .bar,.controls{display:none!important}
-  .layout,.stage{display:block;padding:0;margin:0;max-width:none;overflow:visible}
-  .sheet{width:100%;height:250mm;max-width:none;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;padding:4mm 6mm 0;color:#000;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
-  .sheet .grid{flex:1 1 auto;min-height:0;height:100%;width:100%}
-  .withsol #sheet1{break-after:page;page-break-after:always}
-  .sheet::before{display:none}
-  .sol{display:none}.withsol .sol{display:flex}
-  .sheet *{color:#000!important}.foot{color:#666!important}
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important}
+  .bar,.layout{display:none!important}
+  #printout{display:block;font-family:Lexend,Arial,sans-serif;color:#000}
+  .pp{width:186mm;margin:0 auto;page-break-inside:avoid;break-inside:avoid}
+  .pp+.pp{page-break-before:always;break-before:page}
+  .pp h1{font-size:18pt;font-weight:700;text-align:center;margin:0 0 5mm;line-height:1.2}
+  .pg{text-align:center;line-height:0}.pg svg{display:inline-block}
+  .pw{border-collapse:collapse;margin:6mm auto 0;table-layout:fixed}
+  .pw td{white-space:nowrap;overflow:hidden;padding:0.4mm 1mm;line-height:1.35;letter-spacing:.02em;vertical-align:top}
+  .pf{text-align:right;font-size:8pt;color:#666;margin-top:5mm}
 }
