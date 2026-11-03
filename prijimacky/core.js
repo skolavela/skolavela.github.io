@@ -36,6 +36,9 @@
     if(item.t==='yn'){let c=0;item.s.forEach((s,i)=>{if(ans&&ans[i]===s[1])c++;});return {ok:c===item.s.length,part:c/item.s.length,c};}
     if(item.t==='num'){const v=PQ.parseNum(ans);const tol=item.tol||0;const ok=!isNaN(v)&&item.a.some(a=>Math.abs(a-v)<=tol+1e-6*Math.max(1,Math.abs(a)));return {ok,part:ok?1:0};}
     if(item.t==='txt'){const v=PQ.norm(ans);const ok=item.a.some(a=>PQ.norm(a)===v);return {ok,part:ok?1:0};}
+    if(item.t==='err'){const tk=PQ.tokenize(item.w);const E=tk.map((t,i)=>t.r!==undefined?i:-1).filter(i=>i>=0);const A=new Set(ans||[]);
+      const hits=E.filter(i=>A.has(i)).length,fp=[...A].filter(i=>!E.includes(i)).length;return {ok:hits===E.length&&fp===0,part:Math.max(0,hits-fp)/E.length,c:hits,fp};}
+    if(item.t==='ord'){const n=item.parts.length-1;let c=0;for(let i=0;i<n;i++)if(ans&&ans[i]===i+1)c++;return {ok:c===n,part:c/n};}
     return {ok:false,part:0};
   };
 })(typeof window!=='undefined'?window:globalThis);

@@ -8,7 +8,8 @@ let st=load();function load(){try{return JSON.parse(localStorage.getItem(KEY))||
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 st.p=st.p||{};st.sel=st.sel||{};st.subj=st.subj||'cj';st.mode=st.mode||'prac';st.len=st.len||'short';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const topics=s=>PQ.topics.filter(t=>t.subj===s);
+const ORDER=['pravopis','chyby','text','razeni','zasoba','tvaroslovi','skladba','lit'];
+const topics=s=>PQ.topics.filter(t=>t.subj===s).sort((a,b)=>(ORDER.indexOf(a.id)+1||99)-(ORDER.indexOf(b.id)+1||99));
 const tById=id=>PQ.topics.find(t=>t.id===id);
 const L='ABCDEFGH';
 const praise=['Správně!','Výborně!','Přesně tak!','Paráda!','Super, sedí to!'];
@@ -29,6 +30,7 @@ function draw(t,exclude){
 function prep(it,t){
   const q=Object.assign({},it,{topic:t.id,src:it});
   if(q.t==='mc'&&!q.keep){const idx=PQ.shuffle(q.o.map((x,i)=>i));q.o=idx.map(i=>it.o[i]);q.a=idx.indexOf(it.a);}
+  if(q.t==='ord')q.pool=PQ.shuffle(it.parts.map((x,i)=>i).slice(1));
   return q;
 }
 
@@ -82,8 +84,22 @@ function renderQ(q,box,opts){ // opts: {instant, answer, onAnswer}
   if(q.t==='mc')h+=`<div class="opts ${q.keep&&q.o.length===2&&q.o.every(o=>o.length<5)?'two':''}">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${L[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`;
   if(q.t==='yn')h+=`<div class="yn">${q.s.map((s,i)=>`<div class="ynr" data-i="${i}"><p>${esc(s[0])}</p><div class="seg"><button data-v="1">ANO</button><button data-v="0">NE</button></div></div>`).join('')}</div>`;
   if(q.t==='num'||q.t==='txt')h+=`<div class="inp"><input id="inp" ${q.t==='num'?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${q.t==='num'?'Číslo, např. 3,5 nebo 3/4':'Napiš odpověď'}"></div>`;
+  if(q.t==='err')h+=`<div class="etext">${PQ.tokenize(q.w).map((t,i)=>`<button class="tok" data-i="${i}">${esc(t.w)}</button>`).join(' ')}</div>`;
+  if(q.t==='ord')h+=`<div class="ord"><div class="part fixed"><span class="k">1</span><span>${esc(q.parts[0])}</span></div><div id="seq"></div><div class="sh"><span>Klepni na další část</span><span><button class="tb" id="undo">↶ Zpět</button> &nbsp; <button class="tb" id="clr">Znovu</button></span></div><div id="pool"></div></div>`;
   box.innerHTML=h;
   const cur={v:ans};
+  if(q.t==='err'){cur.v=new Set(ans||[]);box.querySelectorAll('.tok').forEach(b=>{const i=+b.dataset.i;b.classList.toggle('sel',cur.v.has(i));b.onclick=()=>{cur.v.has(i)?cur.v.delete(i):cur.v.add(i);b.classList.toggle('sel');opts.onAnswer([...cur.v].sort((a,b)=>a-b),cur.v.size>0);};});}
+  if(q.t==='ord'){cur.v=(ans||[]).slice();const n=q.parts.length-1;
+    const draw=()=>{const seq=box.querySelector('#seq'),pool=box.querySelector('#pool');
+      seq.innerHTML=cur.v.map((pi,k)=>`<div class="part" draggable="true" data-k="${k}"><span class="k">${k+2}</span><span>${esc(q.parts[pi])}</span><span class="grip">⋮⋮</span></div>`).join('');
+      pool.innerHTML=q.pool.filter(pi=>!cur.v.includes(pi)).map(pi=>`<button class="part pick" data-p="${pi}"><span class="k">+</span><span>${esc(q.parts[pi])}</span></button>`).join('')||'<p class="meta center">Všechny části jsou seřazené. Pořadí můžeš měnit přetažením nebo tlačítkem Zpět.</p>';
+      pool.querySelectorAll('.pick').forEach(b=>b.onclick=()=>{cur.v.push(+b.dataset.p);draw();emit();});
+      let drag=null;seq.querySelectorAll('.part').forEach(el=>{el.ondragstart=e=>{drag=+el.dataset.k;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','x');}catch(_){}};
+        el.ondragover=e=>{e.preventDefault();el.classList.add('over');};el.ondragleave=()=>el.classList.remove('over');
+        el.ondrop=e=>{e.preventDefault();const to=+el.dataset.k;if(drag!==null&&drag!==to){const [m]=cur.v.splice(drag,1);cur.v.splice(to,0,m);draw();emit();}};});};
+    const emit=()=>opts.onAnswer(cur.v.slice(),cur.v.length===n);
+    box.querySelector('#undo').onclick=()=>{cur.v.pop();draw();emit();};box.querySelector('#clr').onclick=()=>{cur.v=[];draw();emit();};
+    draw();}
   if(q.t==='mc')box.querySelectorAll('.opt').forEach(b=>{if(cur.v===+b.dataset.i)b.classList.add('sel');b.onclick=()=>{cur.v=+b.dataset.i;box.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));opts.onAnswer(cur.v,true);};});
   if(q.t==='yn'){cur.v=cur.v?cur.v.slice():q.s.map(()=>null);box.querySelectorAll('.ynr').forEach(r=>{const i=+r.dataset.i;r.querySelectorAll('button').forEach(b=>{if(cur.v[i]!==null&&cur.v[i]===!!+b.dataset.v)b.classList.add('on');b.onclick=()=>{cur.v[i]=!!+b.dataset.v;r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));opts.onAnswer(cur.v.slice(),cur.v.every(x=>x!==null));};});});}
   if(q.t==='num'||q.t==='txt'){const i=box.querySelector('#inp');if(cur.v!=null)i.value=cur.v;i.oninput=()=>opts.onAnswer(i.value,i.value.trim()!=='');i.onkeydown=e=>{if(e.key==='Enter'&&opts.onEnter)opts.onEnter();};}
@@ -93,6 +109,8 @@ function correctText(q){
   if(q.t==='num')return q.fr?esc(q.fr)+(Number.isInteger(q.a[0])?'':` (≈ ${PQ.fmt(Math.round(q.a[0]*1000)/1000)})`):PQ.fmt(q.a[0]);
   if(q.t==='txt')return esc(q.a.join(' / '));
   if(q.t==='yn')return q.s.map(s=>(s[1]?'ANO':'NE')).join(', ');
+  if(q.t==='err')return '<br>'+esc(PQ.tokenize(q.w).map(t=>t.r!==undefined?t.r:t.w).join(' '));
+  if(q.t==='ord')return '<ol class="olist">'+q.parts.map(p=>`<li>${esc(p)}</li>`).join('')+'</ol>';
 }
 function markQ(q,box,ans){
   const r=PQ.check(q,ans);
@@ -100,11 +118,14 @@ function markQ(q,box,ans){
   if(q.t==='mc')box.querySelectorAll('.opt').forEach(b=>{const i=+b.dataset.i;b.classList.remove('sel');if(i===q.a)b.classList.add('right');else if(i===ans)b.classList.add('wrong');});
   if(q.t==='yn')box.querySelectorAll('.ynr').forEach(rw=>{const i=+rw.dataset.i;rw.classList.add(ans&&ans[i]===q.s[i][1]?'right':'wrong');});
   if(q.t==='num'||q.t==='txt')box.querySelector('#inp').classList.add(r.ok?'right':'wrong');
+  if(q.t==='err'){const tk=PQ.tokenize(q.w);const A=new Set(ans||[]);box.querySelectorAll('.tok').forEach(b=>{const i=+b.dataset.i,t=tk[i];b.classList.remove('sel');
+    if(t.r!==undefined){b.classList.add(A.has(i)?'right':'miss');b.innerHTML=`<s>${esc(t.w)}</s> ${esc(t.r)}`;}else if(A.has(i))b.classList.add('fp');});}
+  if(q.t==='ord'){box.querySelectorAll('#seq .part').forEach((el,k)=>{el.draggable=false;el.classList.add(ans&&ans[k]===k+1?'right':'wrong');});const tb=box.querySelector('.ord .sh');if(tb)tb.remove();const pl=box.querySelector('#pool');if(pl)pl.innerHTML='';}
   return r;
 }
 function fbHtml(q,r,skipped){
-  const head=r.ok?PQ.pick(praise):skipped?'Nevadí, tady je řešení.':(q.t==='yn'&&r.c?`${r.c} z ${q.s.length} tvrzení máš dobře.`:PQ.pick(kind));
-  return `<div class="fb ${r.ok?'ok':'no'}"><b class="h">${r.ok?'✅':'💡'} ${head}</b>${r.ok?'':`Správně: <b>${correctText(q)}</b><br>`}${q.e}</div>`;
+  const head=r.ok?PQ.pick(praise):skipped?'Nevadí, tady je řešení.':(q.t==='yn'&&r.c?`${r.c} z ${q.s.length} tvrzení máš dobře.`:q.t==='err'&&r.c?`Našel/našla jsi ${r.c} z ${PQ.tokenize(q.w).filter(t=>t.r!==undefined).length} chyb${r.fp?` (a ${r.fp}× jsi označil(a) správné slovo)`:''}.`:PQ.pick(kind));
+  return `<div class="fb ${r.ok?'ok':'no'}"><b class="h">${r.ok?'✅':'💡'} ${head}</b>${r.ok?'':`Správně: <b>${correctText(q)}</b>${q.t==='ord'?'':'<br>'}`}${q.e}</div>`;
 }
 
 /* ---------- procvičování ---------- */
@@ -146,8 +167,10 @@ function bindReflect(){app.querySelectorAll('#feel button').forEach(b=>b.onclick
 /* ---------- cvičný test ---------- */
 let timer=null;function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
 function buildTest(subj,n){
-  const ts=topics(subj);const qs=[];const per=Math.floor(n/ts.length);let rest=n-per*ts.length;
-  const counts=ts.map(()=>per);while(rest-->0)counts[PQ.ri(0,ts.length-1)]++;
+  const ts=topics(subj);const qs=[];let counts;
+  const W={full:{pravopis:6,chyby:5,text:8,razeni:3,zasoba:4,tvaroslovi:2,skladba:2,lit:0},short:{pravopis:3,chyby:2,text:3,razeni:1,zasoba:1,tvaroslovi:1,skladba:1,lit:0}};
+  if(subj==='cj'){const w=W[n>=30?'full':'short'];counts=ts.map(t=>w[t.id]||0);}
+  else{const per=Math.floor(n/ts.length);let rest=n-per*ts.length;counts=ts.map(()=>per);while(rest-->0)counts[PQ.ri(0,ts.length-1)]++;}
   ts.forEach((t,i)=>{
     if(t.id==='text'&&counts[i]){ // otázky k jednomu (nebo dvěma) textům pohromadě
       const byP={};t.items.forEach(it=>{if(it.p)(byP[it.p]=byP[it.p]||[]).push(it);});
@@ -208,6 +231,6 @@ function results(T,timeUp){
    <div>Tvoje odpověď: <b>${answerText(x.q,T.ans[x.i])}</b></div>${fbHtml(x.q,x.r,T.ans[x.i]==null).replace(/<b class="h">.*?<\/b>/,'')}</div>`).join('')}</div></section>`:'<p class="note center">Všechny úlohy máš správně. Skvělé! 🎉</p>'}`;
   $('#home').onclick=home;const p=$('#pr');if(p)p.onclick=()=>practice(rows.filter(r=>r.p.ok/r.p.n<0.7).map(r=>r.t.id));bindReflect();window.scrollTo(0,0);
 }
-function answerText(q,a){if(a==null)return 'bez odpovědi';if(q.t==='mc')return `${L[a]}) ${esc(q.o[a])}`;if(q.t==='yn')return a.map(x=>x===null?'–':x?'ANO':'NE').join(', ');return esc(a);}
+function answerText(q,a){if(a==null)return 'bez odpovědi';if(q.t==='mc')return `${L[a]}) ${esc(q.o[a])}`;if(q.t==='yn')return a.map(x=>x===null?'–':x?'ANO':'NE').join(', ');if(q.t==='err'){const tk=PQ.tokenize(q.w);return a.length?a.map(i=>esc(tk[i].w)).join(', '):'nic neoznačeno';}if(q.t==='ord')return a.map(i=>i+1).length+' částí seřazeno';return esc(a);}
 home();
 })();

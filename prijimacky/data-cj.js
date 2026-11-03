@@ -327,5 +327,5 @@ topic('cj','tvaroslovi','Tvarosloví','🔤',tvaroslovi);
 topic('cj','skladba','Skladba','🧩',skladba);
 topic('cj','zasoba','Slovní zásoba a význam','📚',zasoba);
 topic('cj','text','Porozumění textu','🔎',text);
-topic('cj','lit','Literatura a sloh','🎭',lit);
+topic('cj','lit','Literatura a sloh (navíc)','🎭',lit);
 })(typeof window!=='undefined'?window:globalThis);

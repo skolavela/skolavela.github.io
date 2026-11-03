@@ -77,3 +77,19 @@ textarea{font:inherit;font-size:15px;border-radius:14px;border:2px solid var(--b
 .foot{text-align:center;font-size:12px;color:var(--mut);padding:10px 16px calc(14px + env(safe-area-inset-bottom));line-height:1.5}.foot a{color:#007aff}
 .note{font-size:13px;color:var(--mut);background:var(--seg);border-radius:12px;padding:10px 12px;line-height:1.4}
 @media (max-width:520px){.wrap{padding-top:14px;gap:14px}.card{padding:16px;border-radius:20px}.topics{grid-template-columns:1fr 1fr;gap:8px}.tile{padding:10px;gap:8px;min-height:58px}.tile .em{font-size:20px;width:22px}.tile .nm{font-size:13.5px}.bar h1{font-size:16px}.q{font-size:17px}h2{font-size:22px}.mode{padding:12px}}
+.etext{background:#fbfbfd;border:1px solid var(--bd);border-radius:14px;padding:12px 10px;font-size:17px;line-height:2.1}
+.tok{font:inherit;color:inherit;background:none;border:0;border-radius:8px;padding:3px 3px;margin:0 -1px;cursor:pointer;touch-action:manipulation}
+.tok:hover:not(:disabled){background:var(--seg)}
+.tok.sel{background:color-mix(in srgb,var(--sub) 18%,#fff);box-shadow:inset 0 -2px 0 var(--sub)}
+.tok.right{background:#d9f5e3}.tok.miss{background:#ffe9c7}.tok.fp{background:#eee;text-decoration:line-through;text-decoration-color:#999}
+.tok s{color:#b26a00}.tok:disabled{cursor:default;color:inherit}
+.ord{display:flex;flex-direction:column;gap:8px}#seq,#pool{display:flex;flex-direction:column;gap:8px}
+.part{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid transparent;border-radius:14px;padding:11px 12px;font:inherit;font-size:15px;line-height:1.4;text-align:left;color:var(--fg);box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.part .k{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--sub);color:#fff;font-weight:700;font-size:13px}
+.part.fixed{background:#fbfbfd}.part.fixed .k{background:#8e8e93}
+.part.pick{cursor:pointer;border:2px dashed rgba(0,0,0,.12);box-shadow:none;touch-action:manipulation}.part.pick .k{background:var(--seg);color:var(--fg)}
+.part[draggable=true]{cursor:grab}.part.over{border-color:var(--sub)}
+.part .grip{margin-left:auto;color:#c7c7cc;font-weight:700}
+.part.right{border-color:var(--ok)}.part.wrong{border-color:var(--no)}
+.olist{margin:6px 0 6px;padding-left:22px;font-weight:400}.olist li{margin:2px 0}
+@media (max-width:420px){.bar{gap:10px}.bar .logo{display:none}.pill{font-size:13px;padding:5px 10px}.ptop .tag{font-size:11px}}
