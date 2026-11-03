@@ -130,3 +130,6 @@ svg.fig circle{fill:#1d1d1f}svg.fig circle.thin{fill:none;stroke:#8e8e93;stroke-
 .ptab .ok{background:#e3f7e8}.ptab .mid{background:#fff3df}.ptab .no{background:#ffe9e4}.ptab b{font-size:15px}
 .link.inl{display:inline;padding:0;font-size:inherit}
 .rv .thead{margin-top:6px}
+.card{overflow-wrap:break-word;min-width:0}.passage,.sq,.fb{overflow-wrap:anywhere}
+.fld{min-width:0;max-width:100%}.fld input{width:100%}.flds{min-width:0}
+p.fb{margin:10px 0}.fld{flex:1 1 220px}
