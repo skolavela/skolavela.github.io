@@ -53,7 +53,7 @@ button:active{transform:scale(.97)}button:hover{filter:brightness(1.05)}
   html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important}
   .bar,.layout{display:none!important}
   #printout{display:block;font-family:Lexend,Arial,sans-serif;color:#000}
-  .pp{width:186mm;margin:0 auto;page-break-inside:avoid;break-inside:avoid}
+  .pp{width:172mm;margin:0 auto;page-break-inside:avoid;break-inside:avoid}
   .pp+.pp{page-break-before:always;break-before:page}
   .pp h1{font-size:18pt;font-weight:700;text-align:center;margin:0 0 5mm;line-height:1.2}
   .pg{text-align:center;line-height:0}.pg svg{display:inline-block}

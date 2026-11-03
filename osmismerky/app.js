@@ -51,13 +51,13 @@ function printPage(res, title, withSol) {
   var words = res.placed.map(function (p) { return p.w; });
   var maxLen = words.reduce(function (m, w) { return Math.max(m, Array.from(w).length); }, 3);
   var cols = maxLen > 15 ? 2 : maxLen > 11 ? 3 : 4;
-  var colW = 184 / cols;                                   // mm
+  var colW = 170 / cols;                                   // mm
   var pt = Math.min(12, colW / ((maxLen + 2) * 0.27));     // ~0.27 mm šířky znaku na 1 pt (velká písmena Lexend)
   pt = Math.max(7, Math.floor(pt * 2) / 2);
   var rows = Math.ceil(words.length / cols);
   var listH = rows * pt * 0.3528 * 1.6;                    // mm
-  var avail = 273 - 14 - 8 - 8 - listH - 6;                // A4 273 mm bez okrajů − nadpis − mezera − patička − rezerva
-  var size = Math.max(90, Math.min(184, avail));
+  var avail = 235 - 14 - 8 - 8 - listH - 6;                // A4 273 mm bez okrajů − nadpis − mezera − patička − rezerva
+  var size = Math.max(80, Math.min(165, avail));
   var t = '<table class="pw" style="font-size:' + pt + 'pt">';
   for (var r = 0; r < rows; r++) {
     t += '<tr>';
