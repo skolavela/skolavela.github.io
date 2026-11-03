@@ -70,11 +70,9 @@ mc('Ve které větě je čárka správně?',['Jak se máš, Petře?','Jak se, m�
 mc('Ve které větě je čárka správně?',['Buď půjdeš se mnou, nebo zůstaneš doma.','Buď půjdeš se mnou nebo zůstaneš doma.','Buď, půjdeš se mnou nebo zůstaneš doma.','Buď půjdeš, se mnou nebo zůstaneš doma.'],0,'U dvojité spojky buď – nebo píšeme čárku před nebo.'),
 mc('Ve které větě jsou čárky správně?',['Koupili jsme jablka, hrušky a švestky.','Koupili jsme jablka, hrušky, a švestky.','Koupili jsme, jablka, hrušky a švestky.','Koupili jsme jablka hrušky a švestky.'],0,'Členy výčtu oddělujeme čárkou, před slučovacím a čárku nepíšeme.'),
 mc('Ve které větě je čárka správně?',['Čím víc se učí, tím víc ví.','Čím víc, se učí tím víc ví.','Čím víc se učí tím, víc ví.','Čím víc se učí tím víc ví.'],0,'Věty spojené výrazem čím – tím oddělujeme čárkou.'),
-yn('Rozhodněte o každém slově, zda je napsáno pravopisně správně.',[['vysvědčení',true],['výskat',true],['zpívat',true],['bilina',false]],'Vysvědčení, výskat (příbuzné k vyskytnout se? ne – výskat je vyjmenované slovo), zpívat jsou správně; správně je bylina (od býlí).'),
+yn('Rozhodněte o každém slově, zda je napsáno pravopisně správně.',[['vysvědčení',true],['výskat',true],['zpívat',true],['bilina',false]],'Vysvědčení, výskat (vyjmenované slovo) a zpívat jsou správně; správně je bylina (příbuzné k býlí).'),
 yn('Rozhodněte o každé větě, zda je napsána pravopisně správně.',[['Psi štěkali na pošťáka.',true],['Kočky mňoukali u dveří.',false],['Na stromech zpívali ptáci.',true],['Auta stála na parkovišti.',true]],'Kočky (rod ženský) → mňoukaly. Psi, ptáci → -i; auta (rod střední) → -a.'),
 ];
-// opravit vysvětlení u výskat
-pravopis[pravopis.length-2].e='Vysvědčení, výskat (vyjmenované slovo) a zpívat jsou správně; správně je bylina (příbuzné k býlí).';
 
 const SD=['podstatné jméno','přídavné jméno','zájmeno','číslovka','sloveso','příslovce','předložka','spojka','částice','citoslovce'];
 const sd=(v,ans,e)=>{const w=SD.filter(x=>x!==ans);const o=[ans,...w.sort(()=>0).slice(0)];return mc('Určete slovní druh tučného slova: '+v,[ans,...pick3(w,ans)],0,e);};
@@ -149,7 +147,7 @@ mc('Která věta je jednočlenná?',['Prší.','Prší a fouká vítr.','Vítr f
 mc('Co je podmětem věty „Na zahradě kvetly první tulipány.“?',['tulipány','zahradě','kvetly','první'],0,'Co kvetlo? tulipány.'),
 mc('Co je přísudkem věty „Můj bratr je výborný kuchař.“?',['je kuchař','bratr','výborný','je'],0,'Přísudek jmenný se sponou: je kuchař.'),
 num('Kolik vět (určitých slovesných tvarů) obsahuje souvětí: „Když jsme přišli domů, maminka už vařila večeři, kterou jsme pak snědli.“?',3,'Přišli – vařila – snědli → 3 věty.'),
-num('Kolik vět obsahuje souvětí: „Nevěděl, kam jít, a tak se zeptal kolemjdoucího.“?',2,'Nevěděl – (kam jít je neurčitek, ne určité sloveso) – zeptal se → 2 věty.'),
+num('Kolik vět obsahuje souvětí: „Když jsme dorazili na nádraží, vlak už odjel, a tak jsme čekali na další.“?',3,'Určitá slovesa: dorazili – odjel – čekali → 3 věty.'),
 num('Kolik vět obsahuje souvětí: „Říkal, že přijde, ale nepřišel, protože onemocněl.“?',4,'Říkal – přijde – nepřišel – onemocněl → 4 věty.'),
 num('Kolik vět obsahuje souvětí: „Kdo si hraje, nezlobí.“?',2,'hraje – nezlobí → 2 věty.'),
 num('Kolik vět obsahuje souvětí: „Šli jsme do lesa, sbírali houby a večer jsme je usušili.“?',3,'Šli – sbírali – usušili → 3 věty.'),
@@ -171,10 +169,11 @@ pm('Buď přijdeš včas, nebo pojedeme bez tebe.','vylučovací','Jedna možnos
 pm('Byl nemocný, proto nepřišel.','důsledkový','Druhá věta je důsledkem první → důsledkový.'),
 pm('Nepřišel, neboť byl nemocný.','příčinný','Druhá věta uvádí příčinu (neboť) → příčinný.'),
 pm('Venku svítilo slunce, kdežto u nás pršelo.','odporovací','Kdežto vyjadřuje protiklad → odporovací.'),
-yn('Rozhodněte o každém tvrzení k souvětí „Když zazvonilo, děti vyběhly na dvůr, kde si hrály.“',[['Souvětí obsahuje tři věty.',true],['Věta „děti vyběhly na dvůr“ je hlavní.',true],['Věta „kde si hrály“ je příslovečná časová.',false],['Věta „Když zazvonilo“ je vedlejší.',true]],'Kde si hrály rozvíjí slovo dvůr (na jaký dvůr?) – je přívlastková (případně místní), ne časová.'),
+yn('Rozhodněte o každém tvrzení k souvětí „Když zazvonilo, děti vyběhly na dvůr.“',[['Souvětí obsahuje dvě věty.',true],['Věta „děti vyběhly na dvůr“ je hlavní.',true],['Věta „Když zazvonilo“ je příslovečná časová.',true],['Souvětí je tvořeno dvěma větami hlavními.',false]],'Když zazvonilo = vedlejší věta časová, děti vyběhly na dvůr = věta hlavní.'),
+vc('Celý den <b>pilně</b> pracoval.','příslovečné určení','Jak pracoval? → příslovečné určení způsobu.'),
+ vv('Vrátil se tam, <b>odkud vyšel</b>.','příslovečná místní','Odkud? → místní.'),
+ mc('Jaký je významový poměr mezi větami hlavními? Nejen že zpívala, ale i tančila.',['stupňovací','slučovací','odporovací','vylučovací'],0,'Spojovací výraz nejen – ale i vyjadřuje stupňování (druhá věta obsah zesiluje) → poměr stupňovací.')
 ];
-// poslední tvrzení upřesníme jednoznačně
-skladba[skladba.length-1]=yn('Rozhodněte o každém tvrzení k souvětí „Když zazvonilo, děti vyběhly na dvůr.“',[['Souvětí obsahuje dvě věty.',true],['Věta „děti vyběhly na dvůr“ je hlavní.',true],['Věta „Když zazvonilo“ je příslovečná časová.',true],['Souvětí je tvořeno dvěma větami hlavními.',false]],'Když zazvonilo = vedlejší věta časová, děti vyběhly na dvůr = věta hlavní.');
 
 const syn=(w,a,o)=>mc('Které slovo má nejbližší význam slovu <b>'+w+'</b>?',[a,...o],0,'Synonymum: '+w+' = '+a+'.');
 const ant=(w,a,o)=>mc('Které slovo má opačný význam než slovo <b>'+w+'</b>?',[a,...o],0,'Antonymum: '+w+' × '+a+'.');
@@ -205,7 +204,7 @@ cz('anonymní','bezejmenný, nepodepsaný',['slavný','podepsaný','oficiální'
 mc('Které slovo vzniklo skládáním?',['vodopád','učitel','přepsat','vodník'],0,'Vodopád = voda + padat (dva slovní základy) → skládání.'),
 mc('Které slovo NENÍ příbuzné se slovem <b>voda</b>?',['vodit','vodník','vodovod','zavodnit'],0,'Vodit souvisí s vést, ne s vodou.'),
 mc('Které slovo je odvozeno předponou?',['přepsat','písař','pisatel','písmo'],0,'Pře- + psát → odvozování předponou.'),
-mc('Které slovo je zkratkové slovo?',['Čedok','auto','kino','foto'],0,'Čedok vznikl ze zkratky Československá dopravní kancelář; auto, kino, foto jsou zkrácená (ne zkratková) slova.'),
+mc('Které slovo je zkratkové slovo?',['Čedok','auto','kino','foto'],0,'Čedok vznikl ze zkratky Československá cestovní a dopravní kancelář; auto, kino, foto jsou zkrácená (ne zkratková) slova.'),
 mc('Které slovo je mnohoznačné?',['koruna','sýkorka','smrk','pondělí'],0,'Koruna: královská, stromu, zubní, peníze – více významů.'),
 mc('Ve které dvojici jsou synonyma?',['zlobit se – hněvat se','den – noc','vysoký – nízký','začátek – konec'],0,'Zlobit se a hněvat se mají stejný význam.'),
 mc('Které slovo je citově zabarvené (zdrobnělina)?',['domeček','dům','domov','domácnost'],0,'Domeček je zdrobnělina.'),
@@ -214,10 +213,11 @@ yn('Rozhodněte o každém tvrzení, zda je pravdivé.',[['Slova „malý“ a �
 ];
 
 // porozumění textu – původní texty
+const T7='<p><b>Text 7</b></p><p>Kompost je jednoduchý způsob, jak z odpadu vyrobit něco užitečného. Do kompostéru patří slupky od ovoce a zeleniny, posekaná tráva, listí nebo kávová sedlina. Naopak maso, kosti a zbytky vařených jídel tam nepatří, protože lákají potkany a nepříjemně zapáchají.</p><p>Aby kompost dobře zrál, potřebuje vzduch a vlhkost. Proto je dobré ho občas promíchat vidlemi a v suchém létě zalít. Po několika měsících se z odpadu stane tmavá, voňavá zemina, kterou můžeme použít na záhonech.</p>';
 const T1='<p><b>Text 1</b></p><p>Včely medonosné žijí ve společenstvích, kterým říkáme včelstva. V jednom včelstvu může v létě žít i padesát tisíc dělnic, ale jen jedna královna. Dělnice během svého krátkého života vystřídají několik prací: nejprve čistí buňky a krmí larvy, později staví plásty a hlídají česno a teprve na konci života vylétají sbírat nektar a pyl.</p><p>Když dělnice najde bohatý zdroj potravy, vrátí se do úlu a předvede ostatním takzvaný tanec. Podle jeho směru a délky dokážou ostatní včely určit, kterým směrem a jak daleko mají letět. Vědci tento způsob dorozumívání zkoumali desítky let a dodnes je považován za jeden z nejpozoruhodnějších v živočišné říši.</p>';
 const T2='<p><b>Text 2</b></p><p>Milá Báro,</p><p>konečně ti píšu z tábora! První dva dny pršelo, takže jsme místo plánované výpravy na hrad hráli ve srubu deskové hry. Myslela jsem, že se budu nudit, ale nakonec to byla legrace – Tonda prohrál snad dvacetkrát a pořád chtěl odvetu.</p><p>Ve středu se konečně vyjasnilo a vyrazili jsme na hrad. Cesta vedla lesem a trvala skoro tři hodiny. Nahoře jsem byla tak unavená, že jsem si ani nevšimla nádherného výhledu, dokud mě vedoucí neupozornila. Zítra nás čeká noční hra, tak mi drž palce, ať se v lese neztratím.</p><p>Tvoje Klára</p>';
 const T3='<p><b>Text 3</b></p><p><b>Oznámení pro žáky 9. tříd</b></p><p>Exkurze do technického muzea se uskuteční v pátek 14. března. Sraz je v 7:45 před hlavním vchodem školy, návrat plánujeme kolem 14:30. Vstupné 120 Kč vybírají třídní učitelé nejpozději do pondělí 10. března. Žáci, kteří mají průkaz ISIC, zaplatí pouze 80 Kč. S sebou si vezměte svačinu, pití a pohodlnou obuv. Exkurze je součástí výuky fyziky, proto je účast povinná.</p>';
-const T4='<p><b>Text 4</b></p><p><i>Podzimní</i></p><p>Listí šustí pod nohama,<br>mlha leží nad lesem,<br>vítr zpívá písně sám a<br>já se domů neseném…</p>';
+const T4='<p><b>Text 4</b></p><p><i>Podzim</i></p><p>Listí šustí pod nohama,<br>mlha spí nad lesem,<br>vítr zpívá písně sám<br>a já jdu domů s podzimem.</p>';
 const T5='<p><b>Text 5</b></p><p>Ještě před sto lety se lidé dívali do noční oblohy a viděli tisíce hvězd. Dnes většina obyvatel měst spatří jen pár desítek nejjasnějších. Příčinou je světelné znečištění – umělé světlo z pouličních lamp, reklam a oken, které se rozptyluje v ovzduší a vytváří nad městy světelný opar.</p><p>Světelné znečištění neškodí jen astronomům. Ruší noční živočichy, například můry, které se k lampám slétají a vyčerpají se, a mate tažné ptáky. Ovlivňuje i lidi: příliš mnoho světla v noci může zhoršovat spánek. Přitom řešení bývá jednoduché – stačí svítit jen tam, kde je to potřeba, a lampy směrovat dolů, nikoli do nebe.</p>';
 const T6='<p><b>Text 6</b></p><p>Dědeček seděl na lavičce před domem a díval se, jak Matěj už potřetí padá z kola. „Nech to být, dneska to nepůjde,“ zavolal na něj. Matěj se ale zvedl, oprášil si kolena a znovu nasedl. Tentokrát ujel pět metrů, pak deset. Když se konečně dostal až k vrátkům, otočil se s úsměvem od ucha k uchu.</p><p>„Vidíš, dědo, šlo to,“ řekl udýchaně. Dědeček se usmál a pomyslel si, že některé věci se člověk nenaučí od druhých, ale jen sám od sebe.</p>';
 const tx=(p,q,o,a,e)=>mc(q,o,a,e,{p});
@@ -253,18 +253,17 @@ tx(T6,'Co si na konci textu 6 dědeček uvědomil?',['Některé věci se člově
 txyn(T6,'Rozhodněte o každém tvrzení, zda odpovídá textu 6.',[['Matěj spadl z kola nejméně třikrát.',true],['Dědeček Matěje nejprve povzbuzoval, ať pokračuje.',false],['Matěj nakonec dojel až k vrátkům.',true],['Text je psán v ich-formě.',false]],'Dědeček Matějovi radil, ať toho nechá; text je ve er-formě (3. osoba).'),
 tx(T6,'Jaký slohový útvar nejlépe odpovídá textu 6?',['vypravování','popis','úvaha','výklad'],0,'Text líčí děj v časové posloupnosti → vypravování.'),
 tx(T6,'Ve kterém pádě je slovo „dědo“ ve větě „Vidíš, dědo, šlo to“?',['5. pád','1. pád','4. pád','2. pád'],0,'Oslovení → 5. pád.'),
-tx(T4,'Jaký je rým v ukázce (text 4)?',['střídavý (ABAB)','sdružený (AABB)','obkročný (ABBA)','žádný'],0,'Nohama – sám a, lesem – nesem: 1. a 3., 2. a 4. verš → ABAB.'),
-tx(T4,'Který básnický prostředek je ve verši „vítr zpívá písně“?',['personifikace','přirovnání','hyperbola','oxymóron'],0,'Vítr dostává lidskou vlastnost (zpívá) → personifikace.'),
-tx(T4,'Do kterého literárního druhu patří ukázka (text 4)?',['lyrika','epika','drama','publicistika'],0,'Vyjadřuje pocity a nálady, nemá děj → lyrika.'),
+tx(T4,'Který básnický prostředek je ve verši „vítr zpívá písně“?',['personifikace','přirovnání','hyperbola','zdrobnělina'],0,'Vítr dostává lidskou vlastnost (zpívá) → personifikace.'),
+ tx(T4,'Do kterého literárního druhu patří ukázka (text 4)?',['lyrika','epika','drama','publicistika'],0,'Vyjadřuje pocity a nálady, nemá děj → lyrika.'),
+ tx(T4,'Který další básnický prostředek najdeme ve verši „mlha spí nad lesem“?',['personifikace','přirovnání','nadsázka','rým obkročný'],0,'Mlha „spí“ – opět lidská vlastnost → personifikace.'),
+ tx(T4,'Kolik veršů má ukázka (text 4)?',['4','2','3','8'],0,'Báseň má jednu sloku o čtyřech verších.'),
+tx(T7,'Co podle textu 7 do kompostu NEpatří?',['kosti','listí','kávová sedlina','slupky od zeleniny'],0,'Maso, kosti a vařená jídla do kompostu nepatří.'),
+ tx(T7,'Proč se kompost podle textu promíchává?',['aby k němu měl přístup vzduch','aby rychleji vychladl','aby odehnal potkany','aby méně vážil'],0,'Kompost potřebuje vzduch a vlhkost.'),
+ tx(T7,'Jaký je hlavní účel textu 7?',['poradit, jak správně kompostovat','pobavit čtenáře příběhem','přesvědčit lidi, aby nejedli maso','popsat život potkanů'],0,'Text dává praktické rady.'),
+ txyn(T7,'Rozhodněte o každém tvrzení, zda odpovídá textu 7.',[['Kompost se v suchém létě může zalít.',true],['Hotový kompost je světlý a bez vůně.',false],['Zbytky vařených jídel lákají potkany.',true],['Kompost je hotový za několik dní.',false]],'Hotová zemina je tmavá a voňavá; zraje několik měsíců.'),
+ tx(T7,'Které slovo z textu 7 je přídavné jméno?',['voňavá','zemina','promíchat','proto'],0,'Voňavá (jaká?) → přídavné jméno.'),
+ tx(T7,'Co znamená v textu slovo „zrál“?',['postupně se měnil v hotový kompost','stárl a kazil se','rostl do výšky','vysychal'],0,'Zrát = postupně dozrávat, měnit se v hotový produkt.')
 ];
-// text 4: nahradíme nepřirozený verš jednoznačnou ukázkou
-const T4b='<p><b>Text 4</b></p><p><i>Podzim</i></p><p>Listí šustí pod nohama,<br>mlha spí nad lesem,<br>vítr zpívá písně sám<br>a já jdu domů s podzimem.</p>';
-text.splice(text.length-3,3,
- tx(T4b,'Který básnický prostředek je ve verši „vítr zpívá písně“?',['personifikace','přirovnání','hyperbola','zdrobnělina'],0,'Vítr dostává lidskou vlastnost (zpívá) → personifikace.'),
- tx(T4b,'Do kterého literárního druhu patří ukázka (text 4)?',['lyrika','epika','drama','publicistika'],0,'Vyjadřuje pocity a nálady, nemá děj → lyrika.'),
- tx(T4b,'Který další básnický prostředek najdeme ve verši „mlha spí nad lesem“?',['personifikace','přirovnání','nadsázka','rým obkročný'],0,'Mlha „spí“ – opět lidská vlastnost → personifikace.'),
- tx(T4b,'Kolik veršů má ukázka (text 4)?',['4','2','3','8'],0,'Báseň má jednu sloku o čtyřech verších.')
-);
 
 const lit=[
 mc('Do kterého literárního druhu patří pohádka?',['epika','lyrika','drama','publicistika'],0,'Pohádka má děj a vypravěče → epika.'),
@@ -308,20 +307,6 @@ mc('Kniha, v níž autor vypráví o svém vlastním životě, je:',['autobiogra
 yn('Rozhodněte o každém tvrzení, zda je pravdivé.',[['Báje vypráví o bozích a hrdinech.',true],['Drama je určeno především k předvádění na jevišti.',true],['Lyrika je založena hlavně na ději.',false],['Román je obvykle kratší než povídka.',false]],'Lyrika vyjadřuje pocity; román je rozsáhlejší než povídka.'),
 yn('Rozhodněte o každé dvojici, zda autor napsal uvedené dílo.',[['Jan Neruda – Povídky malostranské',true],['Karel Čapek – Kytice',false],['Alois Jirásek – Staré pověsti české',true],['Božena Němcová – Máj',false]],'Kytice – Erben; Máj – Mácha.'),
 ];
-const T7='<p><b>Text 7</b></p><p>Kompost je jednoduchý způsob, jak z odpadu vyrobit něco užitečného. Do kompostéru patří slupky od ovoce a zeleniny, posekaná tráva, listí nebo kávová sedlina. Naopak maso, kosti a zbytky vařených jídel tam nepatří, protože lákají potkany a nepříjemně zapáchají.</p><p>Aby kompost dobře zrál, potřebuje vzduch a vlhkost. Proto je dobré ho občas promíchat vidlemi a v suchém létě zalít. Po několika měsících se z odpadu stane tmavá, voňavá zemina, kterou můžeme použít na záhonech.</p>';
-text.push(
- tx(T7,'Co podle textu 7 do kompostu NEpatří?',['kosti','listí','kávová sedlina','slupky od zeleniny'],0,'Maso, kosti a vařená jídla do kompostu nepatří.'),
- tx(T7,'Proč se kompost podle textu promíchává?',['aby k němu měl přístup vzduch','aby rychleji vychladl','aby odehnal potkany','aby méně vážil'],0,'Kompost potřebuje vzduch a vlhkost.'),
- tx(T7,'Jaký je hlavní účel textu 7?',['poradit, jak správně kompostovat','pobavit čtenáře příběhem','přesvědčit lidi, aby nejedli maso','popsat život potkanů'],0,'Text dává praktické rady.'),
- txyn(T7,'Rozhodněte o každém tvrzení, zda odpovídá textu 7.',[['Kompost se v suchém létě může zalít.',true],['Hotový kompost je světlý a bez vůně.',false],['Zbytky vařených jídel lákají potkany.',true],['Kompost je hotový za několik dní.',false]],'Hotová zemina je tmavá a voňavá; zraje několik měsíců.'),
- tx(T7,'Které slovo z textu 7 je přídavné jméno?',['voňavá','zemina','promíchat','proto'],0,'Voňavá (jaká?) → přídavné jméno.'),
- tx(T7,'Co znamená v textu slovo „zrál“?',['postupně se měnil v hotový kompost','stárl a kazil se','rostl do výšky','vysychal'],0,'Zrát = postupně dozrávat, měnit se v hotový produkt.')
-);
-skladba.push(
- vc('Celý den <b>pilně</b> pracoval.','příslovečné určení','Jak pracoval? → příslovečné určení způsobu.'),
- vv('Vrátil se tam, <b>odkud vyšel</b>.','příslovečná místní','Odkud? → místní.'),
- pm('Nejen že zpívala, ale i tančila.','slučovací','Nejen – ale i (stupňovací varianta slučovacího poměru) → slučovací.')
-);
 topic('cj','pravopis','Pravopis','✍️',pravopis);
 topic('cj','tvaroslovi','Tvarosloví','🔤',tvaroslovi);
 topic('cj','skladba','Skladba','🧩',skladba);

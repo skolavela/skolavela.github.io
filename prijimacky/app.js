@@ -46,6 +46,7 @@ function home(){
   <div class="topics">${ts.map(t=>{const p=st.p[t.id];const pc=p&&p.n?Math.round(100*p.ok/p.n):null;
     return `<button class="tile ${sel.includes(t.id)?'on':''}" data-id="${t.id}"><span class="em">${t.emoji}</span><span class="tx"><span class="nm">${t.name}</span>
     <span class="meter"><i style="width:${pc||0}%"></i></span><span class="meta">${p&&p.n?`${pc} % z ${p.n} ${p.n===1?'otázky':'otázek'}`:'zatím neprocvičeno'}</span></span></button>`}).join('')}</div>
+  <p class="meta" style="margin:-6px 4px 0">Pokrok se ukládá jen na tomto zařízení.</p>
   ${tested.length?`<p class="note">💡 ${nextStep(ts)}</p>`:''}
   <div class="sh"><span>Režim</span></div>
   <div class="modes">
