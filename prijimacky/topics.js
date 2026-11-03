@@ -1,20 +1,20 @@
 // Okruhy pro procvičování – každý okruh čerpá z úloh ve stylu CERMAT (stejné formáty i bodování jako v testu)
 (function(G){
 const PQ=G.PQ;PQ.topics=[];
-const T=(subj,id,name,emoji,slots)=>PQ.topics.push({subj,id,name,emoji,slots,items:[],gens:[]});
-T('cj','pravopis','Pravopis','✍️',['cj1','cj18','cj24']);
-T('cj','tvaroslovi','Tvarosloví a spisovnost','🔤',['cj7','cj16','cj25']);
-T('cj','skladba','Skladba a interpunkce','🧩',['cj5','cj14','cj6']);
-T('cj','text','Práce s textem','📰',['cjA','cjR','cjS','cj17']);
-T('cj','razeni','Řazení textu','🔀',['cj15']);
-T('cj','lit','Literatura a poezie','🎭',['cjP','cj30']);
-T('ma','cisla','Čísla, zlomky, číselná osa','🔢',['ma1','ma2','maLine']);
-T('ma','vyrazy','Výrazy a mnohočleny','🧮',['ma3']);
-T('ma','rovnice','Rovnice a soustavy','⚖️',['ma4']);
-T('ma','slovni','Slovní úlohy a procenta','💬',['ma5','ma6','ma7','ma12']);
-T('ma','rovina','Geometrie v rovině','📐',['ma8','ma9','ma10','ma13','maPyth']);
-T('ma','prostor','Tělesa','🧊',['ma14','ma15','maNet']);
-T('ma','data','Grafy, tabulky a vzory','📊',['ma11','maBar','ma16']);
+const T=(subj,id,name,icon,slots)=>PQ.topics.push({subj,id,name,icon,slots,items:[],gens:[]});
+T('cj','pravopis','Pravopis','pen',['cj1','cj18','cj24']);
+T('cj','tvaroslovi','Tvarosloví a spisovnost','type',['cj7','cj16','cj25']);
+T('cj','skladba','Skladba a interpunkce','puzzle',['cj5','cj14','cj6']);
+T('cj','text','Práce s textem','doc',['cjA','cjR','cjS','cj17']);
+T('cj','razeni','Řazení textu','shuffle',['cj15']);
+T('cj','lit','Literatura a poezie','feather',['cjP','cj30']);
+T('ma','cisla','Čísla, zlomky, číselná osa','hash',['ma1','ma2','maLine']);
+T('ma','vyrazy','Výrazy a mnohočleny','calc',['ma3']);
+T('ma','rovnice','Rovnice a soustavy','scale',['ma4']);
+T('ma','slovni','Slovní úlohy a procenta','chat',['ma5','ma6','ma7','ma12']);
+T('ma','rovina','Geometrie v rovině','ruler',['ma8','ma9','ma10','ma13','maPyth']);
+T('ma','prostor','Tělesa','cube',['ma14','ma15','maNet']);
+T('ma','data','Grafy, tabulky a vzory','chart',['ma11','maBar','ma16']);
 // podíl úloh s obrázkem/grafem/diagramem v reálných testech MA (2025 A, 2025 B, 2026 A): 22 ze 48 úloh ≈ 46 %
 PQ.FIGSHARE=0.46;
 PQ.isFig=t=>/<svg/.test((t.src&&t.src.h||'')+t.subs.map(s=>s.q+(s.o||[]).join('')).join(''));

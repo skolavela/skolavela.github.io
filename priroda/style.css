@@ -134,3 +134,4 @@ body.playing .photo{flex:1 1 auto;min-height:150px;height:auto;max-height:520px;
 .fb .reveal{min-height:46px;display:flex;flex-direction:column;justify-content:center}
 @media (max-width:760px),(max-height:700px){.fb .reveal{min-height:40px}}
 @media (max-height:440px){.fb .reveal{min-height:22px}}
+body:has(.setup) .sv-foot{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
