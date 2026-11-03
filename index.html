@@ -21,7 +21,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:40px}
 <footer>Rozcestník školních aplikací</footer>
 <script src="apps.js"></script>
 <script>
-const ICONS={maze:'<path d="M4 4h16v16H4zM8 4v8h4M16 8v8h-8M12 16v4"/>',default:'<circle cx="12" cy="12" r="8"/>'};
+const ICONS={maze:'<path d="M4 4h16v16H4zM8 4v8h4M16 8v8h-8M12 16v4"/>',text:'<path d="M5 7V5h14v2M12 5v14M9 19h6"/>',default:'<circle cx="12" cy="12" r="8"/>'};
 const g=document.getElementById('grid');
 g.innerHTML=APPS.map(a=>`<a class="card" href="${a.url}"><div class="ic" style="background:${a.color||'#0071e3'}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.icon]||ICONS.default}</svg></div><h2>${a.name}</h2><p>${a.desc}</p><span class="go">Otevřít ›</span></a>`).join('')+'<div class="card soon"><p>Další aplikace brzy…</p></div>';
 </script></body></html>

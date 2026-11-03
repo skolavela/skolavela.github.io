@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tučné slabiky – text po slabikách pro dyslektiky</title>
+<link rel="stylesheet" href="style.css">
+<script src="syllab.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="bar">
+  <a class="back" href="../">‹ Rozcestník</a>
+  <h1><span class="logo">Aa</span>Tučné slabiky</h1>
+  <span class="sub">Text po slabikách – střídavě tučně a normálně</span>
+</header>
+<main class="layout">
+  <section class="card controls" aria-label="Nastavení">
+    <div class="group">
+      <label class="lbl" for="title">Nadpis (nepovinný)</label>
+      <input type="text" id="title" placeholder="např. O pejskovi a kočičce" autocomplete="off">
+    </div>
+    <div class="group grow">
+      <label class="lbl" for="src">Text <button class="link" id="clear" type="button">Vymazat</button></label>
+      <textarea id="src" spellcheck="false" placeholder="Sem vložte nebo napište libovolný text…"></textarea>
+    </div>
+    <div class="group">
+      <label class="lbl" for="size">Velikost písma <span class="val" id="sizeVal"></span></label>
+      <input type="range" id="size" min="14" max="48" step="2">
+    </div>
+    <div class="group">
+      <label class="lbl" for="lh">Řádkování <span class="val" id="lhVal"></span></label>
+      <input type="range" id="lh" min="1.2" max="2.6" step="0.1">
+    </div>
+    <div class="group">
+      <label class="lbl">Písmo</label>
+      <div class="seg" id="font">
+        <button data-v="andika">Andika</button><button data-v="sans">Bezpatkové</button><button data-v="verdana">Verdana</button>
+      </div>
+    </div>
+    <div class="group">
+      <label class="lbl">Zvýraznění slabik</label>
+      <div class="seg" id="mode">
+        <button data-v="bold">Tučně / tence</button><button data-v="color">Barevně</button><button data-v="both">Obojí</button>
+      </div>
+    </div>
+    <label class="tg"><span>VELKÁ PÍSMENA</span><input type="checkbox" id="upper"><i></i></label>
+    <button class="primary" id="print">Vytisknout / uložit PDF</button>
+    <p class="hint">Dělení slov je automatické podle pravidel češtiny; u některých slov se může lišit od školního dělení.</p>
+  </section>
+  <section class="stage" aria-label="Náhled">
+    <div class="sheet" id="sheet">
+      <div class="sheetHead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ptitle">Náhled</span></div>
+      <article class="out" id="out"><h2 id="outTitle"></h2><div id="outText"></div></article>
+    </div>
+  </section>
+</main>
+</body>
+</html>
