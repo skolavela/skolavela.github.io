@@ -183,11 +183,12 @@ function gridSvg(n, p, sol, mm) {
 function buildPrint() {
   const n = S.size, lv = S.level, per = S.per, name = `Sudoku ${n}×${n} · ${SDK.LEVELS[n][lv].name}`;
   const games = Array.from({ length: per }, () => SDK.generate(n, lv));
-  const mm = { 1: 165, 2: 112, 4: 86, 6: 72 }[per], cls = per > 2 ? 'c2' : 'c1';
-  const page = (title, right, sols) => `<section class="pp"><div class="ph"><h1>${title}</h1><span>${right}</span></div><div class="pg ${cls}">` +
+  // rozměry mřížky v mm – s rezervou: A4 minus okraje 15 mm = 180 × 267 mm, nejvyšší varianta vyjde zhruba na 240 mm
+  const mm = { 1: 140, 2: 95, 4: 78, 6: 60 }[per], cls = per > 2 ? 'c2' : 'c1';
+  const page = (title, right, sols) => `<section class="pp"><div class="ph"><h1>${title}</h1>${right ? `<span>${right}</span>` : ''}</div><div class="pg ${cls}">` +
     games.map((g, k) => `<figure>${per > 1 ? `<figcaption>${k + 1}.</figcaption>` : ''}${gridSvg(n, g.puzzle, sols ? g.solution : null, mm)}</figure>`).join('') +
     `</div><div class="pf">skolavela.app/sudoku</div></section>`;
-  $('#printout').innerHTML = page(name, 'Jméno: ____________________', false) + (S.printSol ? page('Řešení', name, true) : '');
+  $('#printout').innerHTML = page(name, '', false) + (S.printSol ? page('Řešení', name, true) : '');
 }
 function doPrint() {
   const btn = $('#printBtn span'), old = btn.textContent; btn.textContent = 'Připravuji…';
