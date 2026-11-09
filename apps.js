@@ -11,4 +11,6 @@ window.APPS = [
     desc: 'Kvíz a kartičky: poznej stromy, květiny, houby, ptáky, savce a další podle fotek.' },
   { name: 'Přijímačky', url: 'prijimacky/', icon: 'cap', color: '#ff375f', grade: [2], subj: ['Čeština', 'Matematika'],
     desc: 'Procvičování na jednotné přijímačky z češtiny a matematiky. Témata, cvičné testy na čas, vysvětlení.' },
+  { name: 'Sudoku', url: 'sudoku/', icon: 'sudoku', color: '#ff9500', grade: [1, 2], subj: ['Logika a zábava'],
+    desc: 'Sudoku 4×4, 6×6 a 9×9 se třemi obtížnostmi. Nápověda, která učí postup, poznámky, tisk do PDF.' },
 ];
