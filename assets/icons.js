@@ -96,6 +96,15 @@
       '<text x="34" y="22" text-anchor="middle" font-family="' + F + '" font-size="13" font-weight="700" fill="#FFFFFF" opacity="0.55">i</text>'
     ),
 
+    souctove: svg(
+      '<rect x="8.5" y="32" width="9" height="9" rx="2.5" fill="currentColor"/>' +
+      '<rect x="19.5" y="32" width="9" height="9" rx="2.5" fill="currentColor"/>' +
+      '<rect x="30.5" y="32" width="9" height="9" rx="2.5" fill="currentColor"/>' +
+      '<rect x="14" y="21" width="9" height="9" rx="2.5" fill="currentColor" opacity="0.55"/>' +
+      '<rect x="25" y="21" width="9" height="9" rx="2.5" fill="currentColor" opacity="0.55"/>' +
+      '<rect x="19.5" y="10" width="9" height="9" rx="2.5" fill="currentColor"/>'
+    ),
+
     /* ---- Náhradní ikony, když nová položka ještě nemá vlastní ---- */
     slozka: svg(
       '<path d="M5 13a5 5 0 0 1 5-5h9l4 5h15a5 5 0 0 1 5 5v17a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z" fill="currentColor"/>' +
