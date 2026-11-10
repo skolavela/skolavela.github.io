@@ -203,6 +203,7 @@ const AMBIG = {
   "opylovat": "opilovat",
   "sýrový": "sírový",
   "násyp": "násip",
+  "výskat": "vískat",
   "výt": "vít",
   "výr": "vír",
   "výří": "víří",
@@ -217,7 +218,7 @@ VS.words.filter(it => it.ambig).forEach(it => {
   ok(altOf(it) === AMBIG[it.word], it.word + " protějšek " + altOf(it));
 });
 const nasyp = VS.sentences.find(it => it.target === "násyp");
-ok(nasyp && nasyp.sentence === "Do vozu sypou násyp obilí.", "násyp věta přepsaná (ne násip u trati)");
+ok(nasyp && nasyp.sentence === "U cesty leží násyp písku.", "násyp věta přepsaná (ne násip u trati)");
 ok(!/trati|násep|kolej/.test(nasyp.sentence), "násyp věta nepopisuje násip");
 
 for (let n = 0; n < 40; n++) {

@@ -75,7 +75,7 @@ var VS = {
     {"word": "vy", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"word": "vysoký", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"word": "výt", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V.", "ambig": true},
-    {"word": "výskat", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
+    {"word": "výskat", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V.", "ambig": true},
     {"word": "zvykat", "gap": 2, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"word": "žvýkat", "gap": 2, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"word": "vydra", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
@@ -281,7 +281,7 @@ var VS = {
     {"sentence": "To musíte udělat vy.", "target": "vy", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"sentence": "Na kopci roste vysoký strom.", "target": "vysoký", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"sentence": "Vlci začali výt na měsíc.", "target": "výt", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V.", "ambig": true},
-    {"sentence": "Děti budou výskat radostí.", "target": "výskat", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
+    {"sentence": "Děti budou výskat radostí.", "target": "výskat", "gap": 1, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V.", "ambig": true},
     {"sentence": "Musíme zvykat na pořádek.", "target": "zvykat", "gap": 2, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"sentence": "Jídlo máme žvýkat pomalu.", "target": "žvýkat", "gap": 2, "answer": "ý", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
     {"sentence": "U potoka žije vydra.", "target": "vydra", "gap": 1, "answer": "y", "letter": "V", "type": "vyjmenovane", "why": "Vyjmenované slovo po V."},
@@ -359,7 +359,7 @@ var VS = {
     {"sentence": "Z trávy se ozval sykot.", "target": "sykot", "gap": 1, "answer": "y", "letter": "S", "type": "pribuzne", "why": "Příbuzné se slovem syčet (vyjmenované po S).", "root": "syčet"},
     {"sentence": "Písek je suchý a sypký.", "target": "sypký", "gap": 1, "answer": "y", "letter": "S", "type": "pribuzne", "why": "Příbuzné se slovem sypat (vyjmenované po S).", "root": "sypat"},
     {"sentence": "Můžeme posypat dort cukrem.", "target": "posypat", "gap": 3, "answer": "y", "letter": "S", "type": "pribuzne", "why": "Příbuzné se slovem sypat (vyjmenované po S).", "root": "sypat"},
-    {"sentence": "Do vozu sypou násyp obilí.", "target": "násyp", "gap": 3, "answer": "y", "letter": "S", "type": "pribuzne", "why": "Příbuzné se slovem sypat (vyjmenované po S).", "root": "sypat", "ambig": true},
+    {"sentence": "U cesty leží násyp písku.", "target": "násyp", "gap": 3, "answer": "y", "letter": "S", "type": "pribuzne", "why": "Příbuzné se slovem sypat (vyjmenované po S).", "root": "sypat", "ambig": true},
     {"sentence": "Ve škole se učíme vykat.", "target": "vykat", "gap": 1, "answer": "y", "letter": "V", "type": "pribuzne", "why": "Příbuzné se slovem vy (vyjmenované po V).", "root": "vy"},
     {"sentence": "Jaká je výška našeho stromu?", "target": "výška", "gap": 1, "answer": "ý", "letter": "V", "type": "pribuzne", "why": "Příbuzné se slovem vysoký (vyjmenované po V).", "root": "vysoký"},
     {"sentence": "Kraj Vysočina je velmi hezký.", "target": "Vysočina", "gap": 1, "answer": "y", "letter": "V", "type": "pribuzne", "why": "Příbuzné se slovem vysoký (vyjmenované po V).", "root": "vysoký"},
@@ -587,7 +587,7 @@ else root.VS = VS;
 // sykot: Z trávy se ozval sykot.
 // sypký: Písek je suchý a sypký.
 // posypat: Můžeme posypat dort cukrem.
-// násyp: Do vozu sypou násyp obilí.
+// násyp: U cesty leží násyp písku.
 // vykat: Ve škole se učíme vykat.
 // výška: Jaká je výška našeho stromu?
 // Vysočina: Kraj Vysočina je velmi hezký.
