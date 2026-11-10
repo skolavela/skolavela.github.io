@@ -132,7 +132,9 @@
     }
     var src = opts.mode === "vety" ? VS.sentences : VS.words;
     var pool = src.filter(function (it) {
-      return letters.indexOf(it.letter) >= 0 && (pribuzne || it.type !== "pribuzne");
+      return letters.indexOf(it.letter) >= 0
+        && (pribuzne || it.type !== "pribuzne")
+        && !(opts.mode === "slova" && it.ambig);
     });
     var chyt = pool.filter(function (it) { return it.type === "chytak"; });
     var norm = pool.filter(function (it) { return it.type !== "chytak"; });

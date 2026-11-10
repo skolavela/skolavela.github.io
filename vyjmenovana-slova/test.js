@@ -177,6 +177,90 @@ function simulate(wrongFirst) {
 const sim = simulate({ a: true, c: true });
 ok(sim.correct === 3, "dvě chyby, pak vše správně");
 
+/* ---- jednoznačnost v režimu Slova ---- */
+function flipChar(ch) {
+  return ({ i: "y", y: "i", í: "ý", ý: "í", I: "Y", Y: "I", "Í": "Ý", "Ý": "Í" })[ch] || null;
+}
+function altOf(it) {
+  const w = it.word || it.target;
+  const a = flipChar(w[it.gap]);
+  return w.slice(0, it.gap) + a + w.slice(it.gap + 1);
+}
+
+/* protějšek je platné české slovo (i tvar); při nejistotě raději zařadit */
+const AMBIG = {
+  "být": "bít",
+  "bít": "být",
+  "byt": "bit",
+  "Přibyslav": "Přibislav",
+  "pobyt": "pobit",
+  "lyže": "liže",
+  "my": "mi",
+  "mýt": "mít",
+  "slepýš": "slepíš",
+  "pyl": "pil",
+  "pylový": "pilový",
+  "opylovat": "opilovat",
+  "sýrový": "sírový",
+  "násyp": "násip",
+  "výt": "vít",
+  "výr": "vír",
+  "výří": "víří",
+  "víla": "výla"
+};
+const ambigNames = Object.keys(AMBIG).sort();
+const flaggedW = VS.words.filter(it => it.ambig).map(it => it.word).sort();
+const flaggedS = VS.sentences.filter(it => it.ambig).map(it => it.target).sort();
+ok(flaggedW.join() === ambigNames.join(), "ambig slova: " + flaggedW.join(", "));
+ok(flaggedS.join() === ambigNames.join(), "ambig věty: " + flaggedS.join(", "));
+VS.words.filter(it => it.ambig).forEach(it => {
+  ok(altOf(it) === AMBIG[it.word], it.word + " protějšek " + altOf(it));
+});
+const nasyp = VS.sentences.find(it => it.target === "násyp");
+ok(nasyp && nasyp.sentence === "Do vozu sypou násyp obilí.", "násyp věta přepsaná (ne násip u trati)");
+ok(!/trati|násep|kolej/.test(nasyp.sentence), "násyp věta nepopisuje násip");
+
+for (let n = 0; n < 40; n++) {
+  const r = L.buildRound({ mode: "slova", letters: VS.letters, count: 30, pribuzne: true });
+  const bad = r.filter(it => it.ambig || AMBIG[it.word || it.target]);
+  ok(bad.length === 0, "Slova nesmí obsahovat ambig: " + bad.map(L.nameOf).join(", "));
+}
+for (const letter of VS.letters) {
+  const r = L.buildRound({ mode: "slova", letters: [letter], count: 30, pribuzne: true });
+  ok(r.every(it => !it.ambig), "Slova " + letter + " bez ambig");
+  const v = L.buildRound({ mode: "vety", letters: [letter], count: 30, pribuzne: true });
+  const expected = VS.sentences.filter(it => it.letter === letter && it.ambig).map(it => it.target).sort();
+  const got = v.filter(it => it.ambig).map(it => it.target).sort();
+  /* při 30 otázkách a malém počtu ambig ve filtru písmene se všechny vejdou, pokud je pool >= počtu ambig */
+  const pool = VS.sentences.filter(it => it.letter === letter).length;
+  if (pool <= 30) {
+    ok(got.join() === expected.join(), "Věty " + letter + " si ambig nechávají: " + got.join(", "));
+  }
+}
+const vetyHas = [];
+for (let i = 0; i < 15; i++) {
+  const r = L.buildRound({ mode: "vety", letters: VS.letters, count: 30, pribuzne: true });
+  r.filter(it => it.ambig).forEach(it => vetyHas.push(it.target));
+}
+ok(vetyHas.length > 0, "Věty režim ambig slova stále zařazuje");
+const dAll = L.buildRound({ mode: "dvojice", letters: VS.letters, count: 30, pribuzne: true });
+ok(dAll.length === 12, "Dvojice beze změny, 12 položek");
+
+/* půl chytáků ve Slovech po vyřazení ambig */
+for (let n = 0; n < 20; n++) {
+  const r = L.buildRound({ mode: "slova", letters: VS.letters, count: 10, pribuzne: true });
+  const c = countTypes(r);
+  ok(c.chytak === 5 && c.other === 5, "Slova po ambig stále půl chytáků: " + JSON.stringify(c));
+}
+for (const letter of VS.letters) {
+  const r = L.buildRound({ mode: "slova", letters: [letter], count: 10, pribuzne: true });
+  ok(r.length === 10, "Slova " + letter + " kolo 10 má " + r.length);
+  const c = countTypes(r);
+  const chytPool = VS.words.filter(it => it.letter === letter && it.type === "chytak" && !it.ambig).length;
+  const expectChyt = Math.min(5, chytPool);
+  ok(c.chytak === expectChyt, "Slova " + letter + " chytáky " + c.chytak + " (pool " + chytPool + ")");
+}
+
 if (fails) {
   console.error("\n" + fails + " chyb");
   process.exit(1);
@@ -186,3 +270,6 @@ console.log("OK  vyjmenovaná", byType.vyjmenovane,
   "chytáky", byType.chytak,
   "věty", VS.sentences.length,
   "dvojice", VS.pairs.length);
+console.log("AMBIG (" + ambigNames.length + "):");
+ambigNames.forEach(w => console.log("  " + w + " / " + AMBIG[w]));
+console.log("Slova bez ambig:", VS.words.filter(it => !it.ambig).length);
