@@ -542,7 +542,7 @@
     stredni_vice: "Střední úlohy s více řešeními nejdou vytvořit, zkus Náročnou.",
     lehka_mix: "Lehké úlohy s více řešeními nejdou vytvořit, list má jen úlohy s jedním řešením.",
     stredni_mix: "Střední úlohy s více řešeními nejdou vytvořit, list má jen úlohy s jedním řešením.",
-    fit: function (n) { return "Na jednu stranu se vejde " + n + (n === 1 ? " úloha" : n < 5 ? " úlohy" : " úloh") + ", počet je upravený."; },
+    fit: function (n) { return "Na jednu stranu se " + (n === 1 ? "vejde 1 úloha" : n < 5 ? "vejdou " + n + " úlohy" : "vejde " + n + " úloh") + ", počet je upravený."; },
     few: "Pro toto nastavení se nepodařilo vyrobit dost úloh, zkus jiné nastavení."
   };
 
