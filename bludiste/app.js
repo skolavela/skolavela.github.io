@@ -145,8 +145,7 @@ function buildScene(st) {
 }
 
 const THICK = 0.4; // mm, pevná tloušťka čáry
-function fmtDate(ts) { const d = new Date(ts || Date.now()), p = n => String(n).padStart(2, '0'); return `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; }
-function footerText(st) { return `Bludiště · seed ${st.seed} · ${fmtDate(st.created)}`; }
+function footerText(st) { return `Bludiště č. ${st.seed}`; } // patička listu i PDF: jen číslo bludiště, bez data
 
 // ---------- SVG ----------
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }

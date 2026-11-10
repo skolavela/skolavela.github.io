@@ -4,7 +4,7 @@ Generátor bludišť k tisku na A4 – čisté HTML/CSS/JS, bez build kroku, bě
 
 - Obtížnosti Lehké / Střední / Těžké / Expert (až 70 políček) + vlastní velikost
 - Orientace na šířku / na výšku, tloušťka čáry, ručně kreslený styl
-- Seed – stejný seed = stejné bludiště
+- Číslo bludiště – stejné číslo = stejné bludiště (patička listu: „Bludiště č. …“)
 - Šipky u vstupu a výstupu, ikonky vlajky a hvězdy
 - Zobrazení řešení (volitelně i v PDF)
 - Export do vektorového PDF (A4, jsPDF) s patičkou s názvem, tisk přes `@page A4`
