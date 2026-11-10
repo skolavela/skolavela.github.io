@@ -1,0 +1,394 @@
+/* ==========================================================================
+   Velappky - sdílený design system
+   Jeden soubor pro rozcestník i všechny aplikace.
+   Pravidlo: barvy, rozměry a rohy se berou VŽDY z proměnných níže,
+   nikdy se nepíšou natvrdo do jednotlivých aplikací.
+   ========================================================================== */
+
+/* ---------- 1. Tokeny ---------- */
+:root {
+  color-scheme: light;
+
+  /* Plochy a text (Apple styl) */
+  --bg: #F5F5F7;               /* šedé pozadí stránky */
+  --surface: #FFFFFF;          /* karty, lišta, záhlaví */
+  --stage: #E8E8ED;            /* podklad pod náhledem listu v aplikacích */
+  --text: #1D1D1F;
+  --text-2: #6E6E73;           /* doplňkový text, popisky */
+  --text-3: #8E8E93;           /* ikona lupy, placeholdery */
+  --separator: rgba(0, 0, 0, 0.08);
+  --fill: rgba(118, 118, 128, 0.12);   /* pozadí inputů, hledání, segmentů */
+  --fill-2: rgba(120, 120, 128, 0.24); /* vypnutý přepínač */
+
+  /* Velí modrá - jediná akcentní barva rozhraní */
+  --accent: #0372B6;
+  --accent-hover: #025A91;
+  --accent-soft: rgba(3, 114, 182, 0.10);
+
+  /* Velí dekor (vlnky, čmáranice) - jeden světlý odstín */
+  --doodle: #9CC6E6;
+
+  /* Stíny */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --shadow-icon: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 16px rgba(0, 0, 0, 0.06);
+  --shadow-sheet: 0 1px 2px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.10);
+
+  /* Rohy */
+  --r-icon: 22px;      /* ikona 96 px (≈ 22,4 % velikosti jako iOS) */
+  --r-card: 20px;
+  --r-control: 12px;   /* tlačítka */
+  --r-input: 10px;
+  --r-seg: 9px;
+
+  /* Písmo - systémové, na Apple zařízeních SF Pro */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Rozvržení */
+  --page: 1080px;      /* max. šířka lišty a patičky */
+  --content: 960px;    /* max. šířka mřížky ikon */
+  --gutter: 24px;      /* boční okraj */
+  --header-h: 56px;
+}
+
+/* Barevné tóny témat. Každá složka i appka má právě jeden tón.
+   --tone-bg = pastelová plocha ikony, --tone-fg = kresba ikony. */
+.tone-pink   { --tone-bg: #FCE4EA; --tone-fg: #C8174A; }  /* Čeština */
+.tone-wine   { --tone-bg: #F6E3E7; --tone-fg: #8C1F3C; }
+.tone-blue   { --tone-bg: #DCEBF8; --tone-fg: #0372B6; }  /* Matematika */
+.tone-navy   { --tone-bg: #E3EAF6; --tone-fg: #15438A; }  /* Přijímačky */
+.tone-teal   { --tone-bg: #DDF3EE; --tone-fg: #1A7A67; }  /* Logika */
+.tone-purple { --tone-bg: #EFE4F5; --tone-fg: #7A2982; }  /* Zábava */
+.tone-green  { --tone-bg: #E2F2E5; --tone-fg: #1E7A32; }  /* Přírodověda */
+.tone-orange { --tone-bg: #FCEBDD; --tone-fg: #B4530F; }  /* rezerva pro nová témata */
+.tone-yellow { --tone-bg: #FBF1CC; --tone-fg: #8A6A00; }  /* rezerva pro nová témata */
+
+/* ---------- 2. Základ ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.47;
+  -webkit-font-smoothing: antialiased;
+}
+main { flex: 1 0 auto; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
+:focus-visible { outline: 3px solid rgba(3, 114, 182, 0.45); outline-offset: 2px; border-radius: 6px; }
+img, svg { display: block; }
+.v-wave svg, .a-sheet__brand svg { width: 100%; height: 100%; }
+[hidden] { display: none !important; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- 3. Horní lišta ---------- */
+.v-header {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--separator);
+}
+.v-header__in {
+  max-width: var(--page); margin: 0 auto; padding: 0 var(--gutter);
+  min-height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.v-logo { display: flex; align-items: center; min-height: 44px; flex: 0 0 auto; }
+.v-logo img { height: 34px; width: auto; }
+
+/* Hledání v liště - vpravo, po kliknutí se roztáhne */
+.v-search { position: relative; flex: 0 1 220px; transition: flex-basis 0.2s ease; }
+.v-search:focus-within { flex-basis: 300px; }
+.v-search svg {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  width: 15px; height: 15px; color: var(--text-3); pointer-events: none;
+}
+.v-search input {
+  width: 100%; height: 36px; padding: 0 12px 0 32px;
+  border: 0; border-radius: var(--r-input); background: var(--fill);
+  font: inherit; font-size: 16px; /* 16 px = iOS nezoomuje při psaní */
+  color: var(--text); -webkit-appearance: none; appearance: none;
+}
+.v-search input::placeholder { color: var(--text-3); }
+.v-search input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+
+/* ---------- 4. Záhlaví (hero) ---------- */
+.v-hero { position: relative; overflow: hidden; background: var(--surface); }
+.v-hero__in {
+  position: relative; max-width: 720px; margin: 0 auto;
+  padding: 88px var(--gutter) 40px; text-align: center;
+}
+.v-hero h1 { margin: 0; font-size: 64px; font-weight: 700; line-height: 1.05; letter-spacing: -0.022em; }
+.v-hero p  { margin: 0; font-size: 21px; line-height: 1.4; color: var(--text-2); }
+.v-wave { width: 88px; height: 14px; margin: 20px auto 16px; color: var(--doodle); }
+.v-doodle { position: absolute; width: 240px; height: 220px; color: var(--doodle); pointer-events: none; }
+.v-doodle--l { left: 5%; top: 40px; }
+.v-doodle--r { right: 5%; top: 52px; }
+.v-clouds { width: 100%; height: 36px; color: var(--bg); }
+
+/* Kompaktní záhlaví - uvnitř složky a ve výsledcích hledání */
+.v-hero--compact .v-hero__in { padding: 22px var(--gutter) 8px; }
+.v-hero--compact h1 { font-size: 44px; line-height: 1.08; letter-spacing: -0.02em; }
+.v-hero--compact .v-wave { width: 64px; height: 11px; margin: 8px auto 4px; }
+.v-hero--compact p { font-size: 15px; }
+.v-hero--compact .v-doodle { display: none; }
+
+/* Drobečková navigace */
+.v-crumbs {
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+  gap: 2px 6px; margin: 0 0 6px; padding: 0; list-style: none; font-size: 14px;
+}
+.v-crumbs a { display: inline-flex; align-items: center; min-height: 32px; }
+.v-crumbs li + li::before { content: "›"; color: #B0B0B6; margin-right: 6px; }
+.v-crumbs [aria-current] { color: var(--text-2); }
+
+/* ---------- 5. Mřížka ikon (složky a appky) ---------- */
+.v-main { max-width: var(--content); margin: 0 auto; padding: 24px var(--gutter) 72px; width: 100%; }
+.v-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 36px 20px; margin: 0; padding: 0; list-style: none;
+}
+.v-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  text-align: center; color: var(--text); -webkit-tap-highlight-color: transparent;
+}
+.v-tile:hover { color: var(--text); }
+.v-tile__art { position: relative; padding-top: 8px; }   /* 8 px = místo pro jazýček složky */
+.v-icon {
+  --size: 96px;
+  position: relative; width: var(--size); height: var(--size);
+  border-radius: var(--r-icon); display: grid; place-items: center;
+  background: var(--tone-bg); color: var(--tone-fg); box-shadow: var(--shadow-icon);
+  transition: transform 0.15s ease;
+}
+.v-icon svg { width: 62%; height: 62%; }
+.v-tile:hover .v-icon { transform: translateY(-2px); }
+.v-tile:active .v-icon { transform: scale(0.96); }
+/* Jazýček - odliší složku od appky */
+.v-tile--folder .v-tile__art::before {
+  content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 30px;
+  border-radius: 12px; background: var(--tone-fg); opacity: 0.22;
+}
+.v-tile__text { display: flex; flex-direction: column; align-items: center; }
+.v-tile__name { font-size: 16px; font-weight: 600; line-height: 1.25; }
+.v-tile__sub  { font-size: 13px; color: var(--text-2); line-height: 1.3; margin-top: 2px; }
+
+/* Prázdný stav */
+.v-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 24px; text-align: center; }
+.v-empty .v-wave { width: 56px; height: 10px; margin: 0 0 4px; }
+.v-empty h2 { margin: 0; font-size: 19px; font-weight: 600; }
+.v-empty p  { margin: 0; font-size: 15px; color: var(--text-2); }
+
+/* ---------- 6. Patička ---------- */
+.v-footer { margin-top: 24px; }
+.v-footer .v-clouds { color: var(--surface); height: 40px; }
+.v-footer__bar { background: var(--surface); }
+.v-footer__in {
+  max-width: var(--page); margin: 0 auto; padding: 16px var(--gutter) 32px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px 24px;
+  font-size: 13px; color: var(--text-2);
+}
+.v-footer__in a { color: var(--text-2); }
+.v-footer__in a:hover { color: var(--accent); }
+
+/* ==========================================================================
+   7. Aplikace - společná kostra
+   ========================================================================== */
+
+/* Aplikace používají širší stránku - na <body> dej class="is-app" */
+.is-app { --page: 1280px; }
+
+/* Lišta aplikace: zpět | ikona + název | logo */
+.a-titlebar { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.a-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; font-size: 15px; white-space: nowrap; }
+.a-back svg { width: 18px; height: 18px; }
+.a-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.a-name .v-icon { --size: 32px; border-radius: 8px; box-shadow: none; flex: 0 0 auto; }
+.a-name h1 { margin: 0; font-size: 17px; font-weight: 600; white-space: nowrap; }
+.a-name__sub { font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v-header .v-logo--small img { height: 28px; }
+
+/* Typ A: generátor k tisku - panel nastavení + náhled listu */
+.a-layout {
+  max-width: var(--page); margin: 0 auto; padding: 24px var(--gutter); width: 100%;
+  display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start;
+}
+.a-panel {
+  position: sticky; top: calc(var(--header-h) + 20px);
+  background: var(--surface); border-radius: var(--r-card); padding: 20px;
+  box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 20px;
+}
+.a-stage { background: var(--stage); border-radius: var(--r-card); padding: 28px; display: flex; justify-content: center; }
+.a-sheet {
+  background: #FFFFFF; width: 100%; max-width: 840px; aspect-ratio: 297 / 210;
+  box-shadow: var(--shadow-sheet); padding: 4% 5%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.a-sheet--portrait { aspect-ratio: 210 / 297; max-width: 600px; }
+.a-sheet__meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: var(--text-2); }
+.a-sheet__body { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.a-sheet__brand { display: inline-flex; align-items: center; gap: 8px; }
+.a-sheet__brand svg { width: 28px; height: 7px; color: var(--accent); }
+
+/* Typ B: interaktivní (kvíz, hra, test) - jeden sloupec */
+.a-single { max-width: 760px; margin: 0 auto; padding: 24px 20px 48px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+.a-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.a-card { background: var(--surface); border-radius: var(--r-card); padding: 24px; box-shadow: var(--shadow-card); }
+.a-progress { height: 6px; border-radius: 999px; background: var(--fill); overflow: hidden; }
+.a-progress > span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.a-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.a-choice {
+  min-height: 56px; padding: 12px 16px; border: 0; border-radius: 14px;
+  background: var(--fill); font: inherit; font-size: 17px; font-weight: 500; color: var(--text);
+  text-align: left; cursor: pointer;
+}
+.a-choice:hover { background: var(--fill-2); }
+.a-choice[data-state="correct"] { background: #E2F2E5; color: #1E7A32; font-weight: 600; }
+.a-choice[data-state="wrong"]   { background: #FCE4EA; color: #C8174A; }
+
+/* ---------- 8. Ovládací prvky ---------- */
+.c-field { display: flex; flex-direction: column; gap: 8px; }
+.c-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.c-label { font-size: 13px; font-weight: 600; color: var(--text-2); }
+.c-value { font-size: 13px; font-weight: 600; color: var(--text); }
+.c-sep { height: 1px; background: var(--separator); border: 0; margin: 0; }
+.c-meta { margin: 0; font-size: 12px; color: var(--text-2); }
+
+/* Segmentový přepínač (macOS/iOS) */
+.c-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 2px; border-radius: var(--r-seg); background: var(--fill); }
+.c-seg button {
+  min-height: 32px; padding: 0 4px; border: 0; border-radius: 7px; background: transparent;
+  font: inherit; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer;
+}
+.c-seg button[aria-pressed="true"] { background: #FFFFFF; font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
+
+/* Textové pole */
+.c-input {
+  width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: var(--r-input);
+  background: var(--fill); font: inherit; font-size: 16px; color: var(--text);
+}
+.c-input:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+
+/* Posuvník */
+.c-range { width: 100%; height: 32px; margin: 0; accent-color: var(--accent); }
+
+/* Tlačítka - na obrazovce max. JEDNO primární */
+.c-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 16px; border: 0; border-radius: var(--r-control);
+  font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.c-btn svg { width: 17px; height: 17px; }
+.c-btn--primary { background: var(--accent); color: #FFFFFF; }
+.c-btn--primary:hover { background: var(--accent-hover); color: #FFFFFF; }
+.c-btn--secondary { background: var(--accent-soft); color: var(--accent); }
+.c-btn--secondary:hover { background: rgba(3, 114, 182, 0.16); }
+.c-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+/* Přepínač (iOS switch) */
+.c-switch {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 44px; padding: 0; border: 0; background: transparent;
+  font: inherit; font-size: 15px; color: var(--text); text-align: left; cursor: pointer;
+}
+.c-track {
+  flex: 0 0 auto; width: 51px; height: 31px; padding: 2px; border-radius: 999px;
+  background: var(--fill-2); transition: background 0.2s ease;
+}
+.c-track::after {
+  content: ""; display: block; width: 27px; height: 27px; border-radius: 50%;
+  background: #FFFFFF; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18); transition: transform 0.2s ease;
+}
+.c-switch[aria-checked="true"] .c-track { background: var(--accent); }
+.c-switch[aria-checked="true"] .c-track::after { transform: translateX(20px); }
+
+/* ==========================================================================
+   9. Responzivita
+   Mobil < 600 px | Tablet 600-1023 px | Desktop >= 1024 px
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .v-hero h1 { font-size: 52px; }
+  .v-hero--compact h1 { font-size: 40px; }
+  .v-doodle { width: 180px; height: 165px; }
+}
+
+/* Užší tablet a mobil: aplikace v jednom sloupci, náhled nahoře */
+@media (max-width: 899px) {
+  .a-layout { grid-template-columns: minmax(0, 1fr); }
+  .a-stage { order: -1; padding: 16px; }
+  .a-panel { position: static; }
+}
+
+/* Mobil */
+@media (max-width: 599px) {
+  :root { --gutter: 16px; --header-h: 52px; }
+  .v-logo img { height: 28px; }
+  .v-search { flex: 1 1 auto; max-width: 240px; }
+  .v-search:focus-within { flex-basis: auto; }
+
+  .v-hero__in { padding: 48px var(--gutter) 28px; }
+  .v-hero h1 { font-size: 40px; }
+  .v-hero p  { font-size: 17px; }
+  .v-hero--compact .v-hero__in { padding: 16px var(--gutter) 4px; }
+  .v-hero--compact h1 { font-size: 30px; }
+  .v-doodle { display: none; }
+  .v-clouds { height: 24px; }
+
+  .v-main { padding: 20px var(--gutter) 56px; }
+  .v-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 28px 8px; }
+  .v-icon { --size: 72px; --r-icon: 16px; }
+  .v-tile { gap: 10px; }
+  .v-tile--folder .v-tile__art::before { height: 24px; border-radius: 9px; }
+  .v-tile__name { font-size: 14px; }
+  .v-tile__sub  { font-size: 12px; }
+
+  .v-footer__in { justify-content: center; text-align: center; }
+
+  .a-titlebar { gap: 10px; }
+  .a-back .a-back__label { display: none; }
+  .a-name__sub, .v-logo--small { display: none; }
+  .a-layout { padding: 16px; gap: 16px; }
+  .a-stage { padding: 10px; border-radius: 14px; }
+  .a-single { padding: 16px 16px 40px; }
+  .a-card { padding: 18px; }
+  .a-choices { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Dotyková zařízení: segmenty vysoké 44 px */
+@media (pointer: coarse) {
+  .c-seg button { min-height: 40px; }
+}
+
+/* Omezený pohyb */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ==========================================================================
+   10. Tisk - tiskne se jen list
+   Výchozí A4 na šířku; aplikace na výšku přidá body.print-portrait
+   ========================================================================== */
+@page { size: A4 landscape; margin: 0; }
+@media print {
+  body { background: #FFFFFF; display: block; }
+  .v-header, .v-footer, .a-panel, .a-toolbar, .no-print { display: none !important; }
+  .a-layout { display: block; padding: 0; max-width: none; }
+  .a-stage { padding: 0; background: none; border-radius: 0; }
+  .a-sheet {
+    width: 297mm; height: 210mm; max-width: none; aspect-ratio: auto;
+    box-shadow: none; padding: 12mm 14mm; break-inside: avoid;
+  }
+  body.print-portrait .a-sheet { width: 210mm; height: 297mm; }
+}
