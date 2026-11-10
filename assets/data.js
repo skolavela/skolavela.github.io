@@ -39,9 +39,11 @@ window.VELAPPKY = [
   {
     type: "folder", id: "matematika", name: "Matematika", icon: "matematika", tone: "blue",
     items: [
+      /* Zatím neveřejné (čeká na kontrolu), appka běží na /souctove-ulohy/:
       { type: "app", id: "souctove", name: "Součtové úlohy", short: "Trojúhelníky a řady k tisku",
         url: "/souctove-ulohy/", icon: "souctove", tone: "blue", grades: ["1", "2"],
         keywords: "součtový trojúhelník číselná pyramida řada sčítání odčítání pracovní list 1. stupeň" }
+      */
     ]
   },
   {
