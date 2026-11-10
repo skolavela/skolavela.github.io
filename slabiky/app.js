@@ -1,9 +1,14 @@
 function gcEvent(name, title) { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: title || name, event: true }); } catch (e) {} }
 const $ = id => document.getElementById(id);
 const KEY = 'slabiky-v1';
-const DEF = { title: 'Ukázkový text', text: 'Mladotice jsou malá vesnice. Děti tam chodí do školy a jsou snášenlivé a dobře informované.\nVe čtvrtek jsme viděli vlka, který překřikoval vítr. Pak jsme jeli autem do Brna.', size: 24, lh: 1.8, mode: 'bold', upper: false, lvl: '1' };
+// Výchozí text = první text úrovně 1 ze sbírky texts.js (Kočka Micka).
+const FIRST = (window.TEXTS || []).filter(t => t.l === 1)[0] || { t: '', x: '' };
+const DEF = { title: FIRST.t, text: FIRST.x, size: 24, lh: 1.8, mode: 'bold', upper: false, lvl: '1' };
+// Dřívější výchozí testovací věta (dnes v komentáři v syllab.js) – kdo ji má uloženou jen jako výchozí, dostane nový výchozí text.
+const OLD_DEF_TEXT = 'Mladotice jsou malá vesnice.';
 let st = Object.assign({}, DEF);
 try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+if (st.title === 'Ukázkový text' && String(st.text).indexOf(OLD_DEF_TEXT) === 0) { st.title = DEF.title; st.text = DEF.text; }
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function renderText(text) {
   return text.split(/\n{1,}/).map(par => {

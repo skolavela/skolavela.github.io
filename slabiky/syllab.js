@@ -1,4 +1,8 @@
 // Pravidlové dělení českých slov na slabiky (pro čtení, ne pro typografické dělení).
+// Ukázkový případ pro kontrolu dělení (dřív výchozí text appky, do rozhraní nepatří):
+//   „Mladotice jsou malá vesnice. Děti tam chodí do školy a jsou snášenlivé a dobře informované.
+//    Ve čtvrtek jsme viděli vlka, který překřikoval vítr. Pak jsme jeli autem do Brna.“
+//   Očekávané dělení mj.: Mla-do-ti-ce, sná-šen-li-vé, in-for-mo-va-né, čtvr-tek, pře-kři-ko-val.
 (function (root) {
   const V = 'aeiouyáéíóúůýě';
   const LIQ = 'rlř';
