@@ -8,10 +8,10 @@
 <meta name="theme-color" content="#FFFFFF">
 <meta name="description" content="Zvuková mapa okolí: místa, nahrávky a časová osa příběhu.">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/velappky.css?v=202611102010">
-<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css?v=202611102010">
-<link rel="stylesheet" href="/assets/vendor/leaflet.markercluster/MarkerCluster.css?v=202611102010">
-<link rel="stylesheet" href="style.css?v=202611102010">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611102100">
+<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css?v=202611102100">
+<link rel="stylesheet" href="/assets/vendor/leaflet.markercluster/MarkerCluster.css?v=202611102100">
+<link rel="stylesheet" href="style.css?v=202611102100">
 </head>
 <body class="is-app zm-app">
 
@@ -29,41 +29,15 @@
         </div>
       </div>
     </div>
-    <div class="zm-actions" id="app-actions" hidden>
-      <div class="c-seg zm-skoly" role="group" aria-label="Škola" id="skoly">
-        <button type="button" data-v="hloubetin">Hloubětín</button>
-        <button type="button" data-v="ruzyne">Ruzyně</button>
-      </div>
-      <button class="c-btn c-btn--primary" type="button" id="btn-add" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        Přidat místo
-      </button>
-      <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
-        <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
-      </a>
-    </div>
-    <a class="v-logo v-logo--small" id="gate-logo" href="/" aria-label="Velappky - úvod">
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
       <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
     </a>
-  </div>
-  <div class="zm-teacher" id="teacher-bar" hidden>
-    <div class="zm-teacher__in">
-      <button class="c-switch" type="button" role="switch" aria-checked="false" id="btn-hidden">
-        <span>Zobrazit skryté</span><span class="c-track" aria-hidden="true"></span>
-      </button>
-      <div class="zm-teacher__links">
-        <button type="button" id="btn-export">Exportovat</button>
-        <label for="import-file">Importovat</label>
-      </div>
-    </div>
   </div>
 </header>
 
 <main class="zm-gate" id="gate">
   <form class="a-card zm-gate__card" id="gate-form">
-    <h2>Zadej heslo třídy</h2>
-    <p>Mapu otevře heslo, které vám dá učitelka.</p>
-    <label class="c-label" for="gate-input">Heslo třídy</label>
+    <label class="c-label zm-gate__label" for="gate-input">Zadej heslo, které ti dá dospělák</label>
     <input class="c-input" type="password" id="gate-input" name="password" autocomplete="current-password" required>
     <p class="zm-modal__err" id="gate-err" hidden></p>
     <button class="c-btn c-btn--primary" type="submit">Otevřít mapu</button>
@@ -73,6 +47,25 @@
 <main class="zm-main" id="app-main" hidden>
   <div class="zm-stage">
     <div class="zm-map" id="map" role="application" aria-label="Zvuková mapa okolí školy"></div>
+    <div class="c-seg zm-skoly" role="group" aria-label="Škola" id="skoly">
+      <button type="button" data-v="hloubetin">Hloubětín</button>
+      <button type="button" data-v="dedina">Dědina</button>
+    </div>
+    <button class="c-btn c-btn--primary zm-add" type="button" id="btn-add" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Přidat místo
+    </button>
+    <div class="zm-teacher" id="teacher-bar" hidden>
+      <div class="zm-teacher__in">
+        <button class="c-switch" type="button" role="switch" aria-checked="false" id="btn-hidden">
+          <span>Zobrazit skryté</span><span class="c-track" aria-hidden="true"></span>
+        </button>
+        <div class="zm-teacher__links">
+          <button type="button" id="btn-export">Exportovat</button>
+          <label for="import-file">Importovat</label>
+        </div>
+      </div>
+    </div>
     <div class="zm-legend" id="legend"></div>
     <div class="zm-toast" id="toast" hidden></div>
   </div>
@@ -91,11 +84,11 @@
 
 <input class="sr-only" type="file" id="import-file" accept="application/json,.json">
 
-<script src="/assets/icons.js?v=202611102010"></script>
+<script src="/assets/icons.js?v=202611102100"></script>
 <script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
-<script src="/assets/vendor/leaflet/leaflet.js?v=202611102010"></script>
-<script src="/assets/vendor/leaflet.markercluster/leaflet.markercluster.js?v=202611102010"></script>
-<script src="app.js?v=202611102010"></script>
+<script src="/assets/vendor/leaflet/leaflet.js?v=202611102100"></script>
+<script src="/assets/vendor/leaflet.markercluster/leaflet.markercluster.js?v=202611102100"></script>
+<script src="app.js?v=202611102100"></script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

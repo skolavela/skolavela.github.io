@@ -1,0 +1,22 @@
+name: Zvuková mapa - denní ping
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase, ať se projekt neuspí
+        env:
+          PING_URL: ${{ secrets.ZVUKOVA_MAPA_PING_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PING_URL:-}" ]; then
+            echo "Chybí secret ZVUKOVA_MAPA_PING_URL" >&2
+            exit 1
+          fi
+          curl -fsS --max-time 30 "$PING_URL"
+          echo

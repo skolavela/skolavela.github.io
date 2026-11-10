@@ -15,10 +15,10 @@
 
   /* Souřadnice z Nominatim (OpenStreetMap), 10. 11. 2026:
      Hloubětín = Poděbradská 489/116, 198 00 Praha 14
-     Ruzyně = Žukovského 887/4, 161 00 Praha 6 */
+     Dědina = Žukovského 887/4, 161 00 Praha 6 */
   var SKOLY = {
     hloubetin: { name: "Hloubětín", lat: 50.1053762, lng: 14.5372651 },
-    ruzyne: { name: "Ruzyně", lat: 50.0907173, lng: 14.3088879 }
+    dedina: { name: "Dědina", lat: 50.0907173, lng: 14.3088879 }
   };
 
   var CATS = [
@@ -103,7 +103,14 @@
     } catch (e) {}
   }
   function savedSchool() {
-    try { return localStorage.getItem(SKOLA_KEY) || "hloubetin"; } catch (e) { return "hloubetin"; }
+    try {
+      var id = localStorage.getItem(SKOLA_KEY) || "hloubetin";
+      if (id === "ruzyne") {
+        id = "dedina";
+        try { localStorage.setItem(SKOLA_KEY, id); } catch (e2) {}
+      }
+      return SKOLY[id] ? id : "hloubetin";
+    } catch (e) { return "hloubetin"; }
   }
   function saveSchool(id) {
     try { localStorage.setItem(SKOLA_KEY, id); } catch (e) {}
@@ -256,10 +263,9 @@
   function pinIcon(place, selectedMark) {
     var c = catOf(place);
     var cls = "zm-pin" + (selectedMark ? " is-selected" : "") + (place.hidden ? " is-hidden" : "");
-    var svg = ICO[place.category] || ICO.jine;
     return L.divIcon({
       className: cls,
-      html: "<div class=\"zm-mark\" style=\"--mark:" + c.color + "\"><span class=\"zm-mark__dot\">" + svg + "</span></div>",
+      html: "<div class=\"zm-mark\" style=\"--mark:" + c.color + "\"><span class=\"zm-mark__dot\"></span></div>",
       iconSize: [44, 44],
       iconAnchor: [22, 22]
     });
@@ -283,7 +289,7 @@
         return L.divIcon({
           html: "<span>" + cl.getChildCount() + "</span>",
           className: "zm-cluster",
-          iconSize: [36, 36]
+          iconSize: [20, 20]
         });
       }
     });
@@ -886,8 +892,6 @@
   function showApp() {
     $("gate").hidden = true;
     $("app-main").hidden = false;
-    $("app-actions").hidden = false;
-    $("gate-logo").hidden = true;
     st.unlocked = true;
   }
   function lock() {
@@ -897,9 +901,7 @@
     st.places = [];
     $("gate").hidden = false;
     $("app-main").hidden = true;
-    $("app-actions").hidden = true;
     $("teacher-bar").hidden = true;
-    $("gate-logo").hidden = false;
     $("gate-err").hidden = false;
     $("gate-err").textContent = "Heslo nesedí.";
     $("gate-input").value = "";
@@ -930,7 +932,7 @@
       var v = $("gate-input").value.trim();
       $("gate-err").hidden = true;
       if (!v) {
-        $("gate-err").textContent = "Zadejte heslo třídy.";
+        $("gate-err").textContent = "Zadej heslo.";
         $("gate-err").hidden = false;
         return;
       }

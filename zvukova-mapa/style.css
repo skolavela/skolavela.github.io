@@ -16,38 +16,52 @@
 .zm-name h1 { white-space: nowrap; }
 .zm-name .a-name__sub { margin-top: 1px; }
 
-.zm-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-  min-width: 0;
+.zm-skoly {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+  min-width: 220px;
+  box-shadow: var(--shadow-card);
+  background: var(--fill);
 }
-.zm-actions .c-btn {
-  min-height: 36px;
-  padding: 0 14px;
+.zm-skoly button { padding: 0 12px; }
+
+.zm-add {
+  position: absolute;
+  right: 12px;
+  bottom: 28px;
+  z-index: 11;
+  min-height: 44px;
+  padding: 0 16px;
   font-size: 14px;
   white-space: nowrap;
+  box-shadow: var(--shadow-card);
 }
-.zm-actions .c-btn--primary[aria-pressed="true"] { background: var(--accent-hover); }
-.zm-skoly { flex: 0 0 auto; min-width: 200px; }
-.zm-skoly button { padding: 0 10px; }
+.zm-add[aria-pressed="true"] { background: var(--accent-hover); }
 
 .zm-teacher {
-  border-top: 1px solid var(--separator);
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 11;
+  border: 0;
+  border-radius: var(--r-control);
   background: var(--surface);
+  box-shadow: var(--shadow-card);
+  max-width: min(360px, calc(100% - 24px));
 }
 .zm-teacher__in {
-  max-width: none;
-  margin: 0 auto;
-  padding: 6px var(--gutter);
+  margin: 0;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
-.zm-teacher .c-switch { min-height: 40px; font-size: 14px; gap: 10px; }
+.zm-teacher .c-switch { min-height: 36px; font-size: 13px; gap: 8px; }
 .zm-teacher__links { display: flex; gap: 16px; font-size: 13px; }
 .zm-teacher__links button,
 .zm-teacher__links label {
@@ -77,8 +91,12 @@
   flex-direction: column;
   gap: 14px;
 }
-.zm-gate__card h2 { margin: 0; font-size: 24px; }
-.zm-gate__card p { margin: 0; font-size: 15px; color: var(--text-2); }
+.zm-gate__label {
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--text);
+  line-height: 1.35;
+}
 .zm-gate[hidden], .zm-main[hidden] { display: none !important; }
 
 .zm-main {
@@ -125,7 +143,7 @@
 .leaflet-control-attribution a { color: var(--text-2); }
 .leaflet-crosshair, .leaflet-crosshair .leaflet-interactive { cursor: crosshair; }
 
-/* Značky: kruh 36 px, dotyková plocha 44 px */
+/* Značky: tečka ~12 px, neviditelná dotyková plocha 44 px */
 .zm-pin {
   background: none !important;
   border: 0 !important;
@@ -138,22 +156,17 @@
   place-items: center;
 }
 .zm-mark__dot {
-  width: 36px;
-  height: 36px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--mark);
-  color: #FFFFFF;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 0 0 3px #FFFFFF, 0 2px 8px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 0 0 2px #FFFFFF, 0 1px 3px rgba(0, 0, 0, 0.28);
 }
-.zm-mark__dot svg { width: 18px; height: 18px; }
 .zm-pin.is-selected .zm-mark__dot {
-  width: 42px;
-  height: 42px;
-  box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 6px rgba(29, 29, 31, 0.16), 0 2px 10px rgba(0, 0, 0, 0.28);
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 5px rgba(29, 29, 31, 0.16), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
-.zm-pin.is-selected .zm-mark__dot svg { width: 20px; height: 20px; }
 .zm-pin.is-hidden .zm-mark__dot { opacity: 0.45; }
 
 .zm-cluster {
@@ -163,13 +176,13 @@
 .zm-cluster span {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
   color: #FFFFFF;
-  font: 700 14px/1 var(--font);
-  box-shadow: 0 0 0 3px #FFFFFF, 0 2px 8px rgba(0, 0, 0, 0.22);
+  font: 700 10px/1 var(--font);
+  box-shadow: 0 0 0 2px #FFFFFF, 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
 .zm-legend {
@@ -480,6 +493,11 @@
   .zm-panel.is-collapsed .zm-panel__foot { display: none; }
   .zm-handle { display: block; }
   .zm-legend { bottom: 16px; }
+  .zm-add { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .zm-main:has(#panel:not(.is-hidden)) .zm-add { bottom: calc(50% + 16px); }
+  .zm-main:has(#panel.is-collapsed) .zm-add { bottom: calc(25% + 16px); }
+  .zm-main:has(#panel:not(.is-hidden)) .zm-legend { bottom: calc(50% + 16px); }
+  .zm-main:has(#panel.is-collapsed) .zm-legend { bottom: calc(25% + 16px); }
   .zm-app .v-footer { display: none; }
   .zm-tally { display: inline; }
 }
@@ -488,24 +506,21 @@
 .zm-tally a { color: var(--text-2); }
 .zm-tally a:hover { color: var(--accent); }
 
-@media (max-width: 1023px) {
-  .v-header__in {
-    flex-wrap: wrap;
-    min-height: var(--header-h);
-    padding-top: 4px;
-    padding-bottom: 8px;
-  }
-  .zm-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
-  .a-titlebar { flex: 1 1 auto; }
-}
 
 @media (max-width: 599px) {
   .zm-name h1 { font-size: 15px; }
-  .zm-actions .c-btn { padding: 0 10px; font-size: 13px; }
-  .zm-skoly { min-width: 0; flex: 1 1 auto; }
+  .zm-skoly {
+    left: 56px;
+    transform: none;
+    min-width: 0;
+    width: auto;
+    max-width: calc(100% - 68px);
+  }
+  .zm-add { padding: 0 12px; font-size: 13px; }
+  .zm-teacher { top: 56px; left: 8px; right: 8px; max-width: none; }
   .zm-panel h2 { font-size: 22px; }
   .zm-panel__scroll { padding: 10px 16px 12px; gap: 14px; }
   .zm-panel__foot { padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
-  .zm-legend { left: 8px; }
+  .zm-legend { left: 8px; max-width: calc(100% - 148px); }
   .v-logo--small { display: none; }
 }
