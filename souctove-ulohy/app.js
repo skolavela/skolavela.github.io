@@ -134,9 +134,6 @@ function gcEvent(name, title) {
       return taskHtml(t, labels(i), showSol, hint);
     }).join("");
     return '<div class="su-page">'
-      + '<div class="su-head su-meta">'
-      + '<div class="su-jmeno"><span class="su-jmeno-lab">Jméno</span><span class="su-jmeno-line" aria-hidden="true"></span></div>'
-      + "</div>"
       + '<p class="su-instr">' + instruction(sheet.typ) + "</p>"
       + '<div class="su-grid cols-' + cols + '">' + grid + "</div>"
       + '<div class="su-foot su-meta">'
@@ -269,10 +266,7 @@ function gcEvent(name, title) {
   function drawPdf(doc, fam, txt) {
     var padX = 14, padY = 12, y = padY, box = 14, gap = 2.4;
     doc.setFont(fam, "bold"); doc.setFontSize(11); doc.setTextColor(29, 29, 31);
-    doc.text(txt("Jméno"), padX, y + 3);
-    doc.setDrawColor(142, 142, 147); doc.setLineWidth(0.3);
-    doc.line(padX + 14, y + 3.2, padX + 90, y + 3.2);
-    y += 10;
+    y += 3;
     doc.setFont(fam, "normal"); doc.setFontSize(10); doc.setTextColor(29, 29, 31);
     var instr = instruction(sheet.typ);
     doc.text(txt(instr), padX, y);

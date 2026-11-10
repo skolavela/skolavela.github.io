@@ -26,9 +26,6 @@
   flex: 0 0 auto;
 }
 .su-head { margin-bottom: 4mm; }
-.su-jmeno { display: flex; align-items: flex-end; gap: 8px; min-width: 0; flex: 1; }
-.su-jmeno-lab { font-weight: 600; }
-.su-jmeno-line { flex: 1; max-width: 90mm; border-bottom: 0.4mm solid var(--text-3); height: 0; margin-bottom: 1px; }
 .su-instr {
   margin: 0 0 4mm;
   font-size: 12px;
