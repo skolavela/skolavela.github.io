@@ -1,6 +1,6 @@
 // node test.js – kontrola všech dat
 const vm=require('vm'),fs=require('fs');const ctx={console,Math};vm.createContext(ctx);
-for(const f of ['core.js','exam.js','ex-ma.js','ex-cj.js','topics.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
+for(const f of ['core.js','exam.js','ex-ma.js','ex-cj.js','ex-cj-new.js','ex-cj-p4.js','topics.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
 const PQ=ctx.PQ;let err=0;const bad=(m,it)=>{err++;console.error('CHYBA:',m,JSON.stringify(it).slice(0,200));};
 function val(it,tp){
   if(!it||!it.q||typeof it.q!=='string')return bad(tp+': chybí zadání',it);
@@ -43,8 +43,8 @@ const tests=[['3,5',3.5],['3/4',0.75],['−2',-2],[' 12 cm',12],['1 000',1000]];
 for(const [s,v] of tests)if(Math.abs(PQ.parseNum(s)-v)>1e-9){err++;console.error('parseNum',s);}
 /* ---------- úlohy ve stylu CERMAT ---------- */
 const right=s=>{switch(s.t){case 'mc':return s.a;case 'yn':return s.s.map(x=>x[1]);case 'match':return s.a.slice();case 'ord':return s.parts.map((_,i)=>i);
-  case 'fields':return s.f.map(f=>f.k==='frac'?(f.a[1]===1?String(f.a[0]):`${f.a[0]}/${f.a[1]}`):f.k==='num'?String([].concat(f.a)[0]).replace('.',','):[].concat(f.a)[0]);case 'nums':return s.a.join(', ');}};
-const wrongA=s=>{switch(s.t){case 'mc':return (s.a+1)%s.o.length;case 'yn':return s.s.map(x=>!x[1]);case 'match':return s.a.map(x=>(x+1)%s.o.length);case 'ord':return s.parts.map((_,i)=>s.parts.length-1-i);case 'fields':return s.f.map(()=>'zzz');case 'nums':return '99';}};
+  case 'fields':return s.f.map(f=>f.k==='frac'?(f.a[1]===1?String(f.a[0]):`${f.a[0]}/${f.a[1]}`):f.k==='num'?String([].concat(f.a)[0]).replace('.',','):[].concat(f.a)[0]);case 'nums':return s.a.join(', ');case 'words':return s.a.join(', ');}};
+const wrongA=s=>{switch(s.t){case 'mc':return (s.a+1)%s.o.length;case 'yn':return s.s.map(x=>!x[1]);case 'match':return s.a.map(x=>(x+1)%s.o.length);case 'ord':return s.parts.map((_,i)=>s.parts.length-1-i);case 'fields':return s.f.map(()=>'zzz');case 'nums':return '99';case 'words':return 'zzz';}};
 const TXT=x=>JSON.stringify(x);
 function valTask(t,tag){
   if(!t||!Array.isArray(t.subs)||!t.subs.length)return bad(tag+': úloha bez podúloh',t);

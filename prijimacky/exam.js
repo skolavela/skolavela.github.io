@@ -51,8 +51,12 @@ PQ.checkField=function(f,ans){
   if(k==='expr'){const e=PQ.parseExpr(ans);if(!e)return {ok:false,why:'Výraz se nepodařilo přečíst – zkontroluj závorky a znaménka.'};
     const ok=[].concat(f.a).some(a=>PQ.sameExpr(e,a,f.vars));if(ok&&f.form==='prod'&&!PQ.isProduct(e))return {ok:false,near:true,why:'Hodnota sedí, ale výraz má být zapsán jako součin (rozložený).'};
     if(ok&&f.form==='simp'&&/\(/.test(ans))return {ok:false,near:true,why:'Hodnota sedí, ale výraz ještě není zjednodušený.'};return {ok};}
-  const v=PQ.norm(ans).replace(/[,;]$/,'');return {ok:[].concat(f.a).some(a=>PQ.norm(a)===v)};
+  const dn=x=>f.diac===false?PQ.noDiac(x):x;const v=dn(PQ.norm(ans).replace(/[,;]$/,''));return {ok:[].concat(f.a).some(a=>dn(PQ.norm(a))===v)};
 };
+// bez diakritiky (diac:false – u výpisu slov z textu se hodnotí slovo, ne čárky a háčky)
+PQ.noDiac=x=>String(x).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+// slova oddělená čárkou/mezerou → množina normalizovaných tvarů
+PQ.wordSet=(v,diac)=>[...new Set(String(v||'').split(/[,;\s]+/).map(w=>PQ.norm(w).replace(/[.!?]$/,'')).filter(Boolean).map(w=>diac===false?PQ.noDiac(w):w))];
 /* ---------- bodování podúlohy (pravidla CERMAT) ---------- */
 // sc: mapa „počet správných dílčích odpovědí → body“; bez sc: plný počet bodů jen za vše správně (mc), u polí max(0, body − chyby)
 PQ.scoreSub=function(s,ans){
@@ -67,6 +71,8 @@ PQ.scoreSub=function(s,ans){
       if(s.any){const pool=s.f.map(f=>f);const used=new Set();s.f.forEach((_,i)=>{const a=ans[i];let hit=-1;pool.forEach((f,j)=>{if(hit<0&&!used.has(j)&&PQ.checkField(f,a).ok)hit=j;});if(hit>=0){used.add(hit);c++;det.push({ok:true});}else det.push({ok:false});});}
       else s.f.forEach((f,i)=>{const r=PQ.checkField(f,ans[i]);if(r.ok)c++;det.push(r);});
       return Object.assign(R(c,s.f.length),{det});}
+    case 'words':{const want=new Set(s.a.map(w=>s.diac===false?PQ.noDiac(PQ.norm(w)):PQ.norm(w)));const got=PQ.wordSet(ans,s.diac);const c=got.filter(x=>want.has(x)).length;const extra=got.length-c;
+      return {pts:Math.max(0,s.pts-(s.a.length-c)-extra),c,n:s.a.length,ok:c===s.a.length&&!extra,extra};}
     case 'nums':{const want=new Set(s.a);const got=[...new Set(String(ans).split(/[^0-9]+/).filter(Boolean).map(Number))];const c=got.filter(x=>want.has(x)).length;const extra=got.length-c;
       const pts=Math.max(0,s.pts-(s.a.length-c)-extra);return {pts,c,n:s.a.length,ok:c===s.a.length&&!extra,extra};}
   }
@@ -76,9 +82,18 @@ PQ.taskMax=t=>t.subs.reduce((a,s)=>a+s.pts,0);
 PQ.scoreTask=(t,ans)=>{ans=ans||{};let pts=0;const rs=t.subs.map(s=>{const r=PQ.scoreSub(s,ans[s.id]);pts+=r.pts;return r;});return {pts,max:PQ.taskMax(t),rs};};
 // sestavení testu podle plánu (blueprint); bloky (společný výchozí text) vrací víc úloh
 PQ.buildExam=function(subj,len){const bp=PQ.BP[subj];if(!bp)return null;const plan=bp[len]||bp.full;const tasks=[];
-  plan.forEach(key=>{const sl=PQ.SLOTS[key];const out=[].concat(sl.gen());out.forEach(t=>{t.slot=key;t.sname=t.sname||sl.name;tasks.push(t);});});
+  plan.forEach(key=>{if(Array.isArray(key))key=PQ.pick(key);const sl=PQ.SLOTS[key];const out=[].concat(sl.gen());out.forEach(t=>{t.slot=key;t.sname=t.sname||sl.name;tasks.push(t);});});
   tasks.forEach((t,i)=>{t.no=i+1;t.subs.forEach((s,k)=>{s.id=t.subs.length>1?`${t.no}.${k+1}`:`${t.no}`;});});
   return tasks;};
+/* ---------- banky položek: stabilní id, kontrola učitelem (rev), přednost neviděným ---------- */
+// PQ.SEEN: id → kdy byla položka naposledy ukázána (ukládá app.js do prijimacky:v1 → st.seen)
+PQ.SEEN=PQ.SEEN||{};PQ._lastSeen=0;PQ.BANKS=PQ.BANKS||{};
+PQ.markSeen=function(id){if(PQ.noMark)return;const t=Math.max(Date.now(),PQ._lastSeen+1);PQ._lastSeen=t;PQ.SEEN[id]=t;if(PQ.onSeen)PQ.onSeen();};
+// vybere n položek: nejdřív neviděné (náhodně), pak ty, které dítě nevidělo nejdéle
+PQ.drawItems=function(bank,n){const S=PQ.SEEN;const one=n==null;n=n||1;const arr=PQ.shuffle(bank).sort((a,b)=>(S[a.id]||0)-(S[b.id]||0)).slice(0,n);arr.forEach(x=>PQ.markSeen(x.id));return one?arr[0]:arr;};
+// převod n-tic na položky banky: id = slot-pořadí (pořadí neměnit, nové položky jen přidávat na konec)
+PQ.bank=function(slot,arr,rev){const B=PQ.BANKS[slot]||(PQ.BANKS[slot]=[]);arr.forEach(d=>{const isObj=d&&typeof d==='object'&&!Array.isArray(d);const o=isObj?d:{d};
+  if(!o.id)o.id=`${slot}-${isObj&&o.key?o.key:B.length+1}`;if(o.rev==null)o.rev=rev==null?1:rev;o.slot=slot;B.push(o);});return B;};
 PQ.slot=(subj,key,name,gen,info)=>{PQ.SLOTS[key]=Object.assign({subj,key,name,gen},info||{});};
 // pomocníci pro data
 PQ.T=(title,subs,x)=>Object.assign({title,subs},x||{});
@@ -89,6 +104,7 @@ PQ.S={
   ord:(q,parts,pts,sc,e,x)=>Object.assign({t:'ord',q,parts,pts,sc,e},x||{}),
   fields:(q,f,pts,e,x)=>Object.assign({t:'fields',q,f,pts,e},x||{}),
   nums:(q,items,a,pts,e,x)=>Object.assign({t:'nums',q,items,a,pts,e},x||{}),
+  words:(q,a,pts,e,x)=>Object.assign({t:'words',q,a,pts,e},x||{}),
 };
 // MC s možnostmi A–E, kde E = „jiné řešení“ (správná může být i E)
 PQ.mcE=function(q,right,wrongs,pts,e,x){const fmt=(x&&x.fmt)||PQ.fmt;const useE=Math.random()<0.2;const opts=[];const seen=new Set([fmt(right)]);

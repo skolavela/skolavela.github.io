@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Nanečisto – kontrola dat</title>
+<style>body{font:16px/1.4 system-ui,-apple-system,sans-serif;margin:16px;color:#111}h1{font-size:20px}.ok{color:#1a7f37}.ch{color:#c0162b;font-weight:600}.fp{color:#666}li{margin:2px 0}code{font-size:14px}</style>
+</head><body>
+<h1>Nanečisto – kontrola dat (jen pro vývoj)</h1>
+<p id="sum">Běží…</p><ul id="out"></ul>
+<script src="core.js"></script><script src="exam.js"></script><script src="ex-ma.js"></script><script src="ex-cj.js"></script><script src="ex-cj-new.js"></script><script src="ex-cj-p4.js"></script><script src="topics.js"></script>
+<script>
+(function(){
+const PQ=window.PQ,out=document.getElementById('out');const R={ok:0,ch:0,fp:0,chyby:[]};
+const row=(cls,t)=>{const li=document.createElement('li');li.className=cls;li.textContent=(cls==='ok'?'OK: ':cls==='ch'?'CHYBA: ':'falešný nález (OK): ')+t;out.appendChild(li);};
+const OK=t=>{R.ok++;row('ok',t);},CH=t=>{R.ch++;R.chyby.push(t);row('ch',t);},FP=t=>{R.fp++;row('fp',t);};
+const plain=x=>String(x==null?'':x).replace(/<[^>]+>/g,' ');
+// zakázané výrazy (látka vypuštěná ze specifikace 2026/2027) a slova, která je obsahují jen náhodou
+const BAN=[/thalet/i,/tečn/i,/opsan/i,/válc/i,/válec/i,/koul/i,/přívlast\w* neshodn/i];
+const FALSE=/(skuteč|zbyteč|zbiteč|dostateč|stateč|popsan)/i; // skutečný, zbytečný, (ne)dostatečný, statečný, popsaný – jiná slova než tečna / opsaná
+const banHits={};
+function scan(txt,where){const t=plain(txt);for(const re of BAN){const g=new RegExp(re.source,'gi');let m;while((m=g.exec(t))){let s0=m.index;while(s0>0&&/\p{L}/u.test(t[s0-1]))s0--;const w=t.slice(s0).match(/^\p{L}+/u)[0];const k=where+'|'+w.toLowerCase();if(banHits[k])continue;banHits[k]=1;
+  if(FALSE.test(w))FP(`${where}: „${w}“ (obsahuje „${m[0]}“, ale jde o jiné slovo)`);else CH(`${where}: zakázaný výraz „${w}“`);}}}
+const right=s=>{switch(s.t){case 'mc':return s.a;case 'yn':return s.s.map(x=>x[1]);case 'match':return s.a.slice();case 'ord':return s.parts.map((_,i)=>i);
+  case 'fields':return s.f.map(f=>f.k==='frac'?(f.a[1]===1?String(f.a[0]):`${f.a[0]}/${f.a[1]}`):f.k==='num'?String([].concat(f.a)[0]).replace('.',','):[].concat(f.a)[0]);case 'nums':return s.a.join(', ');case 'words':return s.a.join(', ');}};
+const wrong=s=>{switch(s.t){case 'mc':return (s.a+1)%s.o.length;case 'yn':return s.s.map(x=>!x[1]);case 'match':return s.a.map(x=>(x+1)%s.o.length);case 'ord':return s.parts.map((_,i)=>s.parts.length-1-i);case 'fields':return s.f.map(()=>'zzz');case 'nums':return '99';case 'words':return 'zzz';}};
+const ynRatio={};
+// 1) každý slot 300×
+const N=300;PQ.noMark=true;
+for(const k in PQ.SLOTS){const sl=PQ.SLOTS[k];let e0=R.ch,pmax=new Set(),txt='';
+  for(let i=0;i<N;i++){let out;try{out=[].concat(sl.gen());}catch(e){CH(`${k}: generátor vyhodil ${e.message}`);break;}
+    let pts=0;for(const t of out){if(!t.subs||!t.subs.length){CH(`${k}: úloha bez podúloh`);continue;}
+      const j=JSON.stringify(t);if(/undefined|NaN|\[object|Infinity/.test(j)){CH(`${k}: undefined/NaN v textu`);break;}
+      txt=(t.src&&t.src.h||'')+' '+(t.intro||'');
+      for(const s of t.subs){pts+=s.pts;txt+=' '+s.q+' '+(s.e||'')+' '+JSON.stringify(s.o||s.s||s.items||s.parts||s.f||s.a||'')+' '+JSON.stringify(s.cond||'');
+        if(!(s.pts>0))CH(`${k}: podúloha bez bodů`);
+        if(right(s)===undefined){CH(`${k}: neznámý typ ${s.t}`);continue;}
+        const r=PQ.scoreSub(s,right(s));if(r.pts!==s.pts){CH(`${k}: správná odpověď dává ${r.pts}/${s.pts} – ${plain(s.q).slice(0,80)}`);}
+        const w=PQ.scoreSub(s,wrong(s));if(w.pts>=s.pts)CH(`${k}: špatná odpověď dává plné body`);
+        if(s.t==='yn'&&k.startsWith('cj')){const c=s.s.filter(x=>x[1]).length;const key=Math.min(c,4-c)+':'+Math.max(c,4-c);ynRatio[key]=(ynRatio[key]||0)+1;}
+        if(s.t==='words'){const a=s.a;const nd=PQ.noDiac(a.join(', '));if(s.diac===false&&PQ.scoreSub(s,nd).pts!==s.pts)CH(`${k}: odpověď bez diakritiky nedává plné body`);
+          if(PQ.scoreSub(s,a.slice(1).join(', ')).pts!==s.pts-1)CH(`${k}: chybějící slovo nestrhává 1 bod`);if(PQ.scoreSub(s,a.join(', ')+', xyz').pts!==s.pts-1)CH(`${k}: slovo navíc nestrhává 1 bod`);}
+        if(s.t==='fields')s.f.forEach(f=>{if(f.diac===false){const a=PQ.noDiac([].concat(f.a)[0]);if(!PQ.checkField(f,a).ok)CH(`${k}: pole s diac:false neuzná odpověď bez diakritiky`);}});
+      }
+      scan(txt,k);
+      if(k==='ma3'&&/[a-z]\s*²\s*[−-]\s*[a-z]\s*²|\([a-z]\s*[+−-]\s*[a-z]\)\s*²/i.test(plain(txt).replace(/\^2/g,'²')))CH('ma3: obecný vzorec rozkladu v textu');
+    }pmax.add(pts);if(R.ch-e0>5)break;}
+  if(R.ch===e0)OK(`${k} (${sl.name}): ${N}× vygenerováno, body ${[...pmax].join('/')}`);}
+PQ.noMark=false;
+// nápovědy a texty aplikace
+for(const k in PQ.HINTS)scan(PQ.HINTS[k],'nápověda '+k);
+// 2) banky: stabilní id, rev
+const ids=new Set();let dup=0,bad=0,r0=0;for(const k in PQ.BANKS)PQ.BANKS[k].forEach(x=>{if(!x.id)bad++;if(ids.has(x.id))dup++;ids.add(x.id);if(x.rev!==0&&x.rev!==1)bad++;if(x.rev===0)r0++;});
+dup||bad?CH(`banky: ${dup} duplicitních id, ${bad} položek bez id/rev`):OK(`banky: ${ids.size} položek, všechny mají stabilní id; rev:0 = ${r0}`);
+// 3) poměry ANO/NE v češtině
+['2:2','1:3','0:4'].every(x=>ynRatio[x])?OK(`ANO/NE v češtině: poměry ${Object.entries(ynRatio).map(([a,b])=>a+' ('+b+'×)').join(', ')}`):CH(`ANO/NE: chybí některý poměr 2:2 / 1:3 / 0:4 (${JSON.stringify(ynRatio)})`);
+// 4) testy 100×
+const WANT={cj:{full:[30,50],short:[14,24]},ma:{full:[16,50],short:[8,27]}};
+for(const subj in WANT)for(const len in WANT[subj]){let e0=R.ch;PQ.noMark=true;for(let i=0;i<100;i++){const ts=PQ.buildExam(subj,len);const n=ts.length,p=ts.reduce((a,t)=>a+PQ.taskMax(t),0);const [wn,wp]=WANT[subj][len];
+  if(n!==wn||p!==wp){CH(`test ${subj} ${len}: ${n} úloh / ${p} b (má být ${wn} / ${wp})`);break;}
+  const tot=ts.reduce((a,t)=>a+PQ.scoreTask(t,Object.fromEntries(t.subs.map(s=>[s.id,right(s)]))).pts,0);if(tot!==wp){CH(`test ${subj} ${len}: správné odpovědi dávají ${tot} b`);break;}}
+  PQ.noMark=false;if(R.ch===e0)OK(`test ${subj} ${len}: 100× sestaven, vždy ${WANT[subj][len][0]} úloh / ${WANT[subj][len][1]} b, správné odpovědi = plný počet`);}
+(PQ.BP.cj.mins.full===60&&PQ.BP.ma.mins.full===70)?OK('časy testů: ČJ 60 min, MA 70 min'):CH('časy testů neodpovídají (ČJ 60, MA 70)');
+document.getElementById('sum').innerHTML=`<b class="${R.ch?'ch':'ok'}">OK: ${R.ok} · CHYBA: ${R.ch}</b> · falešné nálezy zakázaných výrazů: ${R.fp}`;
+window.TEST_RESULT=R;document.title=(R.ch?'CHYBA ':'OK ')+document.title;
+})();
+</script></body></html>

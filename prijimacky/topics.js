@@ -3,8 +3,9 @@
 const PQ=G.PQ;PQ.topics=[];
 const T=(subj,id,name,icon,slots)=>PQ.topics.push({subj,id,name,icon,slots,items:[],gens:[]});
 T('cj','pravopis','Pravopis','pen',['cj1','cj18','cj24']);
-T('cj','tvaroslovi','Tvarosloví a spisovnost','type',['cj7','cj16','cj25']);
-T('cj','skladba','Skladba a interpunkce','puzzle',['cj5','cj14','cj6']);
+T('cj','tvaroslovi','Tvarosloví a spisovnost','type',['cj7','cj16','cj25','cjTvar','cjSlova']);
+T('cj','skladba','Skladba a interpunkce','puzzle',['cj5','cj14','cj6','cjVyp','cjUprava']);
+T('cj','zasoba','Slovní zásoba a tvoření slov','book',['cjPrib','cjFraz']);
 T('cj','text','Práce s textem','doc',['cjA','cjR','cjS','cj17']);
 T('cj','razeni','Řazení textu','shuffle',['cj15']);
 T('cj','lit','Literatura a poezie','feather',['cjP','cj30']);
@@ -25,6 +26,12 @@ PQ.HINTS={
  cj7:'Zeptej se pádovou otázkou (o kom? s kým? před čím?) a podle ní urči tvar.',
  cj16:'Dosaď každou možnost do věty a zeptej se pádovou otázkou. Pozor na hovorové tvary.',
  cj25:'Přečti každou větu nahlas. Nespisovné bývají koncovky -ej, -im, -aj, zkrácené samohlásky.',
+ cjTvar:'Urči, kdo děj koná (rod a číslo podmětu), a podle toho vyber koncovku. U rozkazovacího způsobu si větu řekni nahlas.',
+ cjSlova:'Projdi text slovo po slově a u každého se zeptej, jaký je to slovní druh. Vypiš všechna, ne víc – za chybějící i navíc se strhává bod.',
+ cjVyp:'Najdi ve větě požadované slovo a převeď ho do základního tvaru, na který se zadání ptá.',
+ cjUprava:'Po přepsání si větu přečti celou. Zkontroluj spojku, čárku a jestli se nezměnil význam.',
+ cjPrib:'Najdi kořen slova a přidej k němu předponu nebo příponu tak, aby vznikl požadovaný slovní druh.',
+ cjFraz:'Ustálená spojení mají pevnou podobu. Vybav si celé spojení, jak ho znáš z běžné řeči.',
  cj5:'Nejdřív najdi sloveso v určitém tvaru (přísudek), pak se zeptej „kdo/co“ dělá – to je podmět.',
  cj14:'Spočítej slovesa = počet vět. Vedlejší věty oddělujeme čárkou, vložené z obou stran.',
  cj6:'U každé věty se zeptej, na co vedlejší věta odpovídá, nebo jak se slovo chová ve větě.',
@@ -37,13 +44,13 @@ PQ.HINTS={
  cj30:'Nejdřív přiřaď jisté dvojice, zbytek vyluč. Dvě možnosti zbudou.',
  ma1:'Sčítání/odčítání: společný jmenovatel. Dělení: násob převráceným zlomkem. Na konci zkrať.',
  ma2:'Přednost: násobení a dělení před sčítáním. U složeného zlomku zvlášť čitatel a jmenovatel.',
- ma3:'Vzorce: (a ± b)² = a² ± 2ab + b², a² − b² = (a − b)(a + b). Nejdřív zkus vytknout.',
- ma4:'Roznásob závorky, převeď neznámé na jednu stranu. U soustavy vyjádři jednu neznámou nebo rovnice sečti.',
+ ma3:'Rozklad: najdi, co mají všechny členy společné (číslo i proměnnou), a vytkni to před závorku. Zkouška: roznásob zpět. U úpravy nejdřív roznásob závorky, pak sečti podobné členy.',
+ ma4:'Roznásob závorky, převeď neznámé na jednu stranu. U soustavy si postup zvol sám – můžeš třeba dosadit, nebo rovnice sečíst. Na konci udělej zkoušku.',
  ma5:'Vyjádři, kolik dílů nebo procent odpovídá známé hodnotě. Pozor: základ se změnil!',
  ma6:'Zbytek je vždy část z toho, co zbylo – ne z celku. Rozkresli si to jako úsečku.',
  ma7:'Dráha = rychlost · čas. Minuty převeď na hodiny (: 60).',
  ma12:'Procenta se nesčítají přes různé základy. Spočítej kusy nebo koruny, pak procenta.',
- ma8:'Součet úhlů v trojúhelníku je 180°. Hledej rovnoramenné trojúhelníky (poloměry, osy).',
+ ma8:'Součet úhlů v trojúhelníku je 180°. Osa úhlu ho půlí. U rovnoběžek hledej střídavé a souhlasné úhly – mají stejnou velikost.',
  ma9:'Každá podmínka = jedna množina bodů (přímka, kružnice). Řešení jsou jejich průsečíky.',
  ma10:'Posun mezi dvěma vrcholy je stejný jako posun mezi protějšími vrcholy.',
  ma13:'Výška rozdělí rovnoramenný trojúhelník na dva pravoúhlé – použij Pythagorovu větu.',

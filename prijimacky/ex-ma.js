@@ -37,11 +37,11 @@ slot('ma2','Desetinná čísla a složený zlomek',()=>{
 /* 3 – výrazy */
 slot('ma3','Výrazy: dosazení, rozklad, úprava',()=>{
   const v=pick(['a','x','y']);const k=ri(2,5),m=ri(1,6),val=ri(-3,8);const c=[k*k,-2*k*m,m*m];const vv=r2(Math.pow(k*val-m,2));
-  // rozklad
+  // rozklad – jen vytýkáním (CERMAT 2027: rozklad podle vzorců se nevyžaduje)
   let fq,fa,fe;const t=ri(0,2),u=ri(2,6),w=ri(1,7);
-  if(t===0){fq=poly([u*u,0,-w*w],v);fa=`(${u}${v}-${w})(${u}${v}+${w})`;fe=`a² − b² = (a − b)(a + b): ${fq} = (${u}${v} − ${w})(${u}${v} + ${w}).`;}
-  else if(t===1){fq=poly([1,2*w,w*w],v);fa=`(${v}+${w})^2`;fe=`(a + b)² = a² + 2ab + b²: ${fq} = (${v} + ${w})².`;}
-  else{fq=poly([u,-u*w,0],v);fa=`${u}${v}(${v}-${w})`;fe=`Vytkneme ${u}${v}: ${fq} = ${u}${v}(${v} − ${w}).`;}
+  if(t===0){const g=ri(2,6),p0=ri(2,5),q0=pick([1,2,3,4,5,7].filter(x=>PQ.gcd(x,p0)===1));fq=poly([g*p0,g*q0],v);fa=`${g}(${p0}${v}+${q0})`;fe=`Vytkneme společného dělitele obou koeficientů, číslo ${g}: ${fq} = ${g}(${p0}${v} + ${q0}).`;}
+  else if(t===1){const q0=pick([1,2,3,4,5,6,7].filter(x=>PQ.gcd(x,u)===1));fq=poly([u,q0,0,0],v);fa=`${v}^2(${u}${v}+${q0})`;fe=`Oba členy obsahují ${v}², vytkneme ho: ${fq} = ${v}²(${u}${v} + ${q0}).`;}
+  else{fq=poly([u,-u*w,0],v);fa=`${u}${v}(${v}-${w})`;fe=`Oba členy obsahují ${u}${v}, vytkneme ho: ${fq} = ${u}${v}(${v} − ${w}).`;}
   // úprava
   let sq,sa,se,work;const a=ri(1,6),b=ri(1,6);
   if(Math.random()<0.5){sq=`(${v} + ${a})² − (${v} − ${b})(${v} + ${b})`;const res=[0,2*a,a*a+b*b];sa=poly(res,v).replace(/−/g,'-').replace(/²/g,'^2');
@@ -49,8 +49,8 @@ slot('ma3','Výrazy: dosazení, rozklad, úprava',()=>{
   else{sq=`2${v}(${v} − ${a}) − (${v} − ${b})²`;const res=[1,2*b-2*a,-b*b];sa=poly(res,v).replace(/−/g,'-').replace(/²/g,'^2');
     work=[`2${v}(${v} − ${a}) = ${poly([2,-2*a,0],v)}`,`(${v} − ${b})² = ${poly([1,-2*b,b*b],v)}`,`${poly([2,-2*a,0],v)} − ${v}² + ${2*b}${v} − ${b*b} = ${poly(res,v)}`];se=`Výsledek: ${poly(res,v)}.`;}
   return PQ.T('Výrazy',[
-    S.fields(`Vypočtěte hodnotu výrazu ${poly(c,v)} pro ${v} = ${fmt(val)}.`,[{k:'num',a:vv}],1,`Výraz je (${k}${v} − ${m})². Pro ${v} = ${fmt(val)}: (${fmt(k*val)} − ${m})² = ${par(k*val-m)}² = ${fmt(vv)}. (Dosazením do původního tvaru vyjde totéž.)`),
-    S.fields(`Rozložte na součin: ${fq}`,[{k:'expr',a:fa,vars:v,form:'prod'}],1,fe),
+    S.fields(`Vypočtěte hodnotu výrazu ${poly(c,v)} pro ${v} = ${fmt(val)}.`,[{k:'num',a:vv}],1,`Dosadíme ${v} = ${fmt(val)}: ${k*k} · ${par(val)}² − ${2*k*m} · ${par(val)} + ${m*m} = ${fmt(k*k*val*val)} ${2*k*m*val<0?'+':'−'} ${fmt(Math.abs(2*k*m*val))} + ${m*m} = ${fmt(vv)}. Nejdřív mocnina, pak násobení, nakonec sčítání a odčítání.`),
+    S.fields(`Rozložte na součin vytknutím před závorku: ${fq}`,[{k:'expr',a:fa,vars:v,form:'prod'}],1,fe),
     S.fields(`Zjednodušte (výsledek bez závorek): ${sq}`,[{k:'expr',a:sa,vars:v,form:'simp'}],2,se,{work})],
    {intro:`Výrazy zapisuj s proměnnou ${v}, mocninu jako ${v}^2 nebo ${v}², násobení můžeš vynechat (např. 3${v}(${v}+1)).`});});
 
@@ -62,8 +62,8 @@ slot('ma4','Rovnice a soustava rovnic',()=>{
   return PQ.T('Rovnice',[
     S.fields(`Řešte rovnici: ${fmt(a)}(x − ${p}) − ${fmt(b)}(x + ${q}) = ${fmt(cc)}`,[{k:'num',a:x,l:'x ='}],2,`Roznásobíme: ${fmt(a)}x − ${fmt(r2(a*p))} − ${fmt(b)}x − ${fmt(r2(b*q))} = ${fmt(cc)}, tedy ${fmt(r2(a-b))}x = ${fmt(r2(cc+a*p+b*q))}, x = ${fmt(x)}. Zkouška dosazením potvrdí výsledek.`,
       {work:[`${fmt(a)}x − ${fmt(r2(a*p))} − ${fmt(b)}x − ${fmt(r2(b*q))} = ${fmt(cc)}`,`${fmt(r2(a-b))}x = ${fmt(r2(cc+a*p+b*q))}`,`x = ${fmt(x)}`]}),
-    S.fields(`Řešte soustavu rovnic:<br>${eq(A1,B1,C1)}<br>${eq(A2,B2,C2)}`,[{k:'num',a:x2,l:'x ='},{k:'num',a:y2,l:'y ='}],2,`Řešení: x = ${fmt(x2)}, y = ${fmt(y2)}. Dosazovací nebo sčítací metodou; zkouška: ${A1}·${par(x2)} ${B1<0?'−':'+'} ${Math.abs(B1)}·${par(y2)} = ${C1}.`,
-      {minus:1,work:['Vyjádři jednu neznámou z jedné rovnice nebo rovnice vhodně vynásob a sečti.',`x = ${fmt(x2)}, y = ${fmt(y2)}`,'Zkouška dosazením do obou rovnic.']})],
+    S.fields(`Řešte soustavu rovnic:<br>${eq(A1,B1,C1)}<br>${eq(A2,B2,C2)}`,[{k:'num',a:x2,l:'x ='},{k:'num',a:y2,l:'y ='}],2,`Řešení: x = ${fmt(x2)}, y = ${fmt(y2)}. Metodu si zvol sám – můžeš třeba z jedné rovnice vyjádřit neznámou a dosadit ji do druhé, nebo rovnice vhodně vynásobit a sečíst, případně jinak. Zkouška: ${A1}·${par(x2)} ${B1<0?'−':'+'} ${Math.abs(B1)}·${par(y2)} = ${C1}.`,
+      {minus:1,work:['Zvol si libovolný postup (jednou z možností je dosazení, jinou sečtení rovnic) a vypočti jednu neznámou.',`x = ${fmt(x2)}, y = ${fmt(y2)}`,'Zkouška dosazením do obou rovnic.']})],
    {intro:'Řešte. U přijímaček se u obou rovnic hodnotí <b>celý postup</b>.'});});
 
 /* 5 – slovní úloha s pastí */
@@ -120,29 +120,39 @@ slot('ma8','Úhly v rovinném útvaru (obrázek)',()=>{
     return PQ.T('Úhly',[S.fields('Jaká je velikost úhlu ACD (ve stupních)?',[{k:'num',a:ga/2}],1,`|∠ACB| = 180° − ${al}° − ${be}° = ${ga}°. Osa ho půlí: ${ga/2}°.`),
       S.fields('Jaká je velikost úhlu ADC (ve stupních)?',[{k:'num',a:adc}],2,`V trojúhelníku ADC: 180° − ${al}° − ${ga/2}° = ${adc}°.`,{work:[`|∠ACB| = 180° − ${al}° − ${be}° = ${ga}°`,`|∠ACD| = ${ga/2}°`,`|∠ADC| = 180° − ${al}° − ${ga/2}° = ${adc}°`]})],
       {src:{h:`<p>V trojúhelníku ABC je |∠BAC| = ${al}° a |∠ABC| = ${be}°. Úsečka CD leží na ose úhlu ACB, bod D leží na straně AB.</p>${fig}<p class="meta">Obrázek je jen ilustrační.</p>`}});}
-  const al=ri(20,65);const S0=[0,0],A=[-5,0],B=[5,0],C=[5*Math.cos(rad(180-2*al)),5*Math.sin(rad(180-2*al))];
-  const T=fit([A,B,C,[0,5],[0,-5]],320,210,20);const s=T(S0),a=T(A),b=T(B),c=T(C),R=(b[0]-a[0])/2;
-  const fig=svg(`<circle cx="${s[0].toFixed(1)}" cy="${s[1].toFixed(1)}" r="${R.toFixed(1)}" class="thin"/><polygon points="${[a,b,c].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}"/>${ln(s,c,'acc')}${[a,b,c,s].map(dot).join('')}${lbl(a,'A',-14,4)}${lbl(b,'B',6,4)}${lbl(c,'C',4,-8)}${lbl(s,'S',-4,16)}${lbl(a,al+'°',24,-4)}`,210);
-  return PQ.T('Úhly',[S.fields('Jaká je velikost úhlu ABC (ve stupních)?',[{k:'num',a:90-al}],1,`Úhel ACB je pravý (Thaletova věta), proto |∠ABC| = 90° − ${al}° = ${90-al}°.`),
-    S.fields('Jaká je velikost úhlu BSC (ve stupních)?',[{k:'num',a:2*al}],2,`Trojúhelník ASC je rovnoramenný (|SA| = |SC| = poloměr), proto |∠ACS| = ${al}° a |∠ASC| = ${180-2*al}°. Úhel BSC je k němu vedlejší: ${2*al}°.`,{work:[`|SA| = |SC| ⇒ |∠SCA| = |∠SAC| = ${al}°`,`|∠ASC| = 180° − 2 · ${al}° = ${180-2*al}°`,`|∠BSC| = 180° − ${180-2*al}° = ${2*al}°`]})],
-    {src:{h:`<p>Úsečka AB je průměr kružnice se středem S. Bod C leží na kružnici, |∠CAB| = ${al}°.</p>${fig}<p class="meta">Obrázek je jen ilustrační.</p>`}});});
+  // rovnoběžky p ∥ q a příčky (náhrada za úlohu s Thaletovou kružnicí – CERMAT 2027)
+  let ep,be,ga;do{ep=ri(35,80);be=ri(35,80);ga=180-ep-be;}while(ga<25);
+  const h=6,cx=h/Math.tan(rad(ep)),bx=cx+h/Math.tan(rad(be));const A=[0,0],B=[bx,0],C=[cx,h],E=[cx-4,h],D=[cx+4,h];
+  const T=fit([A,B,C,E,D,[-1,0],[bx+1,0]],320,190,24);const a=T(A),b=T(B),c=T(C),e=T(E),d=T(D),p0=T([-1.6,0]),p1=T([bx+1.6,0]),q0=T([cx-5,h]),q1=T([Math.max(cx+5,bx+1.6),h]);
+  const fig=svg(`${ln(p0,p1)}${ln(q0,q1)}${ln(a,c,'acc')}${ln(b,c,'acc')}${[a,b,c,e,d].map(dot).join('')}${lbl(a,'A',-6,16)}${lbl(b,'B',-4,16)}${lbl(c,'C',-4,-8)}${lbl(e,'E',-4,-8)}${lbl(d,'D',-4,-8)}${lbl(p1,'p',-10,-6)}${lbl(q1,'q',-10,-6)}${lbl(c,ep+'°',-40,16)}${lbl(c,be+'°',14,16)}`,190);
+  return PQ.T('Úhly',[S.fields('Jaká je velikost úhlu CAB (ve stupních)?',[{k:'num',a:ep}],1,`Přímky p a q jsou rovnoběžné, úhly ECA a CAB jsou střídavé, a proto shodné: |∠CAB| = ${ep}°.`),
+    S.fields('Jaká je velikost úhlu ACB (ve stupních)?',[{k:'num',a:ga}],2,`Úhly ECA, ACB a BCD leží vedle sebe na přímce q, dohromady mají 180°: |∠ACB| = 180° − ${ep}° − ${be}° = ${ga}°.`,{work:[`|∠ECA| + |∠ACB| + |∠BCD| = 180° (přímý úhel)`,`|∠ACB| = 180° − ${ep}° − ${be}° = ${ga}°`,`kontrola: |∠CAB| = ${ep}°, |∠ABC| = ${be}° (střídavé úhly), součet v trojúhelníku ${ep}° + ${be}° + ${ga}° = 180°`]})],
+    {src:{h:`<p>Přímky p a q jsou rovnoběžné. Body A, B leží na přímce p, body E, C, D leží v tomto pořadí na přímce q. |∠ECA| = ${ep}°, |∠BCD| = ${be}°.</p>${fig}<p class="meta">Obrázek je jen ilustrační.</p>`}});});
 
 /* 9 – konstrukční úloha (zjednodušení) */
 slot('ma9','Konstrukce: počet řešení a postup',()=>{
-  const t=ri(0,2);let txt,n,q2,o,e1,e2;
+  const t=ri(0,3);let txt,n,q2,o,e1,e2;
   if(t===0){const c=ri(6,9),v=ri(3,5),b=v+pick([-1,0,1,2]);n=b>v?2:b===v?1:0;
     txt=`Sestrojte trojúhelník ABC, je-li |AB| = ${c} cm, výška na stranu AB v<sub>c</sub> = ${v} cm a |AC| = ${b} cm. Hledejte řešení jen v jedné polorovině s hraniční přímkou AB.`;
     e1=`Bod C leží na přímce rovnoběžné s AB ve vzdálenosti ${v} cm a zároveň na kružnici se středem A a poloměrem ${b} cm. ${n===2?`Poloměr ${b} cm je větší než ${v} cm, kružnice přímku protne ve 2 bodech.`:n===1?`Poloměr se rovná vzdálenosti přímky, kružnice se jí jen dotkne – 1 řešení.`:`Poloměr ${b} cm je menší než ${v} cm, kružnice přímku nezasáhne – úloha nemá řešení.`}`;
-    o=[`přímce rovnoběžné s AB ve vzdálenosti ${v} cm a na kružnici se středem A a poloměrem ${b} cm`,b===v?`přímce rovnoběžné s AB ve vzdálenosti ${v} cm a na kružnici se středem B a poloměrem ${b} cm`:`přímce rovnoběžné s AB ve vzdálenosti ${b} cm a na kružnici se středem A a poloměrem ${v} cm`,`ose úsečky AB a na kružnici se středem A a poloměrem ${b} cm`,`Thaletově kružnici nad průměrem AB`];q2='Bod C je nutné hledat jako průsečík množin bodů. Leží na…';e2='Výška určuje vzdálenost bodu C od přímky AB, délka |AC| poloměr kružnice kolem A.';}
-  else if(t===1){const c=pick([6,8,10]),v=c/2+pick([-1,0,1]);n=v<c/2?2:v===c/2?1:0;
-    txt=`Sestrojte pravoúhlý trojúhelník ABC s přeponou AB, |AB| = ${c} cm, a výškou v<sub>c</sub> = ${fmt(v)} cm. Hledejte řešení jen v jedné polorovině s hraniční přímkou AB.`;
-    e1=`Vrchol C leží na Thaletově kružnici nad AB (poloměr ${fmt(c/2)} cm) a na přímce rovnoběžné s AB ve vzdálenosti ${fmt(v)} cm. ${n===2?'Přímka kružnici protne ve 2 bodech.':n===1?'Přímka se kružnice dotkne – 1 řešení.':'Přímka je od AB dál než poloměr – řešení neexistuje.'}`;
-    o=[`Thaletově kružnici nad průměrem AB a na přímce rovnoběžné s AB ve vzdálenosti ${fmt(v)} cm`,`ose úsečky AB a na přímce rovnoběžné s AB ve vzdálenosti ${fmt(v)} cm`,`kružnici se středem A a poloměrem ${fmt(v)} cm`,`Thaletově kružnici nad průměrem AB a na kružnici se středem B a poloměrem ${fmt(v)} cm`];q2='Vrchol C leží na…';e2='Pravý úhel u C ⇒ Thaletova kružnice; výška ⇒ rovnoběžka s AB.';}
+    o=[`přímce rovnoběžné s AB ve vzdálenosti ${v} cm a na kružnici se středem A a poloměrem ${b} cm`,b===v?`přímce rovnoběžné s AB ve vzdálenosti ${v} cm a na kružnici se středem B a poloměrem ${b} cm`:`přímce rovnoběžné s AB ve vzdálenosti ${b} cm a na kružnici se středem A a poloměrem ${v} cm`,`ose úsečky AB a na kružnici se středem A a poloměrem ${b} cm`,`kolmici k AB vedené bodem A a na kružnici se středem B a poloměrem ${b} cm`];q2='Bod C je nutné hledat jako průsečík množin bodů. Leží na…';e2='Výška určuje vzdálenost bodu C od přímky AB, délka |AC| poloměr kružnice kolem A.';}
+  else if(t===1){const c=pick([6,8,10]),r=c/2+pick([-1,0,1,2]);n=r>c/2?2:r===c/2?1:0;
+    txt=`Jsou dány body A, B, |AB| = ${c} cm. Sestrojte všechny body X, které mají od bodů A a B stejnou vzdálenost a od bodu A vzdálenost ${r} cm.`;
+    e1=`Body se stejnou vzdáleností od A i B leží na ose úsečky AB. Ta je od bodu A vzdálená ${fmt(c/2)} cm. ${n===2?`${r} > ${fmt(c/2)}: kružnice se středem A protne osu ve 2 bodech (v každé polorovině jeden).`:n===1?`${r} = ${fmt(c/2)}: kružnice se osy jen dotkne ve středu úsečky AB – 1 bod.`:`${r} < ${fmt(c/2)}: kružnice osu nezasáhne – žádný bod.`}`;
+    o=[`ose úsečky AB a na kružnici se středem A a poloměrem ${r} cm`,`přímce AB a na kružnici se středem A a poloměrem ${r} cm`,`kolmici k AB vedené bodem B a na kružnici se středem A a poloměrem ${r} cm`,`ose úsečky AB a na přímce rovnoběžné s AB ve vzdálenosti ${r} cm`];q2='Bod X leží na…';e2='Stejná vzdálenost od dvou bodů ⇒ osa úsečky; daná vzdálenost od bodu A ⇒ kružnice se středem A.';}
+  else if(t===3){const c=ri(4,7),a=c+pick([-1,0,1,2,3]);n=a>c?1:0;
+    txt=`Sestrojte pravoúhlý trojúhelník ABC s pravým úhlem při vrcholu A, je-li |AB| = ${c} cm a |BC| = ${a} cm. Hledejte řešení jen v jedné polorovině s hraniční přímkou AB.`;
+    e1=`Vrchol C leží na kolmici k AB v bodě A a na kružnici se středem B a poloměrem ${a} cm. ${n?`Přepona ${a} cm je delší než odvěsna ${c} cm, kružnice kolmici v dané polorovině protne v 1 bodě.`:`Přepona musí být nejdelší strana. ${a} cm není víc než ${c} cm, takže kružnice kolmici v dané polorovině neprotne (nebo jen v bodě A) – úloha nemá řešení.`}`;
+    o=[`kolmici k přímce AB vedené bodem A a na kružnici se středem B a poloměrem ${a} cm`,`kolmici k přímce AB vedené bodem B a na kružnici se středem A a poloměrem ${a} cm`,`ose úsečky AB a na kružnici se středem B a poloměrem ${a} cm`,`přímce rovnoběžné s AB ve vzdálenosti ${a} cm a na kružnici se středem A a poloměrem ${c} cm`];q2='Vrchol C leží na…';e2='Pravý úhel při A ⇒ kolmice k AB v bodě A; délka |BC| ⇒ kružnice se středem B.';}
   else{const d=ri(2,5),r=d+pick([-1,0,1,2]);n=r>d?2:r===d?1:0;
     txt=`Bod A má od přímky p vzdálenost ${d} cm. Sestrojte všechny body X, které leží na přímce p a mají od bodu A vzdálenost ${r} cm.`;
     e1=`Body X jsou průsečíky přímky p s kružnicí se středem A a poloměrem ${r} cm. ${n===2?`${r} > ${d}: 2 průsečíky.`:n===1?`${r} = ${d}: kružnice se přímky dotkne, 1 bod.`:`${r} < ${d}: žádný průsečík.`}`;
     o=[`na kružnici se středem A a poloměrem ${r} cm`,`na přímce rovnoběžné s p ve vzdálenosti ${r} cm`,`na kolmici k přímce p vedené bodem A`,`na ose úhlu, který svírá p s kolmicí z A`];q2='Kromě přímky p musí bod X ležet…';e2='Vzdálenost od bodu A = kružnice se středem A.';}
-  const sk=t===2?svg(`<line x1="20" y1="150" x2="300" y2="150"/><text x="290" y="168">p</text>${dot([160,70])}${lbl([160,70],'A',6,-6)}<line class="dash" x1="160" y1="70" x2="160" y2="150"/>${lbl([160,110],'?',6,4)}`,180):svg(`<line x1="40" y1="150" x2="280" y2="150"/>${dot([40,150])}${dot([280,150])}${lbl([40,150],'A',-14,14)}${lbl([280,150],'B',6,14)}<line class="dash" x1="10" y1="60" x2="310" y2="60"/>${t===1?'<circle class="thin" cx="160" cy="150" r="120"/>':''}<text class="sm" x="12" y="54">náčrt – ${t===1?'Thaletova kružnice a rovnoběžka':'rovnoběžka s AB'}</text>`,180);
+  const base=`<line x1="40" y1="150" x2="280" y2="150"/>${dot([40,150])}${dot([280,150])}${lbl([40,150],'A',-14,14)}${lbl([280,150],'B',6,14)}`;
+  const sk=t===2?svg(`<line x1="20" y1="150" x2="300" y2="150"/><text x="290" y="168">p</text>${dot([160,70])}${lbl([160,70],'A',6,-6)}<line class="dash" x1="160" y1="70" x2="160" y2="150"/>${lbl([160,110],'?',6,4)}`,180)
+    :t===1?svg(`${base}<line class="dash" x1="160" y1="10" x2="160" y2="175"/><text class="sm" x="12" y="24">náčrt – osa úsečky AB</text>`,180)
+    :t===3?svg(`${base}<line class="dash" x1="40" y1="10" x2="40" y2="175"/><text class="sm" x="52" y="24">náčrt – kolmice k AB v bodě A</text>`,180)
+    :svg(`${base}<line class="dash" x1="10" y1="60" x2="310" y2="60"/><text class="sm" x="12" y="54">náčrt – rovnoběžka s AB</text>`,180);
   txt+=sk;const ix=PQ.shuffle([0,1,2,3]);
   return PQ.T('Konstrukce',[S.fields('Kolik řešení úloha má?',[{k:'num',a:n}],1,e1),S.mc(q2,ix.map(i=>o[i]),ix.indexOf(0),2,e2)],
     {src:{h:`<p>${txt}</p>`},note:'Zjednodušení: u přijímaček tuto úlohu skutečně rýsuješ (a musíš narýsovat všechna řešení). Tady si ověříš úvahu, která za konstrukcí stojí – rýsování si zkus na papír.'});});

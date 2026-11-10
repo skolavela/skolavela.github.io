@@ -154,3 +154,9 @@ svg.fig .top{fill:var(--accent-soft);stroke:var(--text);stroke-width:1.4}svg.fig
 /* dlouhý název tématu v liště se zkrátí (sdílená lišta to sama neumí) */
 .a-name h1 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .actions .c-btn--primary { flex: 1; }
+/* sebehodnocení otevřené odpovědi */
+.selfck{margin-top:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:var(--r-input);padding:10px 12px}
+.selfck p{margin:0}
+.selfck label{display:flex;gap:10px;align-items:flex-start;font-size:16px;line-height:1.35;cursor:pointer}
+.selfck input{width:20px;height:20px;flex:none;margin:1px 0 0;accent-color:var(--sub)}
+.tnote .ic{vertical-align:-3px;margin-right:4px}
