@@ -15,6 +15,8 @@
    keywords  - další slova pro hledání (bez diakritiky stačí)
 
    Pravidlo: max. 2 úrovně složek (téma › podtéma).
+   Zobrazení (assets/nav.js): prázdná složka se neukazuje nikde; složka s 1-2 appkami se na úvodu
+   neukazuje jako složka, její appky jsou přímo na úvodu (adresa #/id dál funguje); od 3 appek je to složka.
    ========================================================================== */
 window.VELAPPKY = [
   {
@@ -47,16 +49,11 @@ window.VELAPPKY = [
     ]
   },
   {
-    type: "folder", id: "logika", name: "Logika", icon: "logika", tone: "teal",
+    type: "folder", id: "logika", name: "Hlavolamy", icon: "logika", tone: "teal",
     items: [
       { type: "app", id: "sudoku", name: "Sudoku", short: "Tři obtížnosti",
         url: "/sudoku/", icon: "sudoku", tone: "teal", grades: ["1", "2"],
-        keywords: "cisla hra napoveda tisk pdf" }
-    ]
-  },
-  {
-    type: "folder", id: "zabava", name: "Zábava", icon: "zabava", tone: "purple",
-    items: [
+        keywords: "cisla hra napoveda tisk pdf logika" },
       { type: "app", id: "bludiste", name: "Bludiště", short: "Bludiště k tisku",
         url: "/bludiste/", icon: "bludiste", tone: "purple", grades: ["1", "2"],
         keywords: "logika tisk pdf hra" }

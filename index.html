@@ -58,11 +58,14 @@
 </footer>
 
 <script src="/assets/icons.js?v=202611101500"></script>
-<script src="/assets/data.js?v=202611101530"></script>
+<script src="/assets/data.js?v=202611102250"></script>
+<script src="/assets/nav.js?v=202611102250"></script>
 <script>
 (function () {
   "use strict";
   var ICONS = window.VELA_ICONS, DATA = window.VELAPPKY;
+  // Pravidlo zobrazení složek je v assets/nav.js; práh (MIN_FOLDER = 3 appky) je konstanta na jeho začátku.
+  var NAV = window.VELAPPKY_NAV;
   var FEEDBACK = "https://tally.so/r/Qo1aeY";
   var $ = function (id) { return document.getElementById(id); };
   var hero = $("hero"), grid = $("grid"), input = $("hledat");
@@ -76,15 +79,12 @@
     if (n === 1) return "1 aplikace";
     return n + (n >= 2 && n <= 4 ? " aplikace" : " aplikací");
   };
-  var countApps = function (node) {
-    if (node.type === "app") return 1;
-    return (node.items || []).reduce(function (s, c) { return s + countApps(c); }, 0);
-  };
+  var countApps = NAV.countApps;
   // najde cestu složek podle id z adresy (#/cestina/cteni)
   var resolve = function (ids) {
     var level = DATA, trail = [];
     for (var i = 0; i < ids.length; i++) {
-      var f = level.filter(function (n) { return n.type === "folder" && n.id === ids[i]; })[0];
+      var f = level.filter(function (n) { return n.type === "folder" && n.id === ids[i] && !NAV.isEmpty(n); })[0];
       if (!f) break;
       trail.push(f); level = f.items || [];
     }
@@ -173,7 +173,9 @@
       $("title").textContent = "Výsledky hledání";
       $("subtitle").textContent = hits.length ? appWord(hits.length) : "";
       hits.forEach(function (h) {
-        grid.appendChild(tile(h.node, h.trail, h.trail.map(function (f) { return f.name; }).join(" › ")));
+        // cesta pod ikonou jen přes složky, které se na úvodu ukazují jako složky
+        var shown = h.trail.filter(function (f, i) { return !(i === 0 && NAV.isDissolved(f, 0)); });
+        grid.appendChild(tile(h.node, h.trail, shown.map(function (f) { return f.name; }).join(" › ")));
       });
       if (!hits.length) showEmpty("Nic jsme nenašli", "Zkuste jiné slovo, nebo nám ", "napište, co vám chybí");
       document.title = "Hledání - Velappky";
@@ -181,13 +183,13 @@
       var n = countApps(folder);
       $("title").textContent = folder.name;
       $("subtitle").textContent = n ? appWord(n) : "";
-      (folder.items || []).forEach(function (c) { grid.appendChild(tile(c, trail)); });
-      if (!(folder.items || []).length) showEmpty("Tady zatím nic není", "Máte nápad na aplikaci? ", "Napište nám");
+      NAV.visibleItems(folder.items).forEach(function (c) { grid.appendChild(tile(c, trail)); });
+      if (!NAV.visibleItems(folder.items).length) showEmpty("Tady zatím nic není", "Máte nápad na aplikaci? ", "Napište nám");
       document.title = folder.name + " - Velappky";
     } else {
       $("title").textContent = "Velappky";
       $("subtitle").textContent = "Nástroje k objevování světa";
-      DATA.forEach(function (c) { grid.appendChild(tile(c, [])); });
+      NAV.homeItems(DATA).forEach(function (c) { grid.appendChild(tile(c, [])); });
       document.title = "Velappky";
     }
   };

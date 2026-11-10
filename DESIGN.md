@@ -85,7 +85,7 @@ Bílá s průhledností a rozmazáním (`backdrop-filter`), přilepená nahoře,
 - Mřížka: `repeat(auto-fill, minmax(140px, 1fr))`, na mobilu `minmax(96px, 1fr)` - tj. 3 sloupce na telefonu, 5 na iPadu na výšku, 6-7 na desktopu.
 
 ### Složky
-- Hlavní stránka obsahuje **jen složky** témat.
+- Hlavní stránka obsahuje složky se 3 a více appkami a za nimi samostatné appky ze složek s 1-2 appkami. Prázdné složky se nezobrazují nikde.
 - Uvnitř složky jsou appky a případně podsložky. **Max. 2 úrovně** (téma › podtéma).
 - Adresa složky je v URL: `#/cestina`, `#/cestina/cteni` → funguje tlačítko Zpět v prohlížeči i sdílení odkazu.
 - Prázdná složka: „Tady zatím nic není“ + odkaz na formulář připomínek.
