@@ -8,10 +8,10 @@
 <meta name="theme-color" content="#FFFFFF">
 <meta name="description" content="Zvuková mapa okolí: místa, nahrávky a časová osa příběhu.">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/velappky.css?v=202611102100">
-<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css?v=202611102100">
-<link rel="stylesheet" href="/assets/vendor/leaflet.markercluster/MarkerCluster.css?v=202611102100">
-<link rel="stylesheet" href="style.css?v=202611102100">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611102130">
+<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css?v=202611102130">
+<link rel="stylesheet" href="/assets/vendor/leaflet.markercluster/MarkerCluster.css?v=202611102130">
+<link rel="stylesheet" href="style.css?v=202611102130">
 </head>
 <body class="is-app zm-app">
 
@@ -23,10 +23,7 @@
       </a>
       <div class="a-name">
         <span class="v-icon tone-green" data-icon="zvukova"></span>
-        <div class="zm-name">
-          <h1>Slyšíš? Vidím! Hledám…</h1>
-          <span class="a-name__sub">Poslechem za původem našeho okolí.</span>
-        </div>
+        <h1>Slyšíš? Vidím! Hledám…</h1>
       </div>
     </div>
     <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
@@ -77,18 +74,22 @@
   <div class="v-footer__bar">
     <div class="v-footer__in">
       <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
-      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      <nav class="p-flinks" aria-label="Patička">
+        <a href="o-aplikaci.html">O aplikaci</a>
+        <a href="otazky.html">Časté otázky</a>
+        <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      </nav>
     </div>
   </div>
 </footer>
 
 <input class="sr-only" type="file" id="import-file" accept="application/json,.json">
 
-<script src="/assets/icons.js?v=202611102100"></script>
+<script src="/assets/icons.js?v=202611102130"></script>
 <script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
-<script src="/assets/vendor/leaflet/leaflet.js?v=202611102100"></script>
-<script src="/assets/vendor/leaflet.markercluster/leaflet.markercluster.js?v=202611102100"></script>
-<script src="app.js?v=202611102100"></script>
+<script src="/assets/vendor/leaflet/leaflet.js?v=202611102130"></script>
+<script src="/assets/vendor/leaflet.markercluster/leaflet.markercluster.js?v=202611102130"></script>
+<script src="app.js?v=202611102130"></script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

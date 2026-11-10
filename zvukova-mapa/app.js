@@ -470,7 +470,7 @@
       (isTeacher() ? (place.hidden
         ? "<button type=\"button\" class=\"zm-link\" id=\"btn-restore\">Obnovit místo</button>"
         : "<button type=\"button\" class=\"zm-link zm-link--danger\" id=\"btn-hide\">Skrýt místo</button>") : "") +
-      "<span class=\"zm-tally\"><a href=\"https://tally.so/r/Qo1aeY\">Napsat připomínku</a></span>" +
+      "<nav class=\"zm-tally\" aria-label=\"Patička\"><a href=\"o-aplikaci.html\">O aplikaci</a><a href=\"otazky.html\">Časté otázky</a><a href=\"https://tally.so/r/Qo1aeY\">Napsat připomínku</a></nav>" +
       "</div>";
   }
   function mediaField(label, target, kind, currentUrl, draftMedia, cleared) {
@@ -606,7 +606,7 @@
       "<h2>Zvuková mapa</h2>" +
       "<p>Klepni na značku na mapě, nebo přidej nové místo. Úpravy chrání heslo třídy.</p>" +
       "</div>" +
-      "<div class=\"zm-panel__foot\"><span class=\"zm-tally\"><a href=\"https://tally.so/r/Qo1aeY\">Napsat připomínku</a></span></div>";
+      "<div class=\"zm-panel__foot\"><nav class=\"zm-tally\" aria-label=\"Patička\"><a href=\"o-aplikaci.html\">O aplikaci</a><a href=\"otazky.html\">Časté otázky</a><a href=\"https://tally.so/r/Qo1aeY\">Napsat připomínku</a></nav></div>";
   }
   function renderPanel() {
     var panel = $("panel");

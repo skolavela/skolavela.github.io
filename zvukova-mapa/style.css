@@ -7,15 +7,6 @@
   overflow-x: hidden;
 }
 
-.zm-name {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.2;
-}
-.zm-name h1 { white-space: nowrap; }
-.zm-name .a-name__sub { margin-top: 1px; }
-
 .zm-skoly {
   position: absolute;
   top: 12px;
@@ -498,17 +489,17 @@
   .zm-main:has(#panel.is-collapsed) .zm-add { bottom: calc(25% + 16px); }
   .zm-main:has(#panel:not(.is-hidden)) .zm-legend { bottom: calc(50% + 16px); }
   .zm-main:has(#panel.is-collapsed) .zm-legend { bottom: calc(25% + 16px); }
-  .zm-app .v-footer { display: none; }
-  .zm-tally { display: inline; }
+  .zm-app:has(#app-main:not([hidden])) .v-footer { display: none; }
+  .zm-tally { display: flex; }
 }
 
-.zm-tally { display: none; font-size: 13px; }
+.zm-tally { display: none; font-size: 13px; gap: 12px 16px; flex-wrap: wrap; align-items: center; }
 .zm-tally a { color: var(--text-2); }
 .zm-tally a:hover { color: var(--accent); }
 
 
 @media (max-width: 599px) {
-  .zm-name h1 { font-size: 15px; }
+  .zm-app .a-name h1 { font-size: 15px; }
   .zm-skoly {
     left: 56px;
     transform: none;
@@ -523,4 +514,30 @@
   .zm-panel__foot { padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
   .zm-legend { left: 8px; max-width: calc(100% - 148px); }
   .v-logo--small { display: none; }
+}
+
+/* Statické stránky O aplikaci / Časté otázky (stejné jako Nanečisto) */
+.p-flinks { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 24px; }
+.p-info { max-width: 36rem; flex: 1 0 auto; }
+.p-info p, .p-info li {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--text);
+}
+.p-info__lead { font-weight: 650; }
+.p-info ol {
+  margin: 0;
+  padding-left: 1.3em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.p-qa { display: flex; flex-direction: column; gap: 28px; }
+.p-qa h2 { margin: 0 0 6px; font-size: 17px; font-weight: 600; line-height: 1.35; }
+.p-qa p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--text-2);
 }
