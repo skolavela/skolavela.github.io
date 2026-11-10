@@ -3,8 +3,16 @@
 
 /* ---- nastavení ---- */
 .p-setup { display: flex; flex-direction: column; gap: 24px; }
-.p-intro h2 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
-.p-intro p { margin: 6px 0 0; color: var(--text-2); font-size: 15px; }
+.p-title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.02em; }
+.p-sumrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0; padding: 0 4px; }
+.p-sumrow .p-count { font-weight: 400; color: var(--text-2); }
+.p-more { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+.p-more .chev { display: inline-block; font-size: 18px; transition: transform .2s; }
+.p-more[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.p-start { width: 100%; }
+.p-start:disabled { opacity: .45; cursor: default; }
+.p-choices { display: flex; flex-direction: column; gap: 24px; }
+.p-choices[hidden] { display: none; }
 .p-sec { display: flex; flex-direction: column; gap: 10px; }
 .p-sec > .c-row { align-items: center; padding: 0 4px; }
 .p-link { min-height: 32px; padding: 0; border: 0; background: none; font: inherit; font-size: 15px; color: var(--accent); cursor: pointer; }
@@ -32,12 +40,9 @@
 .pill .n { font-size: 12px; color: var(--text-3); }
 .pill.on { background: var(--tone-bg); color: var(--tone-fg); font-weight: 600; }
 .pill.on .n { color: var(--tone-fg); }
-.p-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.p-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .p-note { text-align: center; }
-.p-startbar { position: sticky; bottom: 12px; z-index: 6; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 12px 12px 20px; margin-bottom: env(safe-area-inset-bottom); }
-.p-startbar .c-btn { min-width: 160px; }
-.p-startbar .c-btn:disabled { opacity: .45; cursor: default; }
-.p-count { margin: 0; font-size: 15px; font-weight: 600; }
+.p-count { margin: 0; font-size: 15px; line-height: 1.35; }
 .p-count b { color: var(--tone-fg); }
 
 /* ---- kvíz ---- */
@@ -90,8 +95,9 @@ body.playing .photo { flex: 1 1 auto; min-height: 150px; height: auto; max-heigh
   .p-tiles--cont { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .p-opts { grid-template-columns: minmax(0, 1fr); }
   .sublist, .sublist.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .p-intro h2 { font-size: 24px; }
-  .p-startbar .c-btn { min-width: 120px; }
+  .p-title { font-size: 24px; }
+  .p-sumrow { align-items: flex-start; }
+  .p-sumrow .p-count { padding-top: 12px; }
 }
 @media (max-width: 760px), (max-height: 700px) {
   body.playing main { padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); gap: 8px; }

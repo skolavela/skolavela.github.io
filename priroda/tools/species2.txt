@@ -162,7 +162,6 @@ savci|selmy|NA,EU,AS|Vulpes lagopus|2|
 savci|selmy|NA,EU,AS|Gulo gulo|2|
 savci|selmy|NA,SA|Puma concolor|2|
 savci|selmy|NA|Canis latrans|2|
-savci|selmy|AS|Panthera tigris altaica|2|
 savci|kopytnici|AF|Loxodonta africana|1|
 savci|kopytnici|AS|Elephas maximus|1|
 savci|kopytnici|AF|Giraffa camelopardalis|1|
@@ -186,7 +185,7 @@ savci|kopytnici|AF|Connochaetes taurinus|2|
 savci|kopytnici|AF|Syncerus caffer|2|
 savci|kopytnici|AS|Bos mutus|2|
 savci|kopytnici|AF|Phacochoerus africanus|2|
-savci|kopytnici|SA,AS|Tapirus terrestris|2|
+savci|kopytnici|SA|Tapirus terrestris|2|
 savci|kopytnici|AS|Equus ferus przewalskii|2|
 savci|kopytnici|AF|Aepyceros melampus|2|
 savci|kopytnici|AF|Oryx gazella|2|
@@ -278,7 +277,7 @@ ptaci|pevci|NA|Cardinalis cardinalis|2|
 ptaci|pevci|EU,AS|Bombycilla garrulus|2|
 ptaci|pevci|AU|Menura novaehollandiae|2|
 ptaci|pevci|EU,AS|Corvus frugilegus|2|
-ptaci|pevci|AS|Serinus canaria|2|
+ptaci|pevci|AF|Serinus canaria|2|
 ptaci|ostatni|AF|Struthio camelus|1|
 ptaci|ostatni|AU|Dromaius novaehollandiae|1|
 ptaci|ostatni|AU|Casuarius casuarius|2|

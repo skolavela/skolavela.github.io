@@ -7,7 +7,7 @@ var CATS = [
   { k: 'obojzivelnici', n: 'Obojživelníci', c: '#0f9d8a', s: [] },
   { k: 'ryby', n: 'Ryby', c: '#0a84c6', s: [['sladkovodni', 'Sladkovodní'], ['morske', 'Mořské']] },
   { k: 'hmyz', n: 'Hmyz', c: '#7a5af5', s: [['motyli', 'Motýli'], ['brouci', 'Brouci'], ['ostatni', 'Ostatní']] },
-  { k: 'bezobratli', n: 'Bezobratlí', c: '#b0527a', s: [['pavoukovci', 'Pavoukovci'], ['mekkysi', 'Měkkýši'], ['korysi', 'Korýši'], ['ostatni', 'Ostatní']] },
+  { k: 'bezobratli', n: 'Ostatní bezobratlí', c: '#b0527a', s: [['pavoukovci', 'Pavoukovci'], ['mekkysi', 'Měkkýši'], ['korysi', 'Korýši'], ['ostatni', 'Ostatní']] },
   { k: 'rostliny', n: 'Rostliny', c: '#2e9e4f', s: [['listnate', 'Listnaté stromy'], ['jehlicnate', 'Jehličnany'], ['byliny', 'Byliny a květiny'], ['lecive', 'Léčivé'], ['jedovate', 'Jedovaté']] },
   { k: 'houby', n: 'Houby', c: '#c2571a', s: [['jedle', 'Jedlé'], ['jedovate', 'Jedovaté'], ['nejedle', 'Nejedlé']] }];
 var CONTS = [['EU', 'Evropa'], ['AS', 'Asie'], ['AF', 'Afrika'], ['NA', 'Severní Amerika'], ['SA', 'Jižní Amerika'], ['AU', 'Austrálie a Oceánie'], ['AN', 'Antarktida'], ['OC', 'Oceány a moře']];
@@ -53,10 +53,32 @@ function renderSetup() {
   $('allConts').textContent = st.conts.length ? 'Zrušit výběr' : 'Vybrat vše';
   ['lvl', 'mode', 'len'].forEach(function (g) { Array.prototype.forEach.call($(g).children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === st[g])); }); });
   var n = pool().length;
-  $('avail').innerHTML = n >= 4 ? 'Vybráno <b>' + druhu(n) + '</b>' : 'Vyberte aspoň 4 druhy';
+  $('avail').innerHTML = n >= 4 ? '<b>' + druhu(n) + '</b> · ' + esc(summary()) : 'Vyberte aspoň 4 druhy';
   $('start').disabled = n < 4;
   save();
 }
+// Shrnutí výběru jedním řádkem, např. „všechny skupiny · celý svět · 10 otázek“
+function listSum(sel, all, allTxt, many) {
+  if (sel.length === all.length) return allTxt;
+  if (!sel.length) return many(0);
+  if (sel.length <= 2) return sel.join(', ').toLowerCase();
+  return many(sel.length);
+}
+function summary() {
+  var anyOff = CATS.some(function (c) { return st.cats.indexOf(c.k) >= 0 && c.s.some(function (s) { return !subOn(c.k, s[0]); }); });
+  var cats = listSum(CATS.filter(function (c) { return st.cats.indexOf(c.k) >= 0; }).map(function (c) { return c.n; }), CATS, anyOff ? 'všechny skupiny (upřesněno)' : 'všechny skupiny',
+    function (k) { return k + (k >= 2 && k <= 4 ? ' skupiny' : ' skupin'); });
+  if (anyOff && st.cats.length !== CATS.length) cats += ' (upřesněno)';
+  var conts = listSum(CONTS.filter(function (c) { return st.conts.indexOf(c[0]) >= 0; }).map(function (c) { return c[1]; }), CONTS, 'celý svět',
+    function (k) { return k + (k >= 2 && k <= 4 ? ' světadíly' : ' světadílů'); });
+  var len = st.len === '0' ? 'všechny otázky' : st.len + ' otázek';
+  return cats + ' · ' + conts + (st.mode === 'quiz' ? ' · ' + len : st.len === '0' ? '' : ' · ' + st.len + ' kartiček');
+}
+$('more').onclick = function () {
+  var open = $('choices').hidden;
+  $('choices').hidden = !open;
+  $('more').setAttribute('aria-expanded', String(open));
+};
 function toggle(arr, v) { var i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
 $('setup').onclick = function (e) {
   var b = e.target.closest('button'); if (!b || b.id === 'start') return;
@@ -97,11 +119,18 @@ function question() {
     return;
   }
   // 3 chybné možnosti: přednostně stejná podskupina, pak stejná skupina
-  var others = SPECIES.filter(function (x) { return x.n !== s.n && x.k === s.k; });
+  // Pravidlo: čtyři možnosti mají vždy různé české názvy a různé latinské názvy.
+  var others = SPECIES.filter(function (x) { return x.k === s.k; });
   var sameSub = shuffle(others.filter(function (x) { return x.s.some(function (q) { return s.s.indexOf(q) >= 0; }) && (st.lvl === '2' || x.v === 1); }));
   var rest = shuffle(others.filter(function (x) { return sameSub.indexOf(x) < 0; }));
-  var wrong = sameSub.concat(rest).slice(0, 3);
-  if (wrong.length < 3) wrong = wrong.concat(shuffle(SPECIES.filter(function (x) { return x.k !== s.k; })).slice(0, 3 - wrong.length));
+  var cand = sameSub.concat(rest, shuffle(SPECIES.filter(function (x) { return x.k !== s.k; })));
+  var seenN = {}, seenL = {}, wrong = [];
+  seenN[s.n] = 1; seenL[s.l] = 1;
+  for (var ci = 0; ci < cand.length && wrong.length < 3; ci++) {
+    var x = cand[ci];
+    if (seenN[x.n] || seenL[x.l]) continue;
+    seenN[x.n] = 1; seenL[x.l] = 1; wrong.push(x);
+  }
   var opts = shuffle([s].concat(wrong));
   $('opts').innerHTML = opts.map(function (o, i) { return '<button type="button" class="a-choice opt" data-i="' + i + '">' + esc(o.n) + '</button>'; }).join('');
   Array.prototype.forEach.call($('opts').children, function (b) {

@@ -7,9 +7,9 @@
 <meta name="theme-color" content="#FFFFFF">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/velappky.css?v=202611101155">
-<link rel="stylesheet" href="style.css?v=202611101155">
-<script src="data.js?v=202611031600" defer></script>
-<script src="app.js?v=202611101155" defer></script>
+<link rel="stylesheet" href="style.css?v=202611102200">
+<script src="data.js?v=202611102200" defer></script>
+<script src="app.js?v=202611102200" defer></script>
 </head>
 <body class="is-app">
 
@@ -33,26 +33,34 @@
 
 <main class="a-single tone-green">
   <section class="p-setup" id="setup">
-    <div class="p-intro"><h2>Co budeme poznávat?</h2><p>Vyberte skupiny a světadíly. Fotky jsou z Wikimedia Commons.</p></div>
-    <div class="p-sec">
-      <div class="c-row"><span class="c-label">Skupiny</span><button class="p-link" type="button" data-all="cats" id="allCats"></button></div>
-      <div class="p-tiles" id="cats"></div>
-    </div>
-    <div class="p-sec" id="subsWrap">
-      <div class="c-row"><span class="c-label">Upřesnit podskupiny</span></div>
-      <div class="a-card p-list" id="subs"></div>
-    </div>
-    <div class="p-sec">
-      <div class="c-row"><span class="c-label">Světadíly</span><button class="p-link" type="button" data-all="conts" id="allConts"></button></div>
-      <div class="p-tiles p-tiles--cont" id="conts"></div>
-    </div>
+    <h2 class="p-title">Co budeme poznávat?</h2>
     <div class="a-card p-opts">
       <div class="c-field"><span class="c-label" id="lbl-lvl">Úroveň</span><div class="c-seg" role="group" aria-labelledby="lbl-lvl" id="lvl"><button type="button" data-v="1">1. stupeň</button><button type="button" data-v="2">2. stupeň</button></div></div>
       <div class="c-field"><span class="c-label" id="lbl-mode">Režim</span><div class="c-seg" role="group" aria-labelledby="lbl-mode" id="mode"><button type="button" data-v="quiz">Kvíz</button><button type="button" data-v="cards">Kartičky</button></div></div>
-      <div class="c-field"><span class="c-label" id="lbl-len">Počet otázek</span><div class="c-seg" role="group" aria-labelledby="lbl-len" id="len"><button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="0">Vše</button></div></div>
+    </div>
+    <div class="p-sumrow">
+      <p class="p-count" id="avail"></p>
+      <button class="p-link p-more" type="button" id="more" aria-expanded="false" aria-controls="choices">Upravit výběr <span class="chev" aria-hidden="true">›</span></button>
+    </div>
+    <button class="c-btn c-btn--primary p-start" type="button" id="start">Začít</button>
+    <div class="p-choices" id="choices" hidden>
+      <div class="p-sec">
+        <div class="c-row"><span class="c-label">Skupiny</span><button class="p-link" type="button" data-all="cats" id="allCats"></button></div>
+        <div class="p-tiles" id="cats"></div>
+      </div>
+      <div class="p-sec" id="subsWrap">
+        <div class="c-row"><span class="c-label">Upřesnit podskupiny</span></div>
+        <div class="a-card p-list" id="subs"></div>
+      </div>
+      <div class="p-sec">
+        <div class="c-row"><span class="c-label">Světadíly</span><button class="p-link" type="button" data-all="conts" id="allConts"></button></div>
+        <div class="p-tiles p-tiles--cont" id="conts"></div>
+      </div>
+      <div class="a-card">
+        <div class="c-field"><span class="c-label" id="lbl-len">Počet otázek</span><div class="c-seg" role="group" aria-labelledby="lbl-len" id="len"><button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="0">Vše</button></div></div>
+      </div>
     </div>
     <p class="c-meta p-note">Fotografie: Wikimedia Commons (autor a licence u každé fotky), uložené na velappky.cz.</p>
-    <div class="a-card p-startbar"><p class="p-count" id="avail"></p><button class="c-btn c-btn--primary" type="button" id="start">Začít</button></div>
   </section>
 
   <section class="p-play" id="play" hidden>
