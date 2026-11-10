@@ -2,62 +2,134 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F2F2F7">
-<title>Sudoku – 4×4, 6×6 a 9×9 s nápovědou a tiskem</title>
-<link rel="stylesheet" href="style.css?v=202611091745">
-<script src="engine.js?v=202611091745" defer></script>
-<script src="app.js?v=202611091745" defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sudoku - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611100830">
+<style>@page { size: A4 portrait; }</style>
+<link rel="stylesheet" href="style.css?v=202611100830">
+<script src="engine.js?v=202611100830" defer></script>
+<script src="app.js?v=202611100830" defer></script>
 </head>
-<body>
-<header class="bar">
-  <a class="back" href="../"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>Aplikace</a>
-  <h1>Sudoku</h1>
+<body class="is-app print-portrait">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/#/logika">
+        <span data-icon="ui_back"></span><span class="a-back__label">Logika</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-teal" data-icon="sudoku"></span>
+        <h1>Sudoku</h1>
+        <span class="a-name__sub">4×4, 6×6 a 9×9 s nápovědou a tiskem</span>
+      </div>
+    </div>
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
 </header>
-<main class="layout">
-  <section class="play" aria-label="Hra">
-    <div class="ptop"><span id="meta"></span><span id="status"></span></div>
-    <div class="board" id="board" role="grid" aria-label="Sudoku"></div>
-    <div class="hintbox" id="hintbox" hidden>
-      <p id="hinttext"></p>
-      <div class="actions"><button class="ghost" id="hintClose" type="button">Zavřít</button><button class="primary" id="hintFill" type="button">Doplnit číslo</button></div>
-    </div>
-    <div class="done" id="done" hidden>
-      <h2>Vyřešeno</h2>
-      <p class="mut" id="doneText"></p>
-      <button class="primary" id="again" type="button">Další sudoku</button>
-    </div>
-    <div class="tools" id="tools">
-      <button type="button" id="tUndo" data-ic="undo">Zpět</button>
-      <button type="button" id="tErase" data-ic="erase">Smazat</button>
-      <button type="button" id="tNotes" data-ic="pencil">Poznámky</button>
-      <button type="button" id="tHint" data-ic="bulb">Nápověda</button>
-    </div>
-    <div class="pad" id="pad"></div>
-  </section>
-  <aside class="side">
-    <div class="gh">Nové sudoku</div>
-    <div class="list">
-      <div class="li"><span>Velikost</span><div class="seg" id="segSize"><button data-v="4">4×4</button><button data-v="6">6×6</button><button data-v="9">9×9</button></div></div>
-      <div class="li"><span>Obtížnost</span><div class="seg" id="segLevel"><button data-v="0">Lehká</button><button data-v="1">Střední</button><button data-v="2">Těžká</button></div></div>
-      <button class="li act" id="newGame" type="button"><span>Začít nové sudoku</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
-    </div>
-    <p class="note" id="levelNote"></p>
 
-    <div class="gh">Pomocníci</div>
-    <div class="list" id="helpers"></div>
-
-    <div class="gh">Tisk</div>
-    <div class="list">
-      <div class="li"><span>Sudoku na stránku</span><div class="seg" id="segPer"><button data-v="1">1</button><button data-v="2">2</button><button data-v="4">4</button><button data-v="6">6</button></div></div>
-      <label class="li sw"><span>Řešení na 2. stránce</span><input type="checkbox" id="printSol"><i></i></label>
-      <button class="li act" id="printBtn" type="button"><span>Tisk nebo PDF</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3M7 14h10v7H7z"/></svg></button>
+<main>
+  <div class="a-single" id="playView">
+    <div class="a-toolbar">
+      <div class="c-seg sd-mode" role="group" aria-label="Režim">
+        <button type="button" data-mode="play" aria-pressed="false">Hrát</button>
+        <button type="button" data-mode="print" aria-pressed="false">Vytisknout</button>
+      </div>
+      <span class="c-meta sd-status"><span id="meta"></span> · <span id="status"></span></span>
     </div>
-    <p class="note">Vytiskne nová zadání ve zvolené velikosti a obtížnosti. PDF uložíte volbou „Uložit jako PDF“ v okně tisku.</p>
-  </aside>
+
+    <section class="sd-play" aria-label="Hra">
+      <div class="tone-pink sd-wrap"><div class="tone-blue"><div class="board" id="board" role="grid" aria-label="Sudoku"></div></div></div>
+      <div class="a-card sd-box" id="hintbox" hidden>
+        <p id="hinttext"></p>
+        <div class="c-btns"><button class="c-btn c-btn--secondary" id="hintClose" type="button">Zavřít</button><button class="c-btn c-btn--secondary" id="hintFill" type="button">Doplnit číslo</button></div>
+      </div>
+      <div class="a-card sd-box" id="done" hidden>
+        <h2>Vyřešeno</h2>
+        <p class="sd-mut" id="doneText"></p>
+        <button class="c-btn c-btn--secondary" id="again" type="button">Další sudoku</button>
+      </div>
+      <div class="tools" id="tools">
+        <button type="button" id="tUndo" data-ic="undo">Zpět</button>
+        <button type="button" id="tErase" data-ic="erase">Smazat</button>
+        <button type="button" id="tNotes" data-ic="pencil">Poznámky</button>
+        <button type="button" id="tHint" data-ic="bulb">Nápověda</button>
+      </div>
+      <div class="pad" id="pad"></div>
+    </section>
+
+    <section class="a-card sd-settings" aria-label="Nové sudoku">
+      <div class="c-field">
+        <span class="c-label" id="lbl-size">Velikost</span>
+        <div class="c-seg" role="group" aria-labelledby="lbl-size" id="segSize"><button type="button" data-v="4">4×4</button><button type="button" data-v="6">6×6</button><button type="button" data-v="9">9×9</button></div>
+      </div>
+      <div class="c-field">
+        <span class="c-label" id="lbl-level">Obtížnost</span>
+        <div class="c-seg" role="group" aria-labelledby="lbl-level" id="segLevel"><button type="button" data-v="0">Lehká</button><button type="button" data-v="1">Střední</button><button type="button" data-v="2">Těžká</button></div>
+      </div>
+      <p class="c-meta" id="levelNote"></p>
+      <button class="c-btn c-btn--primary" id="newGame" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Začít nové sudoku</span></button>
+    </section>
+
+    <section class="a-card sd-settings" aria-labelledby="lbl-helpers">
+      <span class="c-label" id="lbl-helpers">Pomocníci</span>
+      <div class="sd-helpers" id="helpers"></div>
+    </section>
+
+    <p class="c-meta sd-note">Rozehrané sudoku a nastavení se ukládají jen v tomto zařízení.</p>
+  </div>
+
+  <div id="printView" hidden>
+    <div class="sd-printbar"><div class="a-toolbar">
+      <div class="c-seg sd-mode" role="group" aria-label="Režim">
+        <button type="button" data-mode="play" aria-pressed="false">Hrát</button>
+        <button type="button" data-mode="print" aria-pressed="false">Vytisknout</button>
+      </div>
+      
+    </div></div>
+    <div class="a-layout">
+      <section class="a-panel" aria-label="Nastavení tisku">
+        <div class="c-field">
+          <span class="c-label" id="lbl-size-p">Velikost</span>
+          <div class="c-seg" role="group" aria-labelledby="lbl-size-p" id="segSizeP"><button type="button" data-v="4">4×4</button><button type="button" data-v="6">6×6</button><button type="button" data-v="9">9×9</button></div>
+        </div>
+        <div class="c-field">
+          <span class="c-label" id="lbl-level-p">Obtížnost</span>
+          <div class="c-seg" role="group" aria-labelledby="lbl-level-p" id="segLevelP"><button type="button" data-v="0">Lehká</button><button type="button" data-v="1">Střední</button><button type="button" data-v="2">Těžká</button></div>
+        </div>
+        <div class="c-field">
+          <span class="c-label" id="lbl-per">Sudoku na stránku</span>
+          <div class="c-seg" role="group" aria-labelledby="lbl-per" id="segPer"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="4">4</button><button type="button" data-v="6">6</button></div>
+        </div>
+        <button class="c-switch" type="button" role="switch" aria-checked="false" id="printSol">
+          <span>Řešení na 2. stránce</span><span class="c-track" aria-hidden="true"></span>
+        </button>
+        <hr class="c-sep">
+        <button class="c-btn c-btn--primary" id="printBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg><span>Tisk nebo PDF</span></button>
+        <p class="c-meta">Vytiskne nová zadání ve zvolené velikosti a obtížnosti. PDF uložíte volbou „Uložit jako PDF“ v okně tisku.</p>
+      </section>
+      <section class="a-stage sd-stage" aria-label="Náhled listu" id="preview"></section>
+    </div>
+  </div>
 </main>
-<div id="printout" aria-hidden="true"></div>
-<script src="../shared/footer.js?v=202611091745" data-note="Rozehrané sudoku a nastavení se ukládají jen v tomto zařízení." defer></script>
+<div id="printout" class="sd-print" aria-hidden="true"></div>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611100830"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -2,55 +2,126 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Osmisměrka – generátor osmisměrek k tisku</title>
-<link rel="stylesheet" href="style.css?v=202611031600">
-<script src="topics.js?v=202611031500" defer></script>
-<script src="engine.js?v=202611031500" defer></script>
-<script src="app.js?v=202611031500" defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Osmisměrka - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611100830">
+<style>@page { size: A4 portrait; }</style>
+<link rel="stylesheet" href="style.css?v=202611100830">
+<script src="topics.js?v=202611100830" defer></script>
+<script src="engine.js?v=202611100830" defer></script>
+<script src="app.js?v=202611100830" defer></script>
 </head>
-<body>
-<header class="bar">
-  <a class="back" href="../">‹ Rozcestník</a>
-  <h1><span class="logo">Ab</span>Osmisměrka</h1>
-  <span class="sub">Osmisměrky na zvolené téma k tisku na A4</span>
+<body class="is-app print-portrait">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/#/cestina">
+        <span data-icon="ui_back"></span><span class="a-back__label">Čeština</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-wine" data-icon="osmismerka"></span>
+        <h1>Osmisměrka</h1>
+        <span class="a-name__sub">Osmisměrky k tisku na A4</span>
+      </div>
+    </div>
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
 </header>
-<main class="layout">
-  <section class="card controls" aria-label="Nastavení">
-    <div class="group">
-      <label class="lbl">Úroveň</label>
-      <div class="seg" id="lvl"><button data-v="1">1. stupeň</button><button data-v="2">2. stupeň</button></div>
+
+<main class="a-layout">
+
+  <section class="a-panel" aria-label="Nastavení">
+    <div class="c-field">
+      <span class="c-label" id="lbl-lvl">Úroveň</span>
+      <div class="c-seg" role="group" aria-labelledby="lbl-lvl" id="lvl">
+        <button type="button" data-v="1" aria-pressed="false">1. stupeň</button>
+        <button type="button" data-v="2" aria-pressed="false">2. stupeň</button>
+      </div>
     </div>
-    <div class="group">
-      <label class="lbl" for="topic">Téma</label>
-      <select id="topic"></select>
+
+    <div class="c-field">
+      <label class="c-label" for="topic">Téma</label>
+      <select class="c-input" id="topic"></select>
     </div>
-    <div class="group">
-      <label class="lbl" for="own">Vlastní slova <button class="link" id="clearOwn" type="button">Vymazat</button></label>
-      <textarea id="own" rows="2" placeholder="Nepovinné – slova oddělená čárkou nebo mezerou. Nahradí téma."></textarea>
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="own">Vlastní slova</label>
+        <button class="o-clear" id="clearOwn" type="button">Vymazat</button>
+      </div>
+      <textarea class="c-input" id="own" rows="2" placeholder="Nepovinné – slova oddělená čárkou nebo mezerou. Nahradí téma."></textarea>
     </div>
-    <div class="group">
-      <label class="lbl" for="title">Nadpis</label>
-      <input type="text" id="title" autocomplete="off">
+
+    <div class="c-field">
+      <label class="c-label" for="title">Nadpis</label>
+      <input class="c-input" type="text" id="title" autocomplete="off">
     </div>
-    <div class="two">
-      <div class="group"><label class="lbl" for="size">Mřížka <span class="val" id="sizeVal"></span></label><input type="range" id="size" min="6" max="20" step="1"></div>
-      <div class="group"><label class="lbl" for="count">Slov <span class="val" id="countVal"></span></label><input type="range" id="count" min="3" max="30" step="1"></div>
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="size">Mřížka</label>
+        <span class="c-value" id="sizeVal"></span>
+      </div>
+      <input class="c-range" type="range" id="size" min="6" max="20" step="1">
     </div>
-    <label class="tg"><span>Všechny směry (i pozpátku a šikmo)</span><input type="checkbox" id="all8"><i></i></label>
-    <label class="tg"><span>Ponechat diakritiku</span><input type="checkbox" id="dia"><i></i></label>
-    <label class="tg"><span>Přidat řešení (2. strana)</span><input type="checkbox" id="sol"><i></i></label>
-    <button class="ghost" id="regen" type="button">🔀 Nová osmisměrka</button>
-    <button class="primary" id="print" type="button">Vytisknout / uložit PDF</button>
-    <p class="hint" id="info"></p>
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="count">Slov</label>
+        <span class="c-value" id="countVal"></span>
+      </div>
+      <input class="c-range" type="range" id="count" min="3" max="30" step="1">
+    </div>
+
+    <button class="c-btn c-btn--primary" type="button" id="regen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      Nová osmisměrka
+    </button>
+
+    <hr class="c-sep">
+
+    <button class="c-switch" type="button" role="switch" aria-checked="false" id="all8">
+      <span>Všechny směry (i pozpátku a šikmo)</span><span class="c-track" aria-hidden="true"></span>
+    </button>
+    <button class="c-switch" type="button" role="switch" aria-checked="false" id="dia">
+      <span>Ponechat diakritiku</span><span class="c-track" aria-hidden="true"></span>
+    </button>
+    <button class="c-switch" type="button" role="switch" aria-checked="false" id="sol">
+      <span>Přidat řešení (2. strana)</span><span class="c-track" aria-hidden="true"></span>
+    </button>
+
+    <button class="c-btn c-btn--secondary" type="button" id="print">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg>
+      Vytisknout / uložit PDF
+    </button>
+
+    <p class="c-meta" id="info"></p>
   </section>
-  <section class="stage" aria-label="Náhled" id="stage">
-    <div class="sheet" id="sheet1"></div>
-    <div class="sheet sol" id="sheet2"></div>
+
+  <section class="a-stage" aria-label="Náhled listu" id="stage">
+    <div class="a-sheet a-sheet--portrait o-sheet" id="sheet1"></div>
+    <div class="a-sheet a-sheet--portrait o-sheet sol" id="sheet2"></div>
   </section>
 </main>
 <div id="printout"></div>
-<script src="../shared/footer.js?v=202611032310" defer></script>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611100830"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -2,47 +2,110 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Bludiště – generátor bludišť k tisku</title>
-<link rel="stylesheet" href="style.css?v=202611031600">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bludiště - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611100830">
+<link rel="stylesheet" href="style.css?v=202611100830">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-<script src="app.js?v=202611031500" defer></script>
+<script src="app.js?v=202611100830" defer></script>
 </head>
-<body>
-<header class="bar">
-  <a class="back" href="../">‹ Rozcestník</a>
-  <h1><span class="logo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4zM8 4v8h4M16 8v8h-8M12 16v4"/></svg></span>Bludiště</h1>
-  <span class="sub">Bludiště k tisku na A4</span>
-</header>
-<main class="layout">
-  <section class="card controls" aria-label="Nastavení">
-    <div class="group">
-      <label class="lbl">Obtížnost</label>
-      <div class="seg" id="presets">
-        <button data-p="easy">Lehké</button><button data-p="medium">Střední</button><button data-p="hard">Těžké</button><button data-p="expert">Expert</button>
+<body class="is-app">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/#/zabava">
+        <span data-icon="ui_back"></span><span class="a-back__label">Zábava</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-purple" data-icon="bludiste"></span>
+        <h1>Bludiště</h1>
+        <span class="a-name__sub">Bludiště k tisku na A4</span>
       </div>
     </div>
-    <div class="group">
-      <label class="lbl" for="size">Velikost <span class="val" id="sizeVal"></span></label>
-      <input type="range" id="size" min="6" max="70" step="1">
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
+</header>
+
+<main class="a-layout">
+
+  <section class="a-panel" aria-label="Nastavení">
+    <div class="c-field">
+      <span class="c-label" id="lbl-obt">Obtížnost</span>
+      <div class="c-seg" role="group" aria-labelledby="lbl-obt" id="presets">
+        <button type="button" data-p="easy" aria-pressed="false">Lehké</button>
+        <button type="button" data-p="medium" aria-pressed="false">Střední</button>
+        <button type="button" data-p="hard" aria-pressed="false">Těžké</button>
+        <button type="button" data-p="expert" aria-pressed="false">Expert</button>
+      </div>
     </div>
-    <div class="group">
-      <label class="lbl" for="seed">Seed</label>
-      <input type="text" id="seed" inputmode="numeric" autocomplete="off">
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="size">Velikost</label>
+        <span class="c-value" id="sizeVal"></span>
+      </div>
+      <input class="c-range" type="range" id="size" min="6" max="70" step="1">
     </div>
-    <button class="primary" id="newMaze">Nové bludiště</button>
-    <label class="tg"><span>Zobrazit řešení</span><input type="checkbox" id="showSol"><i></i></label>
-    <div class="actions">
-      <button class="primary" id="pdf">Uložit PDF</button>
-      <button class="ghost" id="print">Tisk</button>
+
+    <div class="c-field">
+      <label class="c-label" for="seed">Číslo bludiště</label>
+      <input class="c-input" type="text" id="seed" inputmode="numeric" autocomplete="off">
     </div>
-    <p class="hint" id="info"></p>
+
+    <button class="c-btn c-btn--primary" type="button" id="newMaze">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      Nové bludiště
+    </button>
+
+    <hr class="c-sep">
+
+    <button class="c-switch" type="button" role="switch" aria-checked="false" id="showSol">
+      <span>Zobrazit řešení</span><span class="c-track" aria-hidden="true"></span>
+    </button>
+
+    <div class="c-btns">
+      <button class="c-btn c-btn--secondary" type="button" id="pdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 19.5h14"/></svg>
+        <span>Uložit PDF</span>
+      </button>
+      <button class="c-btn c-btn--secondary" type="button" id="print">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg>
+        Tisk
+      </button>
+    </div>
+
+    <p class="c-meta" id="info"></p>
   </section>
-  <section class="stage" aria-label="Náhled">
-    <div class="sheet" id="sheet"><div id="svgWrap"></div><p class="mfoot" id="mfoot"></p></div>
+
+  <section class="a-stage" aria-label="Náhled listu">
+    <div class="a-sheet" id="sheet">
+      <div class="a-sheet__meta"><span>Start ↓</span><span>Cíl ↑</span></div>
+      <div class="a-sheet__body" id="svgWrap"></div>
+      <div class="a-sheet__meta">
+        <span id="mfoot"></span>
+        <span class="a-sheet__brand"><span data-icon="ui_wave" style="width:28px;height:7px;color:var(--accent)"></span>skolavela.app</span>
+      </div>
+    </div>
   </section>
 </main>
-<script src="../shared/footer.js?v=202611032310" defer></script>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611100830"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

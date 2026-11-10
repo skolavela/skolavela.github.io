@@ -17,27 +17,28 @@ function render() {
   $('outTitle').textContent = st.title;
   $('outText').innerHTML = renderText(st.text);
   const out = $('out'); out.style.fontSize = st.size + 'px'; out.style.lineHeight = st.lh;
-  document.body.className = `m-${st.mode}` + (st.upper ? ' up' : '');
+  document.body.className = `is-app print-portrait m-${st.mode}` + (st.upper ? ' up' : '');
+  $('upper').setAttribute('aria-checked', String(!!st.upper));
   $('sizeVal').textContent = st.size + ' px'; $('lhVal').textContent = (+st.lh).toFixed(1).replace('.', ',');
-  for (const g of ['mode', 'lvl']) for (const b of $(g).children) b.classList.toggle('on', b.dataset.v === st[g]);
+  for (const g of ['mode', 'lvl']) for (const b of $(g).children) b.setAttribute('aria-pressed', String(b.dataset.v === st[g]));
   try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
 }
-$('title').value = st.title; $('src').value = st.text; $('size').value = st.size; $('lh').value = st.lh; $('upper').checked = st.upper;
+$('title').value = st.title; $('src').value = st.text; $('size').value = st.size; $('lh').value = st.lh;
 $('title').oninput = e => { st.title = e.target.value; render(); };
 let gcConv = 0;
 $('src').oninput = e => { st.text = e.target.value; render(); clearTimeout(gcConv); gcConv = setTimeout(() => gcEvent('slabiky-convert', 'Slabiky: převod textu'), 3000); };
 $('size').oninput = e => { st.size = +e.target.value; render(); };
 $('lh').oninput = e => { st.lh = +e.target.value; render(); };
-$('upper').onchange = e => { st.upper = e.target.checked; render(); };
+$('upper').onclick = () => { st.upper = !st.upper; render(); };
 $('clear').onclick = () => { st.text = ''; $('src').value = ''; render(); $('src').focus(); };
-for (const g of ['mode', 'lvl']) $(g).onclick = e => { if (e.target.dataset.v) { st[g] = e.target.dataset.v; render(); } };
+for (const g of ['mode', 'lvl']) $(g).onclick = e => { const b = e.target.closest('button'); if (b && b.dataset.v) { st[g] = b.dataset.v; render(); } };
 let lastText = -1;
 $('rand').onclick = () => {
   const pool = TEXTS.map((t, i) => i).filter(i => String(TEXTS[i].l) === st.lvl && i !== lastText);
   lastText = pool[Math.floor(Math.random() * pool.length)];
   gcEvent('slabiky-random-text', 'Slabiky: náhodný text');
   const t = TEXTS[lastText]; st.title = t.t; st.text = t.x; $('title').value = t.t; $('src').value = t.x; render();
-  if (window.matchMedia && matchMedia('(max-width:860px)').matches) $('sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (window.matchMedia && matchMedia('(max-width:899px)').matches) $('sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 $('print').onclick = () => { gcEvent('slabiky-print', 'Slabiky: tisk'); window.print(); };
 render();

@@ -2,62 +2,128 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tučné slabiky – text po slabikách pro dyslektiky</title>
-<link rel="stylesheet" href="style.css?v=202611031500">
-<script src="syllab.js?v=202611031500" defer></script>
-<script src="texts.js?v=202611031500" defer></script>
-<script src="app.js?v=202611031500" defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tučné slabiky - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611100830">
+<style>@page { size: A4 portrait; }</style>
+<link rel="stylesheet" href="style.css?v=202611100830">
+<script src="syllab.js?v=202611100830" defer></script>
+<script src="texts.js?v=202611100830" defer></script>
+<script src="app.js?v=202611100830" defer></script>
 </head>
-<body>
-<header class="bar">
-  <a class="back" href="../">‹ Rozcestník</a>
-  <h1><span class="logo">Aa</span>Tučné slabiky</h1>
-  <span class="sub">Text po slabikách – střídavě tučně a normálně</span>
+<body class="is-app print-portrait">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/#/cestina">
+        <span data-icon="ui_back"></span><span class="a-back__label">Čeština</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-pink" data-icon="slabiky"></span>
+        <h1>Tučné slabiky</h1>
+        <span class="a-name__sub">Text po slabikách – střídavě tučně a normálně</span>
+      </div>
+    </div>
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
 </header>
-<main class="layout">
-  <section class="card controls" aria-label="Nastavení">
-    <div class="group">
-      <label class="lbl" for="title">Nadpis (nepovinný)</label>
-      <input type="text" id="title" placeholder="např. O pejskovi a kočičce" autocomplete="off">
+
+<main class="a-layout">
+
+  <section class="a-panel" aria-label="Nastavení">
+    <div class="c-field">
+      <label class="c-label" for="title">Nadpis (nepovinný)</label>
+      <input class="c-input" type="text" id="title" placeholder="např. O pejskovi a kočičce" autocomplete="off">
     </div>
-    <div class="group rnd">
-      <label class="lbl">Náhodný text</label>
-      <div class="rrow">
-        <div class="seg" id="lvl"><button data-v="1">Krátký</button><button data-v="2">Střední</button><button data-v="3">Delší</button></div>
-        <button class="dice" id="rand" type="button" title="Náhodný text">🎲</button>
+
+    <div class="c-field">
+      <span class="c-label" id="lbl-lvl">Náhodný text</span>
+      <div class="c-seg" role="group" aria-labelledby="lbl-lvl" id="lvl">
+        <button type="button" data-v="1" aria-pressed="false">Krátký</button>
+        <button type="button" data-v="2" aria-pressed="false">Střední</button>
+        <button type="button" data-v="3" aria-pressed="false">Delší</button>
+      </div>
+      <button class="c-btn c-btn--primary" type="button" id="rand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+        Náhodný text
+      </button>
+    </div>
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="src">Text</label>
+        <button class="s-clear" id="clear" type="button">Vymazat</button>
+      </div>
+      <textarea class="c-input" id="src" spellcheck="false" placeholder="Sem vložte nebo napište libovolný text…"></textarea>
+    </div>
+
+    <hr class="c-sep">
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="size">Velikost písma</label>
+        <span class="c-value" id="sizeVal"></span>
+      </div>
+      <input class="c-range" type="range" id="size" min="14" max="48" step="2">
+    </div>
+
+    <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="lh">Řádkování</label>
+        <span class="c-value" id="lhVal"></span>
+      </div>
+      <input class="c-range" type="range" id="lh" min="1.2" max="2.6" step="0.1">
+    </div>
+
+    <div class="c-field">
+      <span class="c-label" id="lbl-mode">Zvýraznění slabik</span>
+      <div class="c-seg" role="group" aria-labelledby="lbl-mode" id="mode">
+        <button type="button" data-v="bold" aria-pressed="false">Tučně / tence</button>
+        <button type="button" data-v="color" aria-pressed="false">Barevně</button>
+        <button type="button" data-v="both" aria-pressed="false">Obojí</button>
       </div>
     </div>
-    <div class="group grow">
-      <label class="lbl" for="src">Text <button class="link" id="clear" type="button">Vymazat</button></label>
-      <textarea id="src" spellcheck="false" placeholder="Sem vložte nebo napište libovolný text…"></textarea>
-    </div>
-    <div class="group">
-      <label class="lbl" for="size">Velikost písma <span class="val" id="sizeVal"></span></label>
-      <input type="range" id="size" min="14" max="48" step="2">
-    </div>
-    <div class="group">
-      <label class="lbl" for="lh">Řádkování <span class="val" id="lhVal"></span></label>
-      <input type="range" id="lh" min="1.2" max="2.6" step="0.1">
-    </div>
-    <div class="group">
-      <label class="lbl">Zvýraznění slabik</label>
-      <div class="seg" id="mode">
-        <button data-v="bold">Tučně / tence</button><button data-v="color">Barevně</button><button data-v="both">Obojí</button>
-      </div>
-    </div>
-    <label class="tg"><span>VELKÁ PÍSMENA</span><input type="checkbox" id="upper"><i></i></label>
-    <button class="primary" id="print">Vytisknout / uložit PDF</button>
-    <p class="hint">Dělení slov je automatické podle pravidel češtiny; u některých slov se může lišit od školního dělení.</p>
+
+    <button class="c-switch" type="button" role="switch" aria-checked="false" id="upper">
+      <span>VELKÁ PÍSMENA</span><span class="c-track" aria-hidden="true"></span>
+    </button>
+
+    <button class="c-btn c-btn--secondary" type="button" id="print">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg>
+      Vytisknout / uložit PDF
+    </button>
+
+    <p class="c-meta">Dělení slov je automatické podle pravidel češtiny; u některých slov se může lišit od školního dělení.</p>
   </section>
-  <section class="stage" aria-label="Náhled">
-    <div class="sheet" id="sheet">
-      <div class="sheetHead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ptitle">Náhled</span></div>
-      <article class="out" id="out"><h2 id="outTitle"></h2><div id="outText"></div></article>
+
+  <section class="a-stage" aria-label="Náhled listu">
+    <div class="a-sheet a-sheet--portrait s-sheet" id="sheet">
+      <article class="out tone-pink" id="out"><h2 id="outTitle"></h2><div id="outText"></div></article>
+      <div class="a-sheet__meta no-print">
+        <span></span>
+        <span class="a-sheet__brand"><span data-icon="ui_wave" style="width:28px;height:7px;color:var(--accent)"></span>skolavela.app</span>
+      </div>
     </div>
   </section>
 </main>
-<script src="../shared/footer.js?v=202611032310" defer></script>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611100830"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

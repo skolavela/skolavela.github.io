@@ -150,19 +150,19 @@ function paint() {
   paintSide();
 }
 function seg(id, val, cb) {
-  const el = $(id); el.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.v == val); b.onclick = () => cb(b.dataset.v); });
+  document.querySelectorAll(id).forEach(el => el.querySelectorAll('button').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.v == val)); b.onclick = () => cb(b.dataset.v); }));
 }
 function paintSide() {
-  seg('#segSize', S.size, v => { S.size = +v; save(); paintSide(); });
-  seg('#segLevel', S.level, v => { S.level = +v; save(); paintSide(); });
-  seg('#segPer', S.per, v => { S.per = +v; save(); paintSide(); });
+  seg('#segSize, #segSizeP', S.size, v => { S.size = +v; save(); paintSide(); printChanged(); });
+  seg('#segLevel, #segLevelP', S.level, v => { S.level = +v; save(); paintSide(); printChanged(); });
+  seg('#segPer', S.per, v => { S.per = +v; save(); paintSide(); printChanged(); });
   $('#levelNote').textContent = LEVEL_NOTE[S.size][S.level];
-  $('#printSol').checked = S.printSol;
+  $('#printSol').setAttribute('aria-checked', String(!!S.printSol));
 }
 function buildHelpers() {
-  $('#helpers').innerHTML = HELPERS.map(([k, l]) => `<label class="li sw"><span>${l}</span><input type="checkbox" data-k="${k}"${S.set[k] ? ' checked' : ''}><i></i></label>`).join('');
-  $('#helpers').querySelectorAll('input').forEach(x => x.onchange = () => {
-    S.set[x.dataset.k] = x.checked; if (!S.set.hints) hint = null; if (!S.set.notes) notesMode = false; save(); paint();
+  $('#helpers').innerHTML = HELPERS.map(([k, l]) => `<button class="c-switch" type="button" role="switch" aria-checked="${!!S.set[k]}" data-k="${k}"><span>${l}</span><span class="c-track" aria-hidden="true"></span></button>`).join('');
+  $('#helpers').querySelectorAll('button').forEach(x => x.onclick = () => {
+    S.set[x.dataset.k] = !S.set[x.dataset.k]; x.setAttribute('aria-checked', String(S.set[x.dataset.k])); if (!S.set.hints) hint = null; if (!S.set.notes) notesMode = false; save(); paint();
   });
 }
 
@@ -187,12 +187,27 @@ function buildPrint() {
   const mm = { 1: 140, 2: 95, 4: 78, 6: 60 }[per], cls = per > 2 ? 'c2' : 'c1';
   const page = (title, right, sols) => `<section class="pp"><div class="ph"><h1>${title}</h1>${right ? `<span>${right}</span>` : ''}</div><div class="pg ${cls}">` +
     games.map((g, k) => `<figure>${per > 1 ? `<figcaption>${k + 1}.</figcaption>` : ''}${gridSvg(n, g.puzzle, sols ? g.solution : null, mm)}</figure>`).join('') +
-    `</div><div class="pf">skolavela.app/sudoku</div></section>`;
+    `</div><div class="pf"><span class="a-sheet__brand">${(window.VELA_ICONS && window.VELA_ICONS.ui_wave) || ''}skolavela.app/sudoku</span></div></section>`;
   $('#printout').innerHTML = page(name, '', false) + (S.printSol ? page('Řešení', name, true) : '');
+  // náhled = přesně to, co se vytiskne (každá stránka na vlastním listu A4)
+  $('#preview').innerHTML = Array.from($('#printout').children, pp => `<div class="a-sheet a-sheet--portrait sd-sheet"><div class="sd-page sd-print">${pp.outerHTML}</div></div>`).join('');
+  fitPreview();
 }
+function fitPreview() {
+  document.querySelectorAll('.sd-sheet').forEach(sh => { const pg = sh.firstChild; if (pg.offsetWidth) pg.style.transform = `scale(${sh.clientWidth / pg.offsetWidth})`; });
+}
+let mode = 'play';
+function setMode(m) {
+  mode = m; $('#playView').hidden = m !== 'play'; $('#printView').hidden = m !== 'print';
+  document.querySelectorAll('.sd-mode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  if (m === 'print') buildPrint();
+  window.scrollTo(0, 0);
+}
+function printChanged() { if (mode === 'print') buildPrint(); }
 function doPrint() {
   const btn = $('#printBtn span'), old = btn.textContent; btn.textContent = 'Připravuji…';
-  setTimeout(() => { buildPrint(); btn.textContent = old; gcEvent(`sudoku-print-${S.size}-${S.per}`); window.print(); }, 30);
+  // vytiskne zadání z náhledu; po tisku připraví nová zadání (každý tisk = nová zadání jako dřív)
+  setTimeout(() => { btn.textContent = old; gcEvent(`sudoku-print-${S.size}-${S.per}`); window.print(); buildPrint(); }, 30);
 }
 
 // ---------- ovládání ----------
@@ -205,7 +220,9 @@ $('#newGame').onclick = () => {
   const g = S.game; if (g && !g.solved && g.board.some((v, i) => v && !g.puzzle[i]) && !confirm('Rozehrané sudoku se ztratí. Začít nové?')) return;
   newGame(true); window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-$('#printSol').onchange = e => { S.printSol = e.target.checked; save(); };
+$('#printSol').onclick = () => { S.printSol = !S.printSol; save(); paintSide(); printChanged(); };
+document.querySelectorAll('.sd-mode button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+if (window.ResizeObserver) new ResizeObserver(fitPreview).observe($('#preview')); else window.addEventListener('resize', fitPreview);
 $('#printBtn').onclick = doPrint;
 document.addEventListener('keydown', e => {
   if (!S.game || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || e.altKey) return;
@@ -227,4 +244,5 @@ document.addEventListener('keydown', e => {
 });
 
 buildHelpers();
+setMode('play');
 if (S.game && S.game.puzzle && S.game.solution) build(); else newGame(true);

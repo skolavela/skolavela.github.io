@@ -161,7 +161,7 @@ function renderSVG(st, sc, withSol, preview) {
   }
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">`;
   if (!preview) s += `<rect width="${sc.PW}" height="${sc.PH}" fill="#fff"/>`;
-  if (withSol && sc.solution) s += `<path d="${toD(sc.solution)}" fill="none" stroke="#ff3b30" stroke-opacity=".75" stroke-width="${Math.max(.5, sc.cell * .28)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if (withSol && sc.solution) s += `<path d="${toD(sc.solution)}" fill="none" ${preview ? 'style="stroke:var(--doodle)"' : 'stroke="#ff3b30" stroke-opacity=".75"'} stroke-width="${Math.max(.5, sc.cell * .28)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   s += `<path d="${sc.lines.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${t}" stroke-linecap="round" stroke-linejoin="round"/>`;
   s += `<path d="${sc.deco.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${Math.max(.4, t * .8)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   if (!preview) {
@@ -223,8 +223,8 @@ try { const o = JSON.parse(localStorage.getItem(KEY) || '{}'); for (const k in D
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }; // ukládá jen aktuální klíče => staré volby zmizí
 let scene;
 function sync() {
-  document.querySelectorAll('#presets button').forEach(b => b.classList.toggle('on', b.dataset.p === st.preset));
-  $('size').value = st.size; $('seed').value = st.seed; $('showSol').checked = !!st.showSol;
+  document.querySelectorAll('#presets button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === st.preset)));
+  $('size').value = st.size; $('seed').value = st.seed; $('showSol').setAttribute('aria-checked', String(!!st.showSol));
 }
 function render() {
   scene = buildScene(st);
@@ -238,14 +238,14 @@ function update(p) { Object.assign(st, p); sync(); render(); }
 document.querySelectorAll('#presets button').forEach(b => b.onclick = () => update({ preset: b.dataset.p, size: PRESETS[b.dataset.p] }));
 $('size').oninput = e => { const v = +e.target.value; const p = Object.keys(PRESETS).find(k => PRESETS[k] === v); update({ size: v, preset: p || 'custom' }); };
 $('seed').oninput = e => update({ seed: e.target.value || '1', created: Date.now() });
-$('showSol').onchange = e => update({ showSol: e.target.checked });
+$('showSol').onclick = () => update({ showSol: !st.showSol });
 $('newMaze').onclick = () => (gcEvent('bludiste-generate', 'Bludiště: nové bludiště'), update)({ seed: newSeed(), created: Date.now() });
-$('print').onclick = () => { gcEvent('bludiste-print', 'Bludiště: tisk'); $('svgWrap').innerHTML = renderSVG(st, scene, false); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
+$('print').onclick = () => { gcEvent('bludiste-print', 'Bludiště: tisk'); $('svgWrap').innerHTML = renderSVG(st, scene, false, true); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
 $('pdf').onclick = async () => {
-  gcEvent('bludiste-pdf', 'Bludiště: export PDF'); const btn = $('pdf'); btn.disabled = true; const o = btn.textContent; btn.textContent = 'Připravuji…';
+  gcEvent('bludiste-pdf', 'Bludiště: export PDF'); const btn = $('pdf'); btn.disabled = true; const lbl = btn.querySelector('span'), o = lbl.textContent; lbl.textContent = 'Připravuji…';
   try { (await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts())).save(`bludiste-${st.seed}.pdf`); }
   catch (e) { alert('Export PDF selhal: ' + e.message); }
-  btn.disabled = false; btn.textContent = o;
+  btn.disabled = false; lbl.textContent = o;
 };
 sync(); render();
 })(typeof window !== 'undefined' ? window : globalThis);

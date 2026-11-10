@@ -1,4 +1,4 @@
-// Přijímačky – aplikace
+// Nanečisto (dříve Přijímačky) – aplikace
 (function(){
 const gcEvent=(n,t)=>{try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:n,title:t||n,event:true});}catch(e){}};
 const PQ=window.PQ,$=s=>document.querySelector(s),app=$('#app'),pill=$('#pill');
@@ -78,20 +78,20 @@ function home(){
   const slotsHtml=()=>`<div class="gh"><span>Úlohy</span></div><div class="list">${slotList(st.subj).map(k=>{const sl=PQ.SLOTS[k];const pc=pcOf(st.p['slot:'+k]);const on=st.slot===k;
     return `<button class="row-i slotb ${on?'on':''}" data-k="${k}"><span class="sn">${sl.label||''}</span><span class="tx"><span class="nm">${esc(sl.name)}</span>${prog(pc)}</span><span class="val">${pc!=null?pc+' %':(sl.pts?PQ.fmt(sl.pts)+' b':'')}</span><span class="chk">${on?ic('tick'):''}</span></button>`;}).join('')}</div>`;
   app.innerHTML=`
-  <div class="seg" id="subj">${Object.entries(SUBJ).map(([k,v])=>`<button data-v="${k}" class="${k===st.subj?'on':''}">${v.name}</button>`).join('')}</div>
+  <div class="c-seg" id="subj">${Object.entries(SUBJ).map(([k,v])=>`<button data-v="${k}" class="${k===st.subj?'on':''}">${v.name}</button>`).join('')}</div>
   <div class="list">
    <button class="row-i mode ${st.mode==='prac'?'on':''}" data-m="prac"><span class="lic">${ic('leaf')}</span><span class="tx"><span class="nm">Procvičování</span><span class="meta">S nápovědou a vysvětlením</span></span><span class="chk">${st.mode==='prac'?ic('tick'):''}</span></button>
    <button class="row-i mode ${st.mode==='test'?'on':''}" data-m="test"><span class="lic">${ic('timer')}</span><span class="tx"><span class="nm">Cvičný test</span><span class="meta">Jako u přijímaček, 50 bodů</span></span><span class="chk">${st.mode==='test'?ic('tick'):''}</span></button>
   </div>
-  ${st.mode==='prac'?`<div class="seg" id="by"><button data-b="topic" class="${byS?'':'on'}">Podle tématu</button><button data-b="slot" class="${byS?'on':''}">Podle čísla úlohy</button></div>`:''}
+  ${st.mode==='prac'?`<div class="c-seg" id="by"><button data-b="topic" class="${byS?'':'on'}">Podle tématu</button><button data-b="slot" class="${byS?'on':''}">Podle čísla úlohy</button></div>`:''}
   ${st.mode==='prac'&&!byS?topicsHtml():''}
   ${st.mode==='prac'&&byS?slotsHtml():''}
-  <div id="testopts" ${st.mode==='test'?'':'hidden'} class="seg">
+  <div id="testopts" ${st.mode==='test'?'':'hidden'} class="c-seg">
    <button data-l="short" class="${st.len==='short'?'on':''}">${PQ.BP[st.subj]?PQ.BP[st.subj].mins.short:20} min</button>
    <button data-l="full" class="${st.len==='full'?'on':''}">${SUBJ[st.subj].full} min</button>
    <button data-l="free" class="${st.len==='free'?'on':''}">Bez limitu</button>
   </div>
-  <button class="primary" id="go" ${(st.mode==='prac'&&!byS&&!sel.length)||(st.mode==='prac'&&byS&&!(st.slot&&PQ.SLOTS[st.slot]&&PQ.SLOTS[st.slot].subj===st.subj))?'disabled':''}>${st.mode==='prac'?'Začít':'Spustit test'}</button>
+  <button class="c-btn c-btn--primary" id="go" ${(st.mode==='prac'&&!byS&&!sel.length)||(st.mode==='prac'&&byS&&!(st.slot&&PQ.SLOTS[st.slot]&&PQ.SLOTS[st.slot].subj===st.subj))?'disabled':''}>${st.mode==='prac'?'Začít':'Spustit test'}</button>
   <p class="foot">Pokrok se ukládá jen v tomto zařízení.${Object.keys(st.p).length?' <button class="tb" id="reset">Vymazat</button>':''}</p>`;
   app.querySelectorAll('#subj button').forEach(b=>b.onclick=()=>{st.subj=b.dataset.v;save();home();});
   app.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{const i=sel.indexOf(b.dataset.id);i<0?sel.push(b.dataset.id):sel.splice(i,1);save();home();});
@@ -116,9 +116,9 @@ function renderQ(q,box,opts){ // opts: {instant, answer, onAnswer}
   const ans=opts.answer;
   let h='';if(q.p)h+=`<div class="passage">${q.p}</div>`;
   h+=`<p class="q">${q.q}</p>`;
-  if(q.t==='mc')h+=`<div class="opts ${q.keep&&q.o.length===2&&q.o.every(o=>o.length<5)?'two':''}">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${L[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`;
-  if(q.t==='yn')h+=`<div class="yn">${q.s.map((s,i)=>`<div class="ynr" data-i="${i}"><p>${esc(s[0])}</p><div class="seg"><button data-v="1">ANO</button><button data-v="0">NE</button></div></div>`).join('')}</div>`;
-  if(q.t==='num'||q.t==='txt')h+=`<div class="inp"><input id="inp" ${q.t==='num'?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${q.t==='num'?'Číslo, např. 3,5 nebo 3/4':'Napiš odpověď'}"></div>`;
+  if(q.t==='mc')h+=`<div class="opts ${q.keep&&q.o.length===2&&q.o.every(o=>o.length<5)?'two':''}">${q.o.map((o,i)=>`<button class="a-choice opt" data-i="${i}"><span class="k">${L[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`;
+  if(q.t==='yn')h+=`<div class="yn">${q.s.map((s,i)=>`<div class="ynr" data-i="${i}"><p>${esc(s[0])}</p><div class="c-seg"><button data-v="1">ANO</button><button data-v="0">NE</button></div></div>`).join('')}</div>`;
+  if(q.t==='num'||q.t==='txt')h+=`<div class="inp"><input class="c-input" id="inp" ${q.t==='num'?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${q.t==='num'?'Číslo, např. 3,5 nebo 3/4':'Napiš odpověď'}"></div>`;
   if(q.t==='err')h+=`<div class="etext">${PQ.tokenize(q.w).map((t,i)=>`<button class="tok" data-i="${i}">${esc(t.w)}</button>`).join(' ')}</div>`;
   if(q.t==='ord')h+=`<div class="ord"><div class="part fixed"><span class="k">1</span><span>${esc(q.parts[0])}</span></div><div id="seq"></div><div class="sh"><span>Další část</span><span><button class="tb" id="undo">Zpět</button> &nbsp; <button class="tb" id="clr">Znovu</button></span></div><div id="pool"></div></div>`;
   box.innerHTML=h;
@@ -174,8 +174,8 @@ function practice(sel){
   const s={sel,pts:0,max:0,n:0,queue:[],per:{}};setColor(st.subj);
   const next=()=>{if(!s.queue.length)s.queue=pickTask(sel);s.t=s.queue.shift();s.ans={};s.done=false;show();};
   const show=()=>{const t=s.t,tp=tById(t.topic);pill.hidden=false;pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;
-    setTitle(tp.name);app.innerHTML=`<section class="card"><div class="ptop"><span class="tag"></span><button class="link" id="end">Hotovo</button></div><div id="tb"></div>
-    <div id="hb"></div><div class="actions"><button class="ghost" id="skip">Ukázat řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div>
+    setTitle(tp.name);app.innerHTML=`<section class="a-card"><div class="ptop"><span class="tag"></span><button class="link" id="end">Hotovo</button></div><div id="tb"></div>
+    <div id="hb"></div><div class="actions"><button class="c-btn c-btn--secondary" id="skip">Ukázat řešení</button><button class="c-btn c-btn--primary" id="chk" disabled>Zkontrolovat</button></div>
     ${PQ.HINTS[t.slot]?'<button class="link center" id="hint">'+ic('bulb')+' Nápověda</button>':''}</section>`;
     const tb=$('#tb'),chk=$('#chk');renderTask(t,tb,s.ans,a=>{chk.disabled=!taskDone(t,a);});
     const h=$('#hint');if(h)h.onclick=()=>{$('#hb').innerHTML=`<p class="tnote">${PQ.HINTS[t.slot]}</p>`;h.remove();};
@@ -188,15 +188,15 @@ function practice(sel){
 }
 function summary(s){
   setTitle('Shrnutí');pill.hidden=true;const rows=Object.entries(s.per).map(([id,p])=>({t:tById(id),p}));
-  app.innerHTML=`<section class="card">
+  app.innerHTML=`<section class="a-card">
   ${s.n?`<p class="big">${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b</p><p class="mut center">${s.n} ${plural(s.n,'úloha','úlohy','úloh')}</p>
   <div class="bars">${rows.map(r=>bar(r.t.name,r.p)).join('')}</div>`:'<p class="mut center">Žádné úlohy.</p>'}
-  ${reflect()}<div class="row"><button class="ghost" id="home">Úvod</button><button class="primary" id="again">Pokračovat</button></div></section>`;
+  ${reflect()}<div class="row"><button class="c-btn c-btn--secondary" id="home">Úvod</button><button class="c-btn c-btn--primary" id="again">Pokračovat</button></div></section>`;
   $('#home').onclick=home;$('#again').onclick=()=>practice(s.sel);bindReflect();window.scrollTo(0,0);
 }
 const bar=(name,p)=>{const pc=p.n?Math.round(100*p.ok/p.n):0;return `<div class="b"><span>${name}</span><span class="meta">${pc} %</span><span class="meter"><i style="width:${pc}%"></i></span></div>`;};
-function reflect(){return `<div class="sh"><span>Jak to šlo</span></div><div class="seg" id="feel"><button data-f="ok">Šlo to</button><button data-f="mid">Částečně</button><button data-f="hard">Těžké</button></div>
-  <textarea id="note" placeholder="Poznámka pro příště">${esc(st.note||'')}</textarea>`;}
+function reflect(){return `<div class="sh"><span>Jak to šlo</span></div><div class="c-seg" id="feel"><button data-f="ok">Šlo to</button><button data-f="mid">Částečně</button><button data-f="hard">Těžké</button></div>
+  <textarea class="c-input" id="note" placeholder="Poznámka pro příště">${esc(st.note||'')}</textarea>`;}
 function bindReflect(){app.querySelectorAll('#feel button').forEach(b=>b.onclick=()=>{app.querySelectorAll('#feel button').forEach(x=>x.classList.toggle('on',x===b));st.feel=b.dataset.f;save();});const n=$('#note');n.oninput=()=>{st.note=n.value;save();};}
 
 /* ---------- cvičný test ---------- */
@@ -228,10 +228,10 @@ function test(){
   stopTimer();timer=setInterval(tick,1000);tick();
   const show=()=>{
     const q=T.qs[T.i],t=tById(q.topic);setTitle('Cvičný test');
-    app.innerHTML=`<section class="card"><div class="prog"><i style="width:${100*(T.i+1)/T.qs.length}%"></i></div>
+    app.innerHTML=`<section class="a-card"><div class="prog"><i style="width:${100*(T.i+1)/T.qs.length}%"></i></div>
     <div class="ptop"><span>Úloha ${T.i+1} z ${T.qs.length}</span><span>${t.name}</span></div>
     <div id="qb"></div>
-    <div class="actions"><button class="ghost" id="prev" ${T.i?'':'disabled'}>Zpět</button><button class="primary" id="nx">${T.i<T.qs.length-1?'Další':'Odevzdat'}</button></div>
+    <div class="actions"><button class="c-btn c-btn--secondary" id="prev" ${T.i?'':'disabled'}>Zpět</button><button class="c-btn c-btn--primary" id="nx">${T.i<T.qs.length-1?'Další':'Odevzdat'}</button></div>
     <div class="grid">${T.qs.map((x,i)=>`<button data-i="${i}" class="${T.ans[i]!=null?'done':''} ${i===T.i?'cur':''}">${i+1}</button>`).join('')}</div>
     <button class="link" id="sub">Odevzdat</button></section>
     <p class="note">${mins?'Klepnutím na čas nahoře ho skryješ. ':''}Vyhodnocení až na konci.</p>`;
@@ -253,15 +253,15 @@ function results(T,timeUp){
   const rows=Object.entries(per).map(([id,p])=>({t:tById(id),p})).sort((a,b)=>b.p.ok/b.p.n-a.p.ok/a.p.n);
   const good=rows.filter(r=>r.p.ok/r.p.n>=0.7).map(r=>r.t.name),work=rows.filter(r=>r.p.ok/r.p.n<0.7).map(r=>r.t.name);
   const wrong=T.qs.map((q,i)=>({q,i,r:rs[i]})).filter(x=>!x.r.ok);
-  app.innerHTML=`<section class="card">${timeUp?'<p class="note">Čas vypršel.</p>':''}
+  app.innerHTML=`<section class="a-card">${timeUp?'<p class="note">Čas vypršel.</p>':''}
     <p class="big">${PQ.fmt(Math.round(pts*10)/10)} / ${T.qs.length}</p>
   <p class="mut center">${pc} % · ${mins} min${prev?` · minule ${prev.pc} %${pc>prev.pc?'':''}`:''}</p>
   ${good.length?`<p class="fb ok"><b class="h">Co ti jde</b>${good.join(', ')}</p>`:''}
   ${work.length?`<p class="fb no"><b class="h">Procvičit</b>${work.join(', ')}</p>`:''}
   <div class="sh"><span>Podle témat</span></div><div class="bars">${rows.map(r=>bar(`${r.t.name}`,r.p)).join('')}</div>
   ${reflect()}
-  <div class="row"><button class="ghost" id="home">Úvod</button>${work.length?'<button class="primary" id="pr">Procvičit slabší témata</button>':''}</div></section>
-  ${wrong.length?`<section class="card"><h3>Chyby (${wrong.length})</h3><div class="rev">${wrong.map(x=>`<div class="rv"><div class="meta">Úloha ${x.i+1} · ${tById(x.q.topic).name}</div><p class="q">${x.q.q}</p>
+  <div class="row"><button class="c-btn c-btn--secondary" id="home">Úvod</button>${work.length?'<button class="c-btn c-btn--primary" id="pr">Procvičit slabší témata</button>':''}</div></section>
+  ${wrong.length?`<section class="a-card"><h3>Chyby (${wrong.length})</h3><div class="rev">${wrong.map(x=>`<div class="rv"><div class="meta">Úloha ${x.i+1} · ${tById(x.q.topic).name}</div><p class="q">${x.q.q}</p>
    <div>Tvoje odpověď: <b>${answerText(x.q,T.ans[x.i])}</b></div>${fbHtml(x.q,x.r,T.ans[x.i]==null).replace(/<b class="h">.*?<\/b>/,'')}</div>`).join('')}</div></section>`:'<p class="note">Vše správně.</p>'}`;
   $('#home').onclick=home;const p=$('#pr');if(p)p.onclick=()=>practice(rows.filter(r=>r.p.ok/r.p.n<0.7).map(r=>r.t.id));bindReflect();window.scrollTo(0,0);
 }
@@ -284,12 +284,12 @@ function renderTask(t,box,ans,onChange,opt){
 }
 function renderSub(s,el,v,set,opt){
   const up=x=>{v=x;set(x);};
-  if(s.t==='mc'){el.innerHTML=`<div class="opts">${s.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${L[i]}</span><span>${o}</span></button>`).join('')}</div>`;
+  if(s.t==='mc'){el.innerHTML=`<div class="opts">${s.o.map((o,i)=>`<button class="a-choice opt" data-i="${i}"><span class="k">${L[i]}</span><span>${o}</span></button>`).join('')}</div>`;
     el.querySelectorAll('.opt').forEach(b=>{if(v===+b.dataset.i)b.classList.add('sel');b.onclick=()=>{el.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x===b));up(+b.dataset.i);};});}
-  if(s.t==='yn'){const cur=v?v.slice():s.s.map(()=>null);el.innerHTML=`<div class="yn">${s.s.map((x,i)=>`<div class="ynr" data-i="${i}"><p><b class="mut">${i+1}.</b> ${x[0]}</p><div class="seg"><button data-v="1">ANO</button><button data-v="0">NE</button></div></div>`).join('')}</div>`;
+  if(s.t==='yn'){const cur=v?v.slice():s.s.map(()=>null);el.innerHTML=`<div class="yn">${s.s.map((x,i)=>`<div class="ynr" data-i="${i}"><p><b class="mut">${i+1}.</b> ${x[0]}</p><div class="c-seg"><button data-v="1">ANO</button><button data-v="0">NE</button></div></div>`).join('')}</div>`;
     el.querySelectorAll('.ynr').forEach(r=>{const i=+r.dataset.i;r.querySelectorAll('button').forEach(b=>{if(cur[i]!==null&&cur[i]===!!+b.dataset.v)b.classList.add('on');b.onclick=()=>{cur[i]=!!+b.dataset.v;r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));up(cur.slice());};});});}
   if(s.t==='match'){const cur=v?v.slice():s.items.map(()=>null);
-    el.innerHTML=`<div class="mopts">${s.o.map((o,i)=>`<div><span class="k">${L[i]}</span> ${o}</div>`).join('')}</div>`+s.items.map((it,i)=>`<div class="mrow" data-i="${i}"><p><b>${s.id}.${i+1}</b> ${it}</p><div class="seg letters">${s.o.map((_,j)=>`<button data-j="${j}">${L[j]}</button>`).join('')}</div></div>`).join('');
+    el.innerHTML=`<div class="mopts">${s.o.map((o,i)=>`<div><span class="k">${L[i]}</span> ${o}</div>`).join('')}</div>`+s.items.map((it,i)=>`<div class="mrow" data-i="${i}"><p><b>${s.id}.${i+1}</b> ${it}</p><div class="c-seg letters">${s.o.map((_,j)=>`<button data-j="${j}">${L[j]}</button>`).join('')}</div></div>`).join('');
     el.querySelectorAll('.mrow').forEach(r=>{const i=+r.dataset.i;r.querySelectorAll('button').forEach(b=>{if(cur[i]===+b.dataset.j)b.classList.add('on');b.onclick=()=>{cur[i]=+b.dataset.j;r.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));up(cur.slice());};});});}
   if(s.t==='ord'){let cur=(v||[]).slice();const view=s.view||(s.view=PQ.shuffle(s.parts.map((_,i)=>i)));const let_=i=>L[view.indexOf(i)];
     const draw=()=>{el.innerHTML=`<div class="ordv">${view.map(i=>`<button class="part pick ${cur.includes(i)?'used':''}" data-p="${i}"><span class="k">${let_(i)}</span><span>${s.parts[i]}</span></button>`).join('')}</div>
@@ -297,10 +297,10 @@ function renderSub(s,el,v,set,opt){
       el.querySelectorAll('.pick').forEach(b=>b.onclick=()=>{const p=+b.dataset.p;if(cur.includes(p))return;cur.push(p);draw();up(cur.slice());});
       el.querySelector('.undo').onclick=()=>{cur.pop();draw();up(cur.slice());};};draw();}
   if(s.t==='fields'){const cur=v?v.slice():s.f.map(()=>'');
-    el.innerHTML=`<div class="flds">${s.f.map((f,i)=>`<label class="fld">${f.l?`<span>${f.l}</span>`:''}<input data-i="${i}" ${f.k==='num'?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${f.ph||(f.k==='frac'?'zlomek, např. 5/12':f.k==='num'?'číslo':f.k==='expr'?'výraz, např. 2x(x+3)':'odpověď')}"></label>`).join('')}</div>`;
+    el.innerHTML=`<div class="flds">${s.f.map((f,i)=>`<label class="fld">${f.l?`<span>${f.l}</span>`:''}<input class="c-input" data-i="${i}" ${f.k==='num'?'inputmode="decimal"':''} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${f.ph||(f.k==='frac'?'zlomek, např. 5/12':f.k==='num'?'číslo':f.k==='expr'?'výraz, např. 2x(x+3)':'odpověď')}"></label>`).join('')}</div>`;
     el.querySelectorAll('input').forEach(inp=>{const i=+inp.dataset.i;inp.value=cur[i]||'';inp.oninput=()=>{cur[i]=inp.value;up(cur.slice());};});
-    if(s.work&&opt.work!==false)el.insertAdjacentHTML('beforeend',`<details class="wk"><summary>Můj postup</summary><textarea class="wtx" placeholder="Kroky výpočtu"></textarea></details>`);}
-  if(s.t==='nums'){el.innerHTML=(s.items?`<ol class="nl">${s.items.map(x=>`<li>${x}</li>`).join('')}</ol>`:'')+`<div class="flds"><label class="fld"><span>Čísla vět:</span><input inputmode="numeric" autocomplete="off" placeholder="např. 2, 7, 11"></label></div>`;
+    if(s.work&&opt.work!==false)el.insertAdjacentHTML('beforeend',`<details class="wk"><summary>Můj postup</summary><textarea class="c-input wtx" placeholder="Kroky výpočtu"></textarea></details>`);}
+  if(s.t==='nums'){el.innerHTML=(s.items?`<ol class="nl">${s.items.map(x=>`<li>${x}</li>`).join('')}</ol>`:'')+`<div class="flds"><label class="fld"><span>Čísla vět:</span><input class="c-input" inputmode="numeric" autocomplete="off" placeholder="např. 2, 7, 11"></label></div>`;
     const inp=el.querySelector('input');inp.value=v||'';inp.oninput=()=>up(inp.value);}
 }
 function fieldRight(f){if(f.show)return f.show;const a=[].concat(f.a);if(f.k==='frac')return PQ.fracStr(f.a[0],f.a[1]);if(f.k==='num')return PQ.fmt(a[0]);if(f.k==='expr')return a[0].replace(/\*/g,'·').replace(/\^2/g,'²').replace(/-/g,'−');return a[0];}
@@ -334,15 +334,15 @@ function slotPractice(key){
   const fill=()=>{const out=[].concat(sl.gen());const shared=out.length>1?`${1}–${out.length}`:'';out.forEach((t,i)=>{t.no=i+1;t.sname=t.sname||sl.name;t.slot=key;t.subs.forEach((x,k)=>x.id=t.subs.length>1?`${t.no}.${k+1}`:`${t.no}`);if(shared)t.shared=shared;});s.queue=out;};
   const next=()=>{if(!s.queue.length)fill();s.t=s.queue.shift();s.ans={};s.done=false;show();};
   const show=()=>{pill.hidden=false;pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;
-    setTitle(sl.name);app.innerHTML=`<section class="card"><div class="ptop"><span class="tag"></span><button class="link" id="end">Hotovo</button></div><div id="tb"></div>
-    <div id="hb"></div><div class="actions"><button class="ghost" id="skip">Ukázat řešení</button><button class="primary" id="chk" disabled>Zkontrolovat</button></div>${PQ.HINTS[key]?'<button class="link center" id="hint">'+ic('bulb')+' Nápověda</button>':''}</section>`;
+    setTitle(sl.name);app.innerHTML=`<section class="a-card"><div class="ptop"><span class="tag"></span><button class="link" id="end">Hotovo</button></div><div id="tb"></div>
+    <div id="hb"></div><div class="actions"><button class="c-btn c-btn--secondary" id="skip">Ukázat řešení</button><button class="c-btn c-btn--primary" id="chk" disabled>Zkontrolovat</button></div>${PQ.HINTS[key]?'<button class="link center" id="hint">'+ic('bulb')+' Nápověda</button>':''}</section>`;
     const tb=$('#tb'),chk=$('#chk');
     renderTask(s.t,tb,s.ans,a=>{chk.disabled=!taskDone(s.t,a);});const h=$('#hint');if(h)h.onclick=()=>{$('#hb').innerHTML=`<p class="tnote">${PQ.HINTS[key]}</p>`;h.remove();};
     const finish=sk=>{if(s.done)return;s.done=true;const R=markTask(s.t,tb,s.ans,sk);s.pts+=R.pts;s.max+=R.max;s.n++;rec('slot:'+key,R.pts/R.max);
       $('#skip').hidden=true;chk.disabled=false;chk.textContent=s.queue.length?'Další k textu':'Další úloha';chk.onclick=next;
       pill.textContent=`${s.n} ${plural(s.n,'úloha','úlohy','úloh')} · ${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b`;tb.querySelector('.sfb .fb').scrollIntoView({behavior:'smooth',block:'nearest'});};
     chk.onclick=()=>finish(false);$('#skip').onclick=()=>finish(true);
-    $('#end').onclick=()=>{setTitle('Shrnutí');pill.hidden=true;app.innerHTML=`<section class="card">${s.n?`<p class="big">${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b</p><p class="mut center">${s.n} ${plural(s.n,'úloha','úlohy','úloh')} typu „${esc(sl.name)}“.</p>`:''}${reflect()}<div class="row"><button class="ghost" id="home">Úvod</button><button class="primary" id="again">Pokračovat</button></div></section>`;$('#home').onclick=home;$('#again').onclick=()=>slotPractice(key);bindReflect();window.scrollTo(0,0);};
+    $('#end').onclick=()=>{setTitle('Shrnutí');pill.hidden=true;app.innerHTML=`<section class="a-card">${s.n?`<p class="big">${PQ.fmt(s.pts)} / ${PQ.fmt(s.max)} b</p><p class="mut center">${s.n} ${plural(s.n,'úloha','úlohy','úloh')} typu „${esc(sl.name)}“.</p>`:''}${reflect()}<div class="row"><button class="c-btn c-btn--secondary" id="home">Úvod</button><button class="c-btn c-btn--primary" id="again">Pokračovat</button></div></section>`;$('#home').onclick=home;$('#again').onclick=()=>slotPractice(key);bindReflect();window.scrollTo(0,0);};
     window.scrollTo(0,0);};
   next();
 }
@@ -358,8 +358,8 @@ function examTest(){
     const left=Math.max(0,T.end-Date.now());const m=Math.floor(left/60000),s=Math.floor(left/1000)%60;pill.textContent=done+' · '+(T.hideT?'čas skrytý':`${m}:${String(s).padStart(2,'0')}`);if(left<=0){stopTimer();examResults(T,true);}};
   pill.hidden=false;pill.onclick=()=>{T.hideT=!T.hideT;tick();};stopTimer();timer=setInterval(tick,1000);tick();
   const show=()=>{const t=T.tasks[T.i];setTitle('Cvičný test');
-    app.innerHTML=`<section class="card"><div class="prog"><i style="width:${100*(T.i+1)/T.tasks.length}%"></i></div><div id="tb"></div>
-    <div class="actions"><button class="ghost" id="prev" ${T.i?'':'disabled'}>Zpět</button><button class="primary" id="nx">${T.i<T.tasks.length-1?'Další':'Odevzdat'}</button></div>
+    app.innerHTML=`<section class="a-card"><div class="prog"><i style="width:${100*(T.i+1)/T.tasks.length}%"></i></div><div id="tb"></div>
+    <div class="actions"><button class="c-btn c-btn--secondary" id="prev" ${T.i?'':'disabled'}>Zpět</button><button class="c-btn c-btn--primary" id="nx">${T.i<T.tasks.length-1?'Další':'Odevzdat'}</button></div>
     <div class="grid">${T.tasks.map((x,i)=>`<button data-i="${i}" class="${taskDone(x,T.ans[i])?'done':''} ${i===T.i?'cur':''}">${i+1}</button>`).join('')}</div>
     <button class="link" id="sub">Odevzdat</button></section>
     <p class="note">Max. ${T.max} b. ${mins?'Klepnutím na čas nahoře ho skryješ. ':''}Vyhodnocení až na konci.</p>`;
@@ -378,14 +378,14 @@ function examResults(T,timeUp){
   const full=T.tasks.filter((t,i)=>rs[i].pts===rs[i].max).length;
   // nejvíc ztracených bodů podle typu úlohy
   const bySlot={};lost.forEach(x=>{const k=x.t.slot;bySlot[k]=(bySlot[k]||0)+x.r.max-x.r.pts;});const top=Object.entries(bySlot).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  app.innerHTML=`<section class="card">${timeUp?'<p class="note">Čas vypršel.</p>':''}
+  app.innerHTML=`<section class="a-card">${timeUp?'<p class="note">Čas vypršel.</p>':''}
     <p class="big">${PQ.fmt(pts)} / ${T.max} b</p>
   <p class="mut center">${pc} %${T.max!==50?` · v celém testu by to odpovídalo zhruba ${Math.round(pts*50/T.max)} z 50 b`:''} · ${mins} min${prev?` · minule ${prev.pts!=null?prev.pts+' / '+prev.max+' b':prev.pc+' %'}`:''}</p>
   <p class="fb ok"><b class="h">Co ti jde</b>${full} z ${T.tasks.length} úloh za plný počet bodů.</p>
   ${top.length?`<p class="fb no"><b class="h">Kde ztrácíš body</b>${top.map(([k,v])=>`<button class="link inl" data-slot="${k}">${esc(PQ.SLOTS[k].name)}</button> (−${PQ.fmt(v)} b)`).join(', ')}</p>`:''}
   <div class="sh"><span>Body po úlohách</span></div><div class="ptab">${T.tasks.map((t,i)=>`<div class="${rs[i].pts===rs[i].max?'ok':rs[i].pts?'mid':'no'}"><b>${t.no}</b><span>${PQ.fmt(rs[i].pts)}/${rs[i].max}</span></div>`).join('')}</div>
-  ${reflect()}<div class="row"><button class="ghost" id="home">Úvod</button><button class="primary" id="again">Nový test</button></div></section>
-  ${lost.length?`<section class="card"><h3>Řešení (${lost.length})</h3><div class="rev" id="rev"></div></section>`:'<p class="note">Vše za plný počet bodů.</p>'}`;
+  ${reflect()}<div class="row"><button class="c-btn c-btn--secondary" id="home">Úvod</button><button class="c-btn c-btn--primary" id="again">Nový test</button></div></section>
+  ${lost.length?`<section class="a-card"><h3>Řešení (${lost.length})</h3><div class="rev" id="rev"></div></section>`:'<p class="note">Vše za plný počet bodů.</p>'}`;
   const rev=$('#rev');if(rev)lost.forEach(x=>{const d=document.createElement('div');d.className='rv';rev.appendChild(d);
     renderTask(x.t,d,T.ans[x.i],null,{closedSrc:true,work:false});markTask(x.t,d,T.ans[x.i],false);
     d.querySelectorAll('.sub').forEach((el,k)=>{const s=x.t.subs[k];if(x.r.rs[k].pts===s.pts){el.classList.add('fine');}else el.querySelector('.sfb').insertAdjacentHTML('afterbegin',`<div class="meta">Tvoje odpověď: ${ansHtml(s,T.ans[x.i][s.id])}</div>`);});
@@ -394,12 +394,15 @@ function examResults(T,timeUp){
   $('#home').onclick=home;$('#again').onclick=examTest;bindReflect();window.scrollTo(0,0);
 }
 
-/* tlačítko zpět: na úvodu → rozcestník, jinde → úvod Přijímaček */
-const back=document.querySelector('.bar .back');
+/* tlačítko zpět: na úvodu → rozcestník, jinde → úvod appky Nanečisto */
+const back=document.querySelector('.v-header .a-back');
 const CHEV='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>';
-let title='';const setTitle=t=>{title=t;};const h1=document.querySelector('.bar h1');
-const syncBack=()=>{const atHome=!!app.querySelector('#subj');h1.textContent=atHome?'Přijímačky':(title||'Přijímačky');back.innerHTML=CHEV+(atHome?'Aplikace':'Přijímačky');back.setAttribute('href',atHome?'../':'#');back.dataset.inner=atHome?'':'1';};
+let title='';const setTitle=t=>{title=t;};const h1=document.querySelector('.a-name h1');
+const syncBack=()=>{const atHome=!!app.querySelector('#subj');h1.textContent=atHome?'Nanečisto':(title||'Nanečisto');back.innerHTML=((window.VELA_ICONS&&window.VELA_ICONS.ui_back)||'')+'<span class="a-back__label">'+(atHome?'Přijímačky':'Nanečisto')+'</span>';back.setAttribute('href',atHome?'/#/prijimacky':'#');back.dataset.inner=atHome?'':'1';};
 new MutationObserver(syncBack).observe(app,{childList:true});
+/* segmentové přepínače: stav .on se zrcadlí do aria-pressed (vzhled z velappky.css) */
+const segSync=()=>app.querySelectorAll('.c-seg button').forEach(b=>{const v=String(b.classList.contains('on'));if(b.getAttribute('aria-pressed')!==v)b.setAttribute('aria-pressed',v);});
+new MutationObserver(segSync).observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
 back.addEventListener('click',e=>{if(!back.dataset.inner)return;e.preventDefault();if(timer&&!confirm('Opravdu ukončit test? Odpovědi se neuloží.'))return;home();});
 home();
 })();

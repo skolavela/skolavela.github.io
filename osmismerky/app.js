@@ -5,6 +5,7 @@ var LV = { '1': { size: 10, count: 10, all8: false }, '2': { size: 15, count: 18
 var st = { lvl: '1', topic: 0, own: '', title: '', size: 10, count: 10, all8: false, dia: true, sol: false, seed: 1 };
 try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); for (var k in sv) st[k] = sv[k]; } catch (e) {}
 if (!st.seed || st.seed === 1) st.seed = Math.floor(Math.random() * 1e6) + 1;
+var BRAND = '<span class="a-sheet__brand">' + ((window.VELA_ICONS && window.VELA_ICONS.ui_wave) || '') + 'skolavela.app</span>';
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
 TOPICS.forEach(function (t, i) { var o = document.createElement('option'); o.value = i; o.textContent = t.n; $('topic').appendChild(o); });
@@ -45,7 +46,7 @@ function fitWords(placed) {
 function sheet(res, title, withSol) {
   return '<h2>' + esc(title) + (withSol ? ' – řešení' : '') + '</h2>' + svg(res, withSol) +
     '<div class="words" style="' + fitWords(res.placed) + '">' + res.placed.map(function (p) { return '<span>' + esc(p.w) + '</span>'; }).join('') + '</div>' +
-    '<div class="foot">skolavela.app</div>';
+    '<div class="foot">' + BRAND + '</div>';
 }
 // Tisková sestava: pevné rozměry v mm, bez měření a bez CSS sloupců (spolehlivé i v Safari).
 function printPage(res, title, withSol) {
@@ -67,7 +68,7 @@ function printPage(res, title, withSol) {
   }
   t += '</table>';
   return '<div class="pp' + (withSol ? ' psol' : '') + '"><h1>' + esc(title) + (withSol ? ' – řešení' : '') + '</h1>' +
-    '<div class="pg">' + svg(res, withSol, size.toFixed(1)) + '</div>' + t + '<div class="pf">skolavela.app</div></div>';
+    '<div class="pg">' + svg(res, withSol, size.toFixed(1)) + '</div>' + t + '<div class="pf">' + BRAND + '</div></div>';
 }
 function render() {
   var res = Osm.generate({ words: words(), size: st.size, count: st.count, all8: st.all8, keepDia: st.dia, seed: st.seed });
@@ -78,21 +79,21 @@ function render() {
   document.body.classList.toggle('withsol', st.sol);
   $('title').placeholder = autoTitle();
   $('sizeVal').textContent = st.size + ' × ' + st.size; $('countVal').textContent = st.count;
-  for (var b of $('lvl').children) b.classList.toggle('on', b.dataset.v === st.lvl);
+  for (var b of $('lvl').children) b.setAttribute('aria-pressed', String(b.dataset.v === st.lvl));
   var info = 'Umístěno ' + res.placed.length + ' slov.';
   if (res.skipped.length) info += ' <b>Nevešlo se: ' + esc(res.skipped.join(', ')) + '.</b> Zvětšete mřížku nebo uberte slova.';
   $('info').innerHTML = info;
   try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
 }
-function sync() { $('topic').value = st.topic; $('own').value = st.own; $('title').value = st.title; $('size').value = st.size; $('count').value = st.count; $('all8').checked = st.all8; $('dia').checked = st.dia; $('sol').checked = st.sol; }
-$('lvl').onclick = function (e) { var v = e.target.dataset.v; if (!v) return; st.lvl = v; st.size = LV[v].size; st.count = LV[v].count; st.all8 = LV[v].all8; sync(); render(); };
+function sync() { $('topic').value = st.topic; $('own').value = st.own; $('title').value = st.title; $('size').value = st.size; $('count').value = st.count; ['all8', 'dia', 'sol'].forEach(function (k) { $(k).setAttribute('aria-checked', String(!!st[k])); }); }
+$('lvl').onclick = function (e) { var bt = e.target.closest('button'), v = bt && bt.dataset.v; if (!v) return; st.lvl = v; st.size = LV[v].size; st.count = LV[v].count; st.all8 = LV[v].all8; sync(); render(); };
 $('topic').onchange = function (e) { st.topic = +e.target.value; st.own = ''; $('own').value = ''; render(); };
 $('own').oninput = function (e) { st.own = e.target.value; render(); };
 $('clearOwn').onclick = function () { st.own = ''; $('own').value = ''; render(); };
 $('title').oninput = function (e) { st.title = e.target.value; render(); };
 $('size').oninput = function (e) { st.size = +e.target.value; render(); };
 $('count').oninput = function (e) { st.count = +e.target.value; render(); };
-['all8', 'dia', 'sol'].forEach(function (k) { $(k).onchange = function (e) { st[k] = e.target.checked; render(); }; });
+['all8', 'dia', 'sol'].forEach(function (k) { $(k).onclick = function () { st[k] = !st[k]; sync(); render(); }; });
 $('regen').onclick = function () { gcEvent('osmismerky-generate', 'Osmisměrka: nová osmisměrka'); st.seed = Math.floor(Math.random() * 1e9) + 1; render(); };
 $('print').onclick = function () { gcEvent('osmismerky-print', 'Osmisměrka: tisk'); window.print(); };
 sync(); render();
