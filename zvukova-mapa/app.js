@@ -396,7 +396,8 @@
       }
     });
     renderLegend();
-    setTimeout(function () { map.invalidateSize(); }, 80);
+    bindPanelToMap();
+    setTimeout(function () { syncShell(); }, 80);
   }
   function placeDraftMarker() {
     if (!st.addLatLng && !st.draft) return;
@@ -1093,7 +1094,7 @@
       await loadPlaces();
       showApp();
       if (!map) initMap();
-      else map.invalidateSize();
+      else syncShell();
       setSchool(st.school, true);
       syncMarkers();
       showPanel("hidden");
@@ -1106,6 +1107,21 @@
     }
   }
 
+  function syncShell() {
+    var header = document.querySelector(".v-header");
+    if (header) {
+      document.documentElement.style.setProperty("--zm-header-h", header.offsetHeight + "px");
+    }
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+    if (map) map.invalidateSize();
+  }
+  function bindPanelToMap() {
+    var panel = $("panel");
+    if (!panel || !window.L || !L.DomEvent || panel.getAttribute("data-zm-bound") === "1") return;
+    L.DomEvent.disableScrollPropagation(panel);
+    L.DomEvent.disableClickPropagation(panel);
+    panel.setAttribute("data-zm-bound", "1");
+  }
   function bindChrome() {
     $("gate-form").addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -1143,9 +1159,16 @@
       if (f) importJson(f);
     });
     window.addEventListener("resize", function () {
-      if (map) map.invalidateSize();
+      syncShell();
       if (st.sheet !== "hidden") showPanel(st.sheet === "collapsed" ? "collapsed" : "expanded");
     });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", syncShell);
+      window.visualViewport.addEventListener("scroll", function () { window.scrollTo(0, 0); });
+    }
+    window.addEventListener("scroll", function () { window.scrollTo(0, 0); }, { passive: true });
+    syncShell();
+    bindPanelToMap();
     document.addEventListener("visibilitychange", function () {
       if (!document.hidden) pollRefresh();
     });

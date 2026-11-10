@@ -3,11 +3,45 @@
 
 /* Zvuková mapa – rozvržení nad velappky.css. */
 
-.zm-app {
-  height: 100vh;
+/* Ukotvený shell: mapa začíná pod lištou, stránka se neposouvá. */
+html:has(body.zm-app),
+html:has(body.zm-app) body.zm-app {
+  height: 100%;
   height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0 !important;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: fixed;
+  inset: 0;
+}
+body.zm-app {
+  display: flex;
+  flex-direction: column;
+  touch-action: manipulation;
+}
+body.zm-app .v-header {
+  flex: 0 0 auto;
+  position: relative;
+  top: auto;
+  z-index: 30;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+body.zm-app .v-header__in {
+  min-height: var(--header-h);
+}
+.zm-app {
+  --zm-header-h: calc(var(--header-h) + env(safe-area-inset-top, 0px));
   overflow: hidden;
   overflow-x: hidden;
+  overscroll-behavior: none;
+}
+.zm-app input,
+.zm-app select,
+.zm-app textarea {
+  font-size: 16px;
 }
 
 .zm-skoly {
@@ -17,6 +51,7 @@
   transform: translateX(-50%);
   z-index: 11;
   min-width: 220px;
+  max-width: calc(100% - 24px);
   box-shadow: var(--shadow-card);
   background: var(--fill);
 }
@@ -240,8 +275,11 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   box-shadow: var(--shadow-card);
   z-index: 20;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 .zm-panel.is-hidden { display: none; }
 .zm-panel__top {
@@ -278,7 +316,10 @@
 .zm-panel__scroll {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 16px 22px 16px;
   display: flex;
   flex-direction: column;
@@ -414,7 +455,14 @@
 .zm-empty h2 { font-size: 22px; }
 .zm-empty p { margin: 0; color: var(--text-2); font-size: 15px; }
 
-.zm-form { display: flex; flex-direction: column; gap: 16px; }
+.zm-form { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.zm-form .c-field, .zm-form .c-seg { min-width: 0; max-width: 100%; }
+.zm-form .c-seg button {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .zm-form textarea.c-input {
   height: auto;
   min-height: 80px;
@@ -459,24 +507,28 @@
 
 .zm-app .v-footer { margin-top: 0; flex: 0 0 auto; }
 .zm-app .v-footer .v-clouds { height: 22px; color: var(--surface); }
-.zm-app .v-footer__in { padding: 8px var(--gutter) 14px; }
+.zm-app .v-footer__in { padding: 8px var(--gutter) calc(14px + env(safe-area-inset-bottom, 0px)); }
 
 /* Telefon a iPad na výšku: spodní list, mapa aspoň polovina obrazovky */
 @media (max-width: 899px), (orientation: portrait) and (max-width: 1366px) {
-  .zm-main { position: relative; display: block; }
-  .zm-stage { position: absolute; inset: 0; }
+  .zm-main { position: relative; display: block; overflow: hidden; }
+  .zm-stage { position: absolute; inset: 0; overflow: hidden; }
   .zm-panel {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     width: auto;
+    max-width: 100%;
     flex-basis: auto;
     height: 50%;
     max-height: 50%;
     border-radius: 20px 20px 0 0;
     box-shadow: var(--shadow-sheet);
     z-index: 20;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
   .zm-panel.is-collapsed {
     display: flex;
@@ -486,14 +538,18 @@
   .zm-panel.is-collapsed .zm-panel__scroll > :not(.zm-sheet-peek),
   .zm-panel.is-collapsed .zm-panel__foot { display: none; }
   .zm-handle { display: block; }
-  .zm-legend { bottom: 16px; }
+  .zm-legend,
   .zm-add { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
-  .zm-main:has(#panel:not(.is-hidden)) .zm-add { bottom: calc(50% + 16px); }
-  .zm-main:has(#panel.is-collapsed) .zm-add { bottom: calc(25% + 16px); }
+  .zm-main:has(#panel:not(.is-hidden)) .zm-add,
   .zm-main:has(#panel:not(.is-hidden)) .zm-legend { bottom: calc(50% + 16px); }
+  .zm-main:has(#panel.is-collapsed) .zm-add,
   .zm-main:has(#panel.is-collapsed) .zm-legend { bottom: calc(25% + 16px); }
   .zm-app:has(#app-main:not([hidden])) .v-footer { display: none; }
   .zm-tally { display: flex; }
+  .leaflet-control-attribution {
+    margin-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+  .zm-main:has(#panel:not(.is-hidden)) .leaflet-control-attribution { margin-bottom: 0 !important; }
 }
 
 .zm-tally { display: none; font-size: 13px; gap: 12px 16px; flex-wrap: wrap; align-items: center; }
@@ -515,8 +571,30 @@
   .zm-panel h2 { font-size: 22px; }
   .zm-panel__scroll { padding: 10px 16px 12px; gap: 14px; }
   .zm-panel__foot { padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
-  .zm-legend { left: 8px; max-width: calc(100% - 148px); }
+  .zm-legend {
+    left: 8px;
+    right: auto;
+    max-width: calc(100% - 148px);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+  .zm-legend::-webkit-scrollbar { display: none; }
+  .zm-chip {
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .zm-dot { width: 8px; height: 8px; }
   .v-logo--small { display: none; }
+  .zm-form__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 
 /* Statické stránky O aplikaci / Časté otázky (stejné jako Nanečisto) */
@@ -588,7 +666,7 @@
 .zm-lightbox[hidden] { display: none !important; }
 .zm-lightbox img {
   max-width: 100%;
-  max-height: calc(100vh - 72px);
+  max-height: calc(100dvh - 72px);
   object-fit: contain;
   border-radius: 8px;
 }
