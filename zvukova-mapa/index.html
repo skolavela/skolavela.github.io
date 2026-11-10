@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slyšíš? Vidím! Hledám… - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<meta name="description" content="Zvuková mapa okolí: místa, nahrávky a časová osa příběhu.">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611101945">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="style.css?v=202611101945">
+</head>
+<body class="is-app zm-app">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/">
+        <span data-icon="ui_back"></span><span class="a-back__label">Velappky</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-green" data-icon="zvukova"></span>
+        <div class="zm-name">
+          <h1>Slyšíš? Vidím! Hledám…</h1>
+          <span class="a-name__sub">Poslechem za původem našeho okolí.</span>
+        </div>
+      </div>
+    </div>
+    <div class="zm-actions">
+      <button class="c-btn c-btn--secondary" type="button" id="btn-color" aria-pressed="false">Barevná mapa</button>
+      <button class="c-btn c-btn--secondary" type="button" id="btn-panel" aria-pressed="true">Skrýt panel</button>
+      <button class="c-btn c-btn--primary" type="button" id="btn-add" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Přidat místo
+      </button>
+      <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+        <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="zm-main">
+  <div class="zm-stage">
+    <div class="zm-map" id="map" role="application" aria-label="Mapa Prahy"></div>
+    <div class="zm-legend" id="legend"></div>
+    <div class="zm-toast" id="toast" hidden></div>
+  </div>
+  <aside class="zm-panel" id="panel" aria-label="Detail místa"></aside>
+</main>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+    </div>
+  </div>
+</footer>
+
+
+<div class="zm-modal" id="pw-modal" hidden>
+  <form class="zm-modal__card" id="pw-form">
+    <h2>Heslo třídy</h2>
+    <p>Pro přidání nebo úpravu míst zadejte heslo, které vám dá učitelka.</p>
+    <label class="c-label" for="pw-input">Heslo třídy</label>
+    <input class="c-input" type="password" id="pw-input" name="password" autocomplete="current-password" required>
+    <p class="zm-modal__err" id="pw-err" hidden></p>
+    <div class="c-btns">
+      <button class="c-btn c-btn--secondary" type="button" id="pw-cancel">Zrušit</button>
+      <button class="c-btn c-btn--primary" type="submit">Pokračovat</button>
+    </div>
+  </form>
+</div>
+
+<input class="sr-only" type="file" id="import-file" accept="application/json,.json">
+
+<script src="/assets/icons.js?v=202611101945"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="app.js?v=202611101945"></script>
+<script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

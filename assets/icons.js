@@ -105,6 +105,13 @@
       '<rect x="19.5" y="10" width="9" height="9" rx="2.5" fill="currentColor"/>'
     ),
 
+    zvukova: svg(
+      '<path d="M7 11a5 5 0 0 1 5-5h16.5L34 12v25a5 5 0 0 1-5 5H12a5 5 0 0 1-5-5z" fill="currentColor"/>' +
+      '<path d="M20.5 16.5c-3.5 0-6.2 2.7-6.2 6 0 4.5 6.2 11.5 6.2 11.5s6.2-7 6.2-11.5c0-3.3-2.7-6-6.2-6z" fill="#FFFFFF"/>' +
+      '<circle cx="20.5" cy="22.4" r="2.3" fill="currentColor"/>' +
+      '<path d="M29 21.2c1.3-1.3 1.3-3.5 0-4.8M32.4 23.2c2.5-2.5 2.5-6.6 0-9.1" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round"/>'
+    ),
+
     /* ---- Náhradní ikony, když nová položka ještě nemá vlastní ---- */
     slozka: svg(
       '<path d="M5 13a5 5 0 0 1 5-5h9l4 5h15a5 5 0 0 1 5 5v17a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z" fill="currentColor"/>' +
