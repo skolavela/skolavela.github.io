@@ -77,6 +77,8 @@ function render() {
   $('sheet2').innerHTML = sheet(res, title, true);
   $('printout').innerHTML = printPage(res, title, false) + (st.sol ? printPage(res, title, true) : '');
   document.body.classList.toggle('withsol', st.sol);
+  var ownOn = !!st.own.trim();
+  $('topic').disabled = ownOn; $('topicField').classList.toggle('is-off', ownOn); $('ownNote').hidden = !ownOn;
   $('title').placeholder = autoTitle();
   $('sizeVal').textContent = st.size + ' × ' + st.size; $('countVal').textContent = st.count;
   for (var b of $('lvl').children) b.setAttribute('aria-pressed', String(b.dataset.v === st.lvl));

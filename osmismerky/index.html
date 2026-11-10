@@ -8,10 +8,10 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/velappky.css?v=202611101155">
 <style>@page { size: A4 portrait; }</style>
-<link rel="stylesheet" href="style.css?v=202611101155">
-<script src="topics.js?v=202611101155" defer></script>
+<link rel="stylesheet" href="style.css?v=202611102210">
+<script src="topics.js?v=202611102210" defer></script>
 <script src="engine.js?v=202611101155" defer></script>
-<script src="app.js?v=202611101155" defer></script>
+<script src="app.js?v=202611102210" defer></script>
 </head>
 <body class="is-app print-portrait">
 
@@ -37,6 +37,15 @@
 
   <section class="a-panel" aria-label="Nastavení">
     <div class="c-field">
+      <div class="c-row">
+        <label class="c-label" for="own">Vlastní slova</label>
+        <button class="o-clear" id="clearOwn" type="button">Vymazat</button>
+      </div>
+      <textarea class="c-input" id="own" rows="2" placeholder="Nepovinné – slova z vaší hodiny, oddělená čárkou nebo mezerou."></textarea>
+      <p class="c-meta o-ownnote" id="ownNote" hidden>Použijí se vlastní slova</p>
+    </div>
+
+    <div class="c-field">
       <span class="c-label" id="lbl-lvl">Úroveň</span>
       <div class="c-seg" role="group" aria-labelledby="lbl-lvl" id="lvl">
         <button type="button" data-v="1" aria-pressed="false">1. stupeň</button>
@@ -44,17 +53,9 @@
       </div>
     </div>
 
-    <div class="c-field">
+    <div class="c-field o-topic" id="topicField">
       <label class="c-label" for="topic">Téma</label>
       <select class="c-input" id="topic"></select>
-    </div>
-
-    <div class="c-field">
-      <div class="c-row">
-        <label class="c-label" for="own">Vlastní slova</label>
-        <button class="o-clear" id="clearOwn" type="button">Vymazat</button>
-      </div>
-      <textarea class="c-input" id="own" rows="2" placeholder="Nepovinné – slova oddělená čárkou nebo mezerou. Nahradí téma."></textarea>
     </div>
 
     <div class="c-field">

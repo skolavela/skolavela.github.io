@@ -5,6 +5,9 @@
 .o-clear { min-height: 32px; padding: 0; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; }
 textarea.c-input { height: auto; min-height: 64px; padding: 10px 12px; line-height: 1.4; resize: vertical; }
 .c-meta b { color: var(--text); }
+.o-ownnote { margin: 0; }
+.o-topic.is-off { opacity: .45; }
+.o-topic.is-off select { cursor: default; }
 
 .a-stage { flex-direction: column; align-items: center; gap: 20px; }
 .o-sheet { padding: 6% 7% 5%; gap: 0; color: var(--text); font-family: Lexend, var(--font); container-type: inline-size; flex: none; }
