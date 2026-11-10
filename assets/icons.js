@@ -90,6 +90,12 @@
       '<text x="11.4" y="14.6">5</text><text x="36.6" y="27.2">3</text><text x="24" y="39.8">8</text></g>'
     ),
 
+    vyjmenovana: svg(
+      '<path d="M9 6h22a5 5 0 0 1 5 5v26a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V11a5 5 0 0 1 5-5z" fill="currentColor"/>' +
+      '<text x="21" y="33" text-anchor="middle" font-family="' + F + '" font-size="22" font-weight="800" fill="#FFFFFF">y</text>' +
+      '<text x="34" y="22" text-anchor="middle" font-family="' + F + '" font-size="13" font-weight="700" fill="#FFFFFF" opacity="0.55">i</text>'
+    ),
+
     /* ---- Náhradní ikony, když nová položka ještě nemá vlastní ---- */
     slozka: svg(
       '<path d="M5 13a5 5 0 0 1 5-5h9l4 5h15a5 5 0 0 1 5 5v17a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z" fill="currentColor"/>' +

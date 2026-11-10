@@ -1,0 +1,79 @@
+/* Vyjmenovaná slova - jen to, co sdílený velappky.css nepokrývá. */
+.vs-start { display: flex; flex-direction: column; gap: 16px; }
+.vs-start .c-field { gap: 6px; }
+.vs-letters { display: flex; flex-direction: column; }
+.vs-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.vs-actions .c-btn { width: 100%; }
+
+.vs-quiz { display: flex; flex-direction: column; gap: 16px; }
+.vs-quiz .a-progress { width: 100%; }
+.vs-quiz .a-toolbar { align-items: center; }
+#app { width: 100%; max-width: 100%; overflow-x: hidden; }
+.vs-count { font-size: 15px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.vs-end { border: 0; background: none; padding: 0 4px; min-height: 44px; color: var(--accent); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+.vs-prompt {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+@media (max-width: 599px) {
+  .vs-prompt { font-size: 30px; }
+  .vs-choices.a-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.vs-gap, .vs-blank {
+  display: inline-block;
+  border-bottom: 3px solid var(--text);
+  vertical-align: baseline;
+  box-sizing: content-box;
+  line-height: 1;
+}
+.vs-gap { width: 1ch; height: 0.85em; }
+.vs-blank { min-width: 4.5ch; height: 0.85em; }
+.vs-fill { color: #1E7A32; font-weight: 700; }
+
+.vs-choices { margin-top: 2px; }
+.vs-choices .a-choice {
+  min-height: 72px;
+  font-size: 28px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.vs-choices .a-choice.vs-wide { font-size: 22px; }
+.vs-choices .a-choice:disabled { cursor: default; }
+
+.vs-why { margin: 4px 0 0; font-size: 15px; line-height: 1.4; color: var(--text-2); text-align: center; }
+.vs-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+.vs-result { display: flex; flex-direction: column; gap: 14px; }
+.vs-result h2 { margin: 0; font-size: 28px; font-weight: 700; text-align: center; }
+.vs-score { margin: 0; font-size: 19px; font-weight: 600; text-align: center; }
+.vs-miss { display: flex; flex-direction: column; gap: 12px; }
+.vs-miss h3 { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .02em; }
+.vs-miss-item { display: flex; flex-direction: column; gap: 2px; }
+.vs-miss-item b { font-size: 17px; }
+.vs-miss-item span { font-size: 15px; color: var(--text-2); }
+
+.vs-prehled { display: flex; flex-direction: column; gap: 20px; }
+.vs-prehled h2 { margin: 0; font-size: 22px; font-weight: 700; }
+.vs-letter { scroll-margin-top: calc(var(--header-h) + 12px); display: flex; flex-direction: column; gap: 8px; }
+.vs-letter h3 { margin: 0; font-size: 22px; font-weight: 700; }
+.vs-vyj, .vs-pri { margin: 0; font-size: 17px; line-height: 1.55; overflow-wrap: anywhere; }
+.vs-pri { color: var(--text-2); }
+.vs-weak { color: #C8174A; background: #FCE4EA; border-radius: 4px; padding: 0 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .c-track, .c-track::after, .a-choice, .vs-fill { transition: none !important; }
+}
+
+/* tři tlačítka ve výsledku pod sebou na úzkém displeji */
+.vs-result .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.vs-result .row > * { flex: 1 1 140px; }

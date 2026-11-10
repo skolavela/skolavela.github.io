@@ -25,7 +25,10 @@ window.VELAPPKY = [
         keywords: "cteni dyslexie tisk pdf" },
       { type: "app", id: "osmismerka", name: "Osmisměrka", short: "Z vlastních slov",
         url: "/osmismerky/", icon: "osmismerka", tone: "wine", grades: ["1", "2"],
-        keywords: "slova tisk reseni pdf" }
+        keywords: "slova tisk reseni pdf" },
+      { type: "app", id: "vyjmenovana", name: "Vyjmenovaná slova", short: "Doplň i nebo y",
+        url: "/vyjmenovana-slova/", icon: "vyjmenovana", tone: "pink", grades: ["1"],
+        keywords: "vyjmenovaná slova pravopis i y tvrdé měkké obojetné souhlásky 1. stupeň 3. třída" }
 
       /* Příklad podsložky - takhle se vnoří další úroveň:
       ,{ type: "folder", id: "cteni", name: "Čtení", icon: "cteni", tone: "pink",
