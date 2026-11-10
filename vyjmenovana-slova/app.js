@@ -279,29 +279,48 @@
       + '<button type="button" data-v="vety">Věty</button>'
       + '<button type="button" data-v="dvojice">Dvojice</button>'
       + "</div></div>"
-      + '<div class="c-field"><span class="c-label" id="lbl-letters">Písmena</span>'
-      + '<div class="vs-letters" role="group" aria-labelledby="lbl-letters" id="letters">'
-      + lettersHtml + "</div></div>"
       + '<div class="c-field"><span class="c-label" id="lbl-count">Počet otázek</span>'
       + '<div class="c-seg" role="group" aria-labelledby="lbl-count" id="count">'
       + '<button type="button" data-v="10">10</button>'
       + '<button type="button" data-v="20">20</button>'
       + '<button type="button" data-v="30">30</button>'
       + "</div></div>"
+      + '<div class="vs-opts">'
+      + '<button class="vs-more" type="button" id="more" aria-expanded="false" aria-controls="opts">'
+      + '<span class="vs-more__l">Možnosti</span><span class="vs-more__s" id="opts-sum"></span><span class="vs-more__chev" aria-hidden="true">›</span></button>'
+      + '<div class="vs-opts__body" id="opts" hidden>'
+      + '<div class="c-field"><span class="c-label" id="lbl-letters">Písmena</span>'
+      + '<div class="vs-letters" role="group" aria-labelledby="lbl-letters" id="letters">'
+      + lettersHtml + "</div></div>"
       + '<button class="c-switch" type="button" role="switch" id="pribuzne" aria-checked="' + settings.pribuzne + '">'
       + '<span>Příbuzná slova</span><span class="c-track" aria-hidden="true"></span></button>'
+      + "</div></div>"
       + '<p class="c-meta" id="start-err" hidden></p>'
       + '<div class="vs-actions">'
       + '<button class="c-btn c-btn--primary" type="button" id="start">Začít</button>'
       + '<button class="c-btn c-btn--secondary" type="button" id="to-prehled">Přehled slov</button>'
       + "</div></section>"
     );
+    function paintSummary() {
+      var all = settings.letters.length === LETTERS.length;
+      var sel = LETTERS.filter(function (L) { return settings.letters.indexOf(L) >= 0; });
+      var txt = all ? "Všechna písmena" : (sel.length === 1 ? "Písmeno " : "Písmena ") + sel.join(", ");
+      if (settings.mode !== "dvojice") txt += settings.pribuzne ? " · s příbuznými slovy" : " · bez příbuzných slov";
+      document.getElementById("opts-sum").textContent = txt;
+    }
+    document.getElementById("more").addEventListener("click", function () {
+      var body = document.getElementById("opts"), open = body.hidden;
+      body.hidden = !open;
+      this.setAttribute("aria-expanded", String(open));
+    });
     bindSeg(document.getElementById("mode"), settings.mode, function (v) {
       settings.mode = v;
       persist();
       document.getElementById("pribuzne").hidden = (v === "dvojice");
+      paintSummary();
     });
     document.getElementById("pribuzne").hidden = (settings.mode === "dvojice");
+    paintSummary();
     bindSeg(document.getElementById("count"), String(settings.count), function (v) {
       settings.count = Number(v);
       persist();
@@ -310,6 +329,7 @@
       settings.pribuzne = !settings.pribuzne;
       this.setAttribute("aria-checked", String(settings.pribuzne));
       persist();
+      paintSummary();
     });
     [].slice.call(document.querySelectorAll("#letters .c-switch")).forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -323,6 +343,7 @@
         }
         btn.setAttribute("aria-checked", String(!on));
         persist();
+        paintSummary();
       });
     });
     document.getElementById("start").addEventListener("click", function () { beginRound(null); });
