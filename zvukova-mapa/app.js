@@ -12,6 +12,7 @@
   var PHOTO_MAX = 2 * 1024 * 1024;
   var AUDIO_MAX = 5 * 1024 * 1024;
   var SCHOOL_ZOOM = 15;
+  var REC_MAX_MS = 180000;
 
   /* Souřadnice z Nominatim (OpenStreetMap), 10. 11. 2026:
      Hloubětín = Poděbradská 489/116, 198 00 Praha 14
@@ -22,7 +23,7 @@
   };
 
   var CATS = [
-    { id: "mech", name: "Mechanické", color: "#15438A", tone: "navy" },
+    { id: "mech", name: "Technické", color: "#15438A", tone: "navy" },
     { id: "priroda", name: "Přírodní", color: "#1E7A32", tone: "green" },
     { id: "lide", name: "Lidské", color: "#C8174A", tone: "pink" },
     { id: "jine", name: "Jiné", color: "#7A2982", tone: "purple" }
@@ -125,6 +126,33 @@
     toastTimer = setTimeout(function () { el.hidden = true; }, ms || 2800);
   }
 
+  function recMaxMs() {
+    var n = typeof window.__ZM_REC_MAX_MS === "number" ? window.__ZM_REC_MAX_MS : REC_MAX_MS;
+    return n > 0 ? n : REC_MAX_MS;
+  }
+  function fmtMmSs(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    var m = Math.floor(s / 60);
+    s = s % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function todayISO() {
+    var d = new Date();
+    var m = d.getMonth() + 1, day = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (day < 10 ? "0" : "") + day;
+  }
+  function formatDateCZ(iso) {
+    if (!iso) return "";
+    var p = String(iso).slice(0, 10).split("-");
+    if (p.length !== 3) return "";
+    return Number(p[2]) + ". " + Number(p[1]) + ". " + p[0];
+  }
+  function placePhotos(place) {
+    if (place && Array.isArray(place.photos) && place.photos.length) return place.photos.filter(function (x) { return x && (x.url || (x.file && x.file.preview)); });
+    if (place && place.photo_url) return [{ path: null, url: place.photo_url }];
+    return [];
+  }
+
   async function api(url, payload) {
     var res = await fetch(url, {
       method: "POST",
@@ -134,9 +162,15 @@
     var data = {};
     try { data = await res.json(); } catch (e) { data = {}; }
     if (res.status === 401) {
-      var err = new Error(data.error || "Heslo nesedí.");
-      err.code = 401;
-      throw err;
+      var err401 = new Error(data.error || "Heslo nesedí.");
+      err401.code = 401;
+      throw err401;
+    }
+    if (res.status === 409) {
+      var err409 = new Error(data.error || "Mezitím to upravil někdo jiný. Načetla jsem novou verzi, zkus úpravu znovu.");
+      err409.code = 409;
+      err409.place = data.place;
+      throw err409;
     }
     if (!res.ok || data.error) throw new Error(data.error || "Požadavek se nezdařil.");
     return data;
@@ -147,6 +181,22 @@
     st.role = data.role || "class";
     st.places = data.places || [];
     $("teacher-bar").hidden = !isTeacher();
+  }
+  async function pollRefresh() {
+    if (!st.unlocked || document.hidden || st.busy) return;
+    var formOpen = st.mode === "add" || st.mode === "edit";
+    try {
+      await loadPlaces();
+      syncMarkers();
+      if (formOpen) return;
+      if (st.selectedId && !st.places.some(function (p) { return p.id === st.selectedId; })) {
+        st.selectedId = null;
+        showPanel("hidden");
+      }
+      if (st.mode === "view") renderPanel();
+    } catch (err) {
+      if (err.code === 401) lock();
+    }
   }
 
   async function write(payload) {
@@ -198,10 +248,22 @@
       img.src = url;
     });
   }
+  function audioDuration(file) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file);
+      var a = document.createElement("audio");
+      a.preload = "metadata";
+      a.onloadedmetadata = function () { URL.revokeObjectURL(url); resolve(a.duration); };
+      a.onerror = function () { URL.revokeObjectURL(url); resolve(NaN); };
+      a.src = url;
+    });
+  }
   async function prepareAudio(file) {
     if (file.size > AUDIO_MAX) throw new Error("Nahrávka je větší než 5 MB.");
     var data = await fileToDataUrl(file);
     var warn = file.size > 3 * 1024 * 1024 ? "Nahrávka je poměrně velká (" + (file.size / 1048576).toFixed(1) + " MB)." : "";
+    var dur = await audioDuration(file);
+    if (dur > 180) warn = (warn ? warn + " " : "") + "Nahrávka je delší než 3 minuty. Zkus ji zkrátit.";
     return { mime: file.type || "audio/webm", data: data, preview: data, warn: warn, bytes: file.size };
   }
   function pickMime() {
@@ -239,16 +301,43 @@
     rec.start();
     st.rec = rec;
     st.recFor = target;
+    st.recStarted = Date.now();
+    clearInterval(st.recClock);
+    st.recClock = setInterval(function () {
+      updateRecLabel();
+      if (st.recStarted && Date.now() - st.recStarted >= recMaxMs()) stopRec(false);
+    }, 200);
     renderPanel();
+    updateRecLabel();
     gc("Zvuková mapa: nahrávka");
+  }
+  function updateRecLabel() {
+    var el = $("rec-clock");
+    if (!el || !st.recStarted) return;
+    el.textContent = fmtMmSs(Date.now() - st.recStarted) + " / " + fmtMmSs(recMaxMs());
   }
   function stopRec(discard) {
     if (!st.rec) return;
+    clearInterval(st.recClock);
+    st.recClock = null;
+    st.recStarted = 0;
     if (discard) {
       var rec = st.rec;
       rec.onstop = function () { st.rec = null; renderPanel(); };
     }
     if (st.rec.state !== "inactive") st.rec.stop();
+  }
+  function openLightbox(src) {
+    var box = $("lightbox");
+    if (!box || !src) return;
+    $("lightbox-img").src = src;
+    box.hidden = false;
+  }
+  function closeLightbox() {
+    var box = $("lightbox");
+    if (!box) return;
+    box.hidden = true;
+    $("lightbox-img").removeAttribute("src");
   }
   function applyMedia(target, kind, media) {
     if (target === "place") { st.draft[kind] = media; st.draft["clear_" + kind] = false; }
@@ -376,12 +465,12 @@
       st.addLatLng = null;
       st.draft = null;
       clearDraftMarker();
-      map.getContainer().classList.add("leaflet-crosshair");
+      if (map) map.getContainer().classList.add("leaflet-crosshair");
       $("btn-add").setAttribute("aria-pressed", "true");
       toast("Klepni do mapy, kde jsi zvuk slyšel.", 4000);
     } else {
       st.mode = "view";
-      map.getContainer().classList.remove("leaflet-crosshair");
+      if (map) map.getContainer().classList.remove("leaflet-crosshair");
       $("btn-add").setAttribute("aria-pressed", "false");
       clearDraftMarker();
     }
@@ -421,6 +510,13 @@
     if (kind === "photo") return "<div class=\"zm-slot\">" + ICO.photo + "<span>Zatím bez fotografie</span></div>";
     return "<div class=\"zm-slot\">" + ICO.sound + "<span>Zatím bez zvuku</span></div>";
   }
+  function photosView(place) {
+    var list = placePhotos(place);
+    if (!list.length) return "<div class=\"zm-slot\">" + ICO.photo + "<span>Zatím bez fotografie</span></div>";
+    return "<div class=\"zm-phgrid\">" + list.map(function (ph) {
+      return "<button type=\"button\" class=\"zm-ph__open\" data-lightbox=\"" + esc(ph.url) + "\"><img src=\"" + esc(ph.url) + "\" alt=\"Fotografie místa\"></button>";
+    }).join("") + "</div>";
+  }
   function closeBtn() {
     return "<button class=\"zm-close\" type=\"button\" id=\"btn-close\" aria-label=\"Zavřít panel\">" + ICO.close + "</button>";
   }
@@ -430,21 +526,25 @@
     var ev = evs.find(function (e) { return e.id === st.eventId; }) || evs[evs.length - 1];
     var badge = place.hidden ? "<span class=\"zm-badge\">Skryté</span>" : "";
     var who = place.author ? "<p class=\"zm-author\">Kdo: " + esc(place.author) + "</p>" : "";
+    var recorded = place.recorded_at ? "<p class=\"zm-author\">Nahráno: " + esc(formatDateCZ(place.recorded_at)) + "</p>" : "";
     var axis = evs.length ? evs.map(function (e) {
       var cur = ev && e.id === ev.id;
+      var when = e.when_exact ? e.when_exact : e.year;
       return "<button type=\"button\" class=\"zm-axis__item" + (e.hidden ? " is-hidden" : "") + "\" data-event=\"" + esc(e.id) + "\" aria-current=\"" + (cur ? "true" : "false") + "\">" +
         "<span class=\"zm-axis__dot\"></span>" +
-        "<span class=\"zm-axis__year\">" + esc(e.year) + "</span>" +
+        "<span class=\"zm-axis__year\">" + esc(when) + "</span>" +
         "<span class=\"zm-axis__title\">" + esc(e.title) + "</span></button>";
     }).join("") : "";
     var evHtml = "";
     if (ev) {
+      var evWhen = ev.when_exact ? ev.when_exact : ev.year;
       evHtml = "<div class=\"zm-event\">" +
-        "<div class=\"zm-event__year\">" + esc(ev.year) + (ev.hidden ? " · skryté" : "") + "</div>" +
+        "<div class=\"zm-event__year\">" + esc(evWhen) + (ev.hidden ? " · skryté" : "") + "</div>" +
         "<h4>" + esc(ev.title) + "</h4>" +
         (ev.text ? "<p>" + esc(ev.text) + "</p>" : "") +
+        (ev.author ? "<p class=\"zm-author\">Kdo: " + esc(ev.author) + "</p>" : "") +
         (ev.source ? "<p class=\"zm-source\">Odkud: " + esc(ev.source) + "</p>" : "") +
-        (ev.photo_url || ev.audio_url ? "<div class=\"zm-media\">" + slotView(ev.photo_url, "photo") + slotView(ev.audio_url, "audio") + "</div>" : "") +
+        (ev.photo_url ? "<div class=\"zm-media\">" + slotView(ev.photo_url, "photo") + "</div>" : "") +
         (isTeacher() ? (ev.hidden
           ? "<button type=\"button\" class=\"zm-link\" id=\"btn-restore-entry\">Obnovit zastavení</button>"
           : "<button type=\"button\" class=\"zm-link zm-link--danger\" id=\"btn-hide-entry\">Skrýt zastavení</button>") : "") +
@@ -458,11 +558,11 @@
       "<div class=\"zm-panel__top\">" + closeBtn() + "</div>" +
       "<div class=\"zm-panel__scroll\">" +
       "<div class=\"zm-sheet-peek\"><div class=\"zm-kicker\"><span class=\"zm-cat\"><span class=\"zm-dot\" style=\"background:" + c.color + "\"></span>" + esc(c.name) + "</span>" + badge + "</div>" +
-      "<h2>" + esc(place.title) + "</h2>" + who + "</div>" +
+      "<h2>" + esc(place.title) + "</h2>" + who + recorded + "</div>" +
       (place.description ? "<p class=\"zm-desc\">" + esc(place.description) + "</p>" : "") +
-      "<div class=\"zm-block\"><h3>Zvuk a fotografie místa</h3><div class=\"zm-media\">" +
-      slotView(place.audio_url, "audio") + slotView(place.photo_url, "photo") +
-      "</div></div>" +
+      "<div class=\"zm-block\"><h3>Zvuk a fotografie místa</h3>" +
+      slotView(place.audio_url, "audio") + photosView(place) +
+      "</div>" +
       "<div class=\"zm-block\"><h3>Historie zvuku <span>— časová osa příběhu</span></h3>" + timeline + "</div>" +
       "</div>" +
       "<div class=\"zm-panel__foot\">" +
@@ -490,15 +590,27 @@
         : "<button type=\"button\" class=\"c-btn c-btn--secondary\" data-rec=\"" + target + "\">" + ICO.mic + " Nahrát</button>";
     }
     return "<div class=\"zm-upload\"><span class=\"c-label\">" + esc(label) + "</span>" + body + warn +
-      (recOn ? "<div class=\"zm-rec is-on\"><span class=\"zm-rec__dot\"></span>Nahrávám…</div>" : "") +
+      (recOn ? "<div class=\"zm-rec is-on\"><span class=\"zm-rec__dot\"></span><span id=\"rec-clock\">0:00 / " + fmtMmSs(recMaxMs()) + "</span></div>" : "") +
       "<div class=\"zm-upload__btns\">" +
       "<label class=\"c-btn c-btn--secondary\"><input class=\"sr-only\" type=\"file\" accept=\"" + (kind === "photo" ? "image/*" : "audio/*") + "\" data-upload=\"" + target + "\" data-kind=\"" + kind + "\">Vybrat soubor</label>" +
       recBtn +
       (has ? "<button type=\"button\" class=\"zm-link zm-link--danger\" data-clear=\"" + target + "\" data-kind=\"" + kind + "\">Odebrat</button>" : "") +
       "</div></div>";
   }
+  function photosField(d) {
+    var items = d.photos || [];
+    var cells = items.map(function (ph, i) {
+      var src = (ph.file && ph.file.preview) || ph.url;
+      return "<div class=\"zm-ph\"><button type=\"button\" class=\"zm-ph__open\" data-lightbox=\"" + esc(src) + "\"><img src=\"" + esc(src) + "\" alt=\"\"></button>" +
+        "<button type=\"button\" class=\"zm-link zm-link--danger\" data-del-photo=\"" + i + "\">Odebrat</button></div>";
+    }).join("");
+    var add = items.length < 6
+      ? "<label class=\"c-btn c-btn--secondary\"><input class=\"sr-only\" type=\"file\" accept=\"image/*\" id=\"f-photos\" multiple>Přidat fotku</label>"
+      : "";
+    return "<div class=\"zm-upload\"><span class=\"c-label\">Fotografie (nejvýš 6)</span><div class=\"zm-phgrid\">" + cells + "</div>" + add + "</div>";
+  }
   function emptyEntry() {
-    return { id: null, year: "", title: "", source: "", text: "", sort: 0, photo_url: null, audio_url: null, photo: null, audio: null, clear_photo: false, clear_audio: false };
+    return { id: null, year: "", when_exact: "", title: "", author: "", source: "", text: "", sort: 0, photo_url: null, photo: null, clear_photo: false, updated_at: null };
   }
   function openForm(mode, place) {
     st.mode = mode;
@@ -507,8 +619,8 @@
         id: null, category: "mech", title: "", author: "", description: "",
         lat: st.addLatLng ? st.addLatLng.lat : schoolLatLng()[0],
         lng: st.addLatLng ? st.addLatLng.lng : schoolLatLng()[1],
-        photo_url: null, audio_url: null, photo: null, audio: null,
-        clear_photo: false, clear_audio: false, entries: []
+        recorded_at: todayISO(), photos: [], audio_url: null, audio: null,
+        clear_audio: false, entries: []
       };
       placeDraftMarker();
     } else {
@@ -516,13 +628,15 @@
       st.draft = {
         id: place.id, category: place.category, title: place.title, author: place.author || "",
         description: place.description || "", lat: place.lat, lng: place.lng,
-        photo_url: place.photo_url, audio_url: place.audio_url, photo: null, audio: null,
-        clear_photo: false, clear_audio: false,
+        recorded_at: place.recorded_at || todayISO(), updated_at: place.updated_at,
+        photos: placePhotos(place).map(function (ph) { return { path: ph.path || null, url: ph.url, file: null }; }),
+        audio_url: place.audio_url, audio: null, clear_audio: false,
         entries: evs.map(function (e) {
           return {
-            id: e.id, year: e.year, title: e.title, source: e.source || "", text: e.text || "",
-            sort: e.sort, photo_url: e.photo_url, audio_url: e.audio_url,
-            photo: null, audio: null, clear_photo: false, clear_audio: false, hidden: e.hidden
+            id: e.id, year: e.year, when_exact: e.when_exact || "", title: e.title,
+            author: e.author || "", source: e.source || "", text: e.text || "",
+            sort: e.sort, photo_url: e.photo_url, photo: null, clear_photo: false,
+            hidden: e.hidden, updated_at: e.updated_at
           };
         })
       };
@@ -540,13 +654,18 @@
     d.title = ($("f-title") || {}).value || "";
     d.author = ($("f-author") || {}).value || "";
     d.description = ($("f-desc") || {}).value || "";
+    d.recorded_at = ($("f-recorded") || {}).value || d.recorded_at;
     d.entries.forEach(function (e, i) {
       var yearEl = document.querySelector("[data-eyear=\"" + i + "\"]");
+      var whenEl = document.querySelector("[data-ewhen=\"" + i + "\"]");
       var titleEl = document.querySelector("[data-etitle=\"" + i + "\"]");
+      var whoEl = document.querySelector("[data-eauthor=\"" + i + "\"]");
       var srcEl = document.querySelector("[data-esource=\"" + i + "\"]");
       var textEl = document.querySelector("[data-etext=\"" + i + "\"]");
       if (yearEl) e.year = yearEl.value;
+      if (whenEl) e.when_exact = whenEl.value;
       if (titleEl) e.title = titleEl.value;
+      if (whoEl) e.author = whoEl.value;
       if (srcEl) e.source = srcEl.value;
       if (textEl) e.text = textEl.value;
       e.sort = i;
@@ -563,16 +682,21 @@
         (e.id ? "" : "<button type=\"button\" class=\"zm-link zm-link--danger\" data-del-entry=\"" + i + "\">Odebrat ze seznamu</button>") + "</div>" +
         "<div class=\"zm-form__row\">" +
         "<div class=\"c-field\"><label class=\"c-label\" for=\"ey-" + i + "\">Rok</label>" +
-        "<input class=\"c-input\" id=\"ey-" + i + "\" data-eyear=\"" + i + "\" type=\"number\" min=\"1\" max=\"3000\" value=\"" + esc(e.year) + "\"></div>" +
+        "<input class=\"c-input\" id=\"ey-" + i + "\" data-eyear=\"" + i + "\" type=\"number\" min=\"1\" max=\"3000\" required value=\"" + esc(e.year) + "\">" +
+        "<p class=\"zm-help\">Když nevíš přesně, napiš přibližně.</p></div>" +
+        "<div class=\"c-field\"><label class=\"c-label\" for=\"ew-" + i + "\">Kdy přesně</label>" +
+        "<input class=\"c-input\" id=\"ew-" + i + "\" data-ewhen=\"" + i + "\" type=\"text\" maxlength=\"80\" placeholder=\"jaro 1891, 90. léta…\" value=\"" + esc(e.when_exact || "") + "\"></div>" +
+        "</div>" +
         "<div class=\"c-field\"><label class=\"c-label\" for=\"et-" + i + "\">Název</label>" +
         "<input class=\"c-input\" id=\"et-" + i + "\" data-etitle=\"" + i + "\" type=\"text\" maxlength=\"120\" value=\"" + esc(e.title) + "\"></div>" +
-        "</div>" +
         "<div class=\"c-field\"><label class=\"c-label\" for=\"ex-" + i + "\">Co jsi zjistil(a)</label>" +
         "<textarea class=\"c-input\" id=\"ex-" + i + "\" data-etext=\"" + i + "\" rows=\"3\">" + esc(e.text) + "</textarea></div>" +
+        "<div class=\"c-field\"><label class=\"c-label\" for=\"ea-" + i + "\">Kdo</label>" +
+        "<input class=\"c-input\" id=\"ea-" + i + "\" data-eauthor=\"" + i + "\" type=\"text\" maxlength=\"80\" value=\"" + esc(e.author || "") + "\">" +
+        "<p class=\"zm-help\">Třída nebo křestní jméno, bez příjmení</p></div>" +
         "<div class=\"c-field\"><label class=\"c-label\" for=\"es-" + i + "\">Odkud to víš</label>" +
         "<input class=\"c-input\" id=\"es-" + i + "\" data-esource=\"" + i + "\" type=\"text\" maxlength=\"200\" placeholder=\"od babičky, z kroniky…\" value=\"" + esc(e.source) + "\">" +
         "<p class=\"zm-help\">Nepovinné</p></div>" +
-        mediaField("Zvuk", i, "audio", e.audio_url, e.audio, e.clear_audio) +
         mediaField("Fotka", i, "photo", e.photo_url, e.photo, e.clear_photo) +
         "</div>";
     }).join("");
@@ -584,7 +708,9 @@
       "<div class=\"c-field\"><label class=\"c-label\" for=\"f-title\">Název</label>" +
       "<input class=\"c-input\" id=\"f-title\" type=\"text\" maxlength=\"120\" required value=\"" + esc(d.title) + "\"></div>" +
       mediaField("Zvuk", "place", "audio", d.audio_url, d.audio, d.clear_audio) +
-      mediaField("Fotka", "place", "photo", d.photo_url, d.photo, d.clear_photo) +
+      "<div class=\"c-field\"><label class=\"c-label\" for=\"f-recorded\">Kdy jsi zvuk nahrál(a)</label>" +
+      "<input class=\"c-input\" id=\"f-recorded\" type=\"date\" value=\"" + esc(d.recorded_at || todayISO()) + "\"></div>" +
+      photosField(d) +
       "<div class=\"c-field\"><label class=\"c-label\" for=\"f-desc\">Popis</label>" +
       "<textarea class=\"c-input\" id=\"f-desc\" rows=\"3\">" + esc(d.description) + "</textarea></div>" +
       "<div class=\"c-field\"><label class=\"c-label\" for=\"f-author\">Kdo</label>" +
@@ -744,6 +870,37 @@
     $("panel").querySelectorAll("[data-stop]").forEach(function (btn) {
       btn.addEventListener("click", function () { stopRec(false); });
     });
+    $("panel").querySelectorAll("[data-lightbox]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openLightbox(btn.getAttribute("data-lightbox"));
+      });
+    });
+    $("panel").querySelectorAll("[data-del-photo]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        readForm();
+        var i = parseInt(btn.getAttribute("data-del-photo"), 10);
+        if (st.draft && st.draft.photos) st.draft.photos.splice(i, 1);
+        renderPanel();
+      });
+    });
+    var addPh = $("f-photos");
+    if (addPh) addPh.addEventListener("change", async function () {
+      var files = addPh.files ? Array.prototype.slice.call(addPh.files) : [];
+      readForm();
+      if (!st.draft.photos) st.draft.photos = [];
+      for (var i = 0; i < files.length; i++) {
+        if (st.draft.photos.length >= 6) { toast("K místu lze přidat nejvýš 6 fotek."); break; }
+        try {
+          var media = await compressPhoto(files[i]);
+          st.draft.photos.push({ path: null, url: media.preview, file: media });
+          if (media.warn) toast(media.warn, 4000);
+        } catch (err) { toast(err.message || "Soubor se nepodařilo načíst."); }
+      }
+      renderPanel();
+    });
+    var cur = $("panel").querySelector(".zm-axis__item[aria-current='true']");
+    if (cur && cur.scrollIntoView) cur.scrollIntoView({ inline: "center", block: "nearest" });
   }
 
   async function savePlace() {
@@ -757,11 +914,16 @@
     try {
       var payload = {
         action: d.id ? "update_place" : "create_place",
-        place: { id: d.id, category: d.category, title: d.title.trim(), author: d.author.trim(), description: d.description.trim(), lat: d.lat, lng: d.lng },
-        clear_photo: !!d.clear_photo && !d.photo,
-        clear_audio: !!d.clear_audio && !d.audio
+        place: {
+          id: d.id, category: d.category, title: d.title.trim(), author: d.author.trim(),
+          description: d.description.trim(), lat: d.lat, lng: d.lng,
+          recorded_at: d.recorded_at || todayISO(), updated_at: d.updated_at
+        },
+        keep_photos: (d.photos || []).filter(function (ph) { return ph.path && !ph.file; }).map(function (ph) { return ph.path; }),
+        photos: (d.photos || []).filter(function (ph) { return ph.file; }).map(function (ph) { return { mime: ph.file.mime, data: ph.file.data }; }),
+        clear_audio: !!d.clear_audio && !d.audio,
+        entry_stamps: (d.entries || []).filter(function (e) { return e.id; }).map(function (e) { return { id: e.id, updated_at: e.updated_at }; })
       };
-      if (d.photo) payload.photo = { mime: d.photo.mime, data: d.photo.data };
       if (d.audio) payload.audio = { mime: d.audio.mime, data: d.audio.data };
       var out = await write(payload);
       var placeId = out.place.id;
@@ -770,12 +932,15 @@
         if (!String(e.title || "").trim() || !e.year) continue;
         var ep = {
           action: e.id ? "update_entry" : "add_entry",
-          entry: { id: e.id, place_id: placeId, year: e.year, title: String(e.title).trim(), source: String(e.source || "").trim(), text: String(e.text || "").trim(), sort: j },
-          clear_photo: !!e.clear_photo && !e.photo,
-          clear_audio: !!e.clear_audio && !e.audio
+          entry: {
+            id: e.id, place_id: placeId, year: e.year, when_exact: String(e.when_exact || "").trim(),
+            title: String(e.title).trim(), author: String(e.author || "").trim(),
+            source: String(e.source || "").trim(), text: String(e.text || "").trim(),
+            sort: j, updated_at: e.updated_at
+          },
+          clear_photo: !!e.clear_photo && !e.photo
         };
         if (e.photo) ep.photo = { mime: e.photo.mime, data: e.photo.data };
-        if (e.audio) ep.audio = { mime: e.audio.mime, data: e.audio.data };
         await write(ep);
       }
       gc(d.id ? "Zvuková mapa: úprava" : "Zvuková mapa: přidání místa");
@@ -784,6 +949,20 @@
       toast("Uloženo.");
     } catch (err) {
       if (err.code === 401) { lock(); return; }
+      if (err.code === 409) {
+        try { await loadPlaces(); } catch (e2) {}
+        st.busy = false;
+        var fresh = err.place || (d.id && st.places.find(function (p) { return p.id === d.id; }));
+        if (fresh) {
+          var idx = st.places.findIndex(function (p) { return p.id === fresh.id; });
+          if (idx >= 0) st.places[idx] = fresh;
+          else st.places.push(fresh);
+          openForm("edit", fresh);
+          showPanel("expanded");
+        } else renderPanel();
+        toast(err.message);
+        return;
+      }
       toast(err.message || "Uložení se nezdařilo.");
       st.busy = false;
       renderPanel();
@@ -833,12 +1012,13 @@
       places: st.places.map(function (p) {
         return {
           id: p.id, category: p.category, title: p.title, author: p.author, description: p.description,
-          lat: p.lat, lng: p.lng, hidden: !!p.hidden,
+          lat: p.lat, lng: p.lng, hidden: !!p.hidden, recorded_at: p.recorded_at || null,
           photo_url: p.photo_url || null, audio_url: p.audio_url || null,
           timeline: entriesOf(p).map(function (e) {
             return {
-              id: e.id, year: e.year, title: e.title, source: e.source, text: e.text, sort: e.sort, hidden: !!e.hidden,
-              photo_url: e.photo_url || null, audio_url: e.audio_url || null
+              id: e.id, year: e.year, when_exact: e.when_exact || "", title: e.title,
+              author: e.author || "", source: e.source, text: e.text, sort: e.sort, hidden: !!e.hidden,
+              photo_url: e.photo_url || null
             };
           })
         };
@@ -868,14 +1048,14 @@
         var p = list[i];
         var out = await write({
           action: "create_place",
-          place: { category: p.category, title: p.title, author: p.author || "", description: p.description || "", lat: p.lat, lng: p.lng }
+          place: { category: p.category, title: p.title, author: p.author || "", description: p.description || "", lat: p.lat, lng: p.lng, recorded_at: p.recorded_at || null }
         });
         var evs = p.timeline || p.timeline_entries || [];
         for (var j = 0; j < evs.length; j++) {
           var e = evs[j];
           await write({
             action: "add_entry",
-            entry: { place_id: out.place.id, year: e.year, title: e.title, source: e.source || "", text: e.text || "", sort: j }
+            entry: { place_id: out.place.id, year: e.year, when_exact: e.when_exact || "", title: e.title, author: e.author || "", source: e.source || "", text: e.text || "", sort: j }
           });
         }
         n++;
@@ -966,6 +1146,42 @@
       if (map) map.invalidateSize();
       if (st.sheet !== "hidden") showPanel(st.sheet === "collapsed" ? "collapsed" : "expanded");
     });
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) pollRefresh();
+    });
+    setInterval(pollRefresh, 20000);
+    var lb = $("lightbox");
+    if (lb) {
+      $("lightbox-close").addEventListener("click", closeLightbox);
+      lb.addEventListener("click", function (e) { if (e.target === lb) closeLightbox(); });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeLightbox();
+    });
+    window.__ZM_test = {
+      poll: pollRefresh,
+      addAt: function (lat, lng) {
+        st.addLatLng = { lat: lat, lng: lng };
+        setAddMode(true);
+        openForm("add");
+        showPanel("expanded");
+      },
+      selectedId: function () { return st.selectedId; },
+      recMaxMs: recMaxMs,
+      places: function () {
+        return st.places.map(function (p) { return { id: p.id, title: p.title, updated_at: p.updated_at }; });
+      },
+      open: function (id) {
+        var p = st.places.filter(function (x) { return x.id === id; })[0];
+        if (!p) return false;
+        st.selectedId = id;
+        st.mode = "view";
+        renderPanel();
+        showPanel("expanded");
+        return true;
+      },
+      hidden: function () { return document.hidden; }
+    };
   }
 
   async function init() {

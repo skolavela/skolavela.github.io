@@ -135,6 +135,24 @@ async function sign(sb: SupabaseClient, path: string | null | undefined): Promis
   const { data } = await sb.storage.from(BUCKET).createSignedUrl(path, 3600);
   return data?.signedUrl ?? null;
 }
+function photoList(paths: unknown, fallback: unknown): string[] {
+  if (Array.isArray(paths)) return paths.filter((p): p is string => typeof p === "string" && !!p);
+  if (typeof fallback === "string" && fallback) return [fallback];
+  return [];
+}
+function sameTs(a: unknown, b: unknown): boolean {
+  if (a == null || b == null || a === "" || b === "") return false;
+  const ta = new Date(String(a)).getTime();
+  const tb = new Date(String(b)).getTime();
+  if (!Number.isFinite(ta) || !Number.isFinite(tb)) return String(a) === String(b);
+  return Math.abs(ta - tb) < 5;
+}
+function asDate(v: unknown): string | null {
+  if (v == null || v === "") return null;
+  const s = String(v).trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
+}
+const CONFLICT = "Mezitím to upravil někdo jiný. Načetla jsem novou verzi, zkus úpravu znovu.";
 async function decoratePlace(sb: SupabaseClient, id: string, includeHidden: boolean) {
   const q = sb.from("places").select("*, timeline_entries(*)").eq("id", id);
   const { data } = await q.maybeSingle();
@@ -142,14 +160,18 @@ async function decoratePlace(sb: SupabaseClient, id: string, includeHidden: bool
   const entries = ((data.timeline_entries || []) as Record<string, unknown>[])
     .filter((e) => includeHidden || !e.hidden_at);
   const out: Record<string, unknown> = { ...data };
-  out.photo_url = await sign(sb, data.photo_path as string);
+  const paths = photoList(data.photo_paths, data.photo_path);
+  out.photos = await Promise.all(paths.map(async (path) => ({ path, url: await sign(sb, path) })));
+  out.photo_url = (out.photos as { url: string | null }[])[0]?.url ?? null;
   out.audio_url = await sign(sb, data.audio_path as string);
   delete out.photo_path;
+  delete out.photo_paths;
   delete out.audio_path;
   out.timeline_entries = await Promise.all(entries.map(async (e) => {
     const ev = { ...e };
     ev.photo_url = await sign(sb, e.photo_path as string);
     ev.audio_url = await sign(sb, e.audio_path as string);
+    ev.when_exact = e.when_exact || "";
     delete ev.photo_path;
     delete ev.audio_path;
     ev.hidden = !!e.hidden_at;
@@ -193,7 +215,7 @@ Deno.serve(async (req: Request) => {
     const entryIn = (body.entry || {}) as Record<string, unknown>;
 
     if (action === "hide_place" || action === "restore_place") {
-      if (!teacher) return json(req, { error: "Tohle může jen učitel." }, 403);
+      if (!teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
       const id = asText(placeIn.id || body.id, 64);
       if (!id) return json(req, { error: "Chybí místo." }, 400);
       const hidden_at = action === "hide_place" ? new Date().toISOString() : null;
@@ -202,13 +224,44 @@ Deno.serve(async (req: Request) => {
       return json(req, { ok: true, role, place: await decoratePlace(sb, id, true) });
     }
     if (action === "hide_entry" || action === "restore_entry") {
-      if (!teacher) return json(req, { error: "Tohle může jen učitel." }, 403);
+      if (!teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
       const id = asText(entryIn.id || body.id, 64);
       if (!id) return json(req, { error: "Chybí zastavení." }, 400);
       const hidden_at = action === "hide_entry" ? new Date().toISOString() : null;
       const { data, error } = await sb.from("timeline_entries").update({ hidden_at }).eq("id", id).select("place_id").maybeSingle();
       if (error || !data) return json(req, { error: "Zastavení se nepodařilo změnit." }, 500);
       return json(req, { ok: true, role, place: await decoratePlace(sb, data.place_id as string, true) });
+    }
+
+    if (action === "cleanup_orphans") {
+      if (!teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
+      const { data: places } = await sb.from("places").select("id, photo_path, photo_paths, audio_path");
+      const { data: entries } = await sb.from("timeline_entries").select("photo_path, audio_path");
+      const used = new Set<string>();
+      for (const p of places || []) {
+        if (p.photo_path) used.add(p.photo_path as string);
+        if (p.audio_path) used.add(p.audio_path as string);
+        for (const x of (Array.isArray(p.photo_paths) ? p.photo_paths : []) as string[]) {
+          if (x) used.add(x);
+        }
+      }
+      for (const e of entries || []) {
+        if (e.photo_path) used.add(e.photo_path as string);
+        if (e.audio_path) used.add(e.audio_path as string);
+      }
+      const orphans: string[] = [];
+      async function walk(prefix: string) {
+        const { data } = await sb.storage.from(BUCKET).list(prefix || undefined, { limit: 1000, offset: 0 });
+        for (const item of data || []) {
+          const path = prefix ? prefix + "/" + item.name : item.name;
+          const isFile = item.id != null && item.metadata != null;
+          if (!isFile) await walk(path);
+          else if (!used.has(path)) orphans.push(path);
+        }
+      }
+      await walk("");
+      if (orphans.length) await removeFiles(sb, orphans);
+      return json(req, { ok: true, removed: orphans });
     }
 
     if (action === "create_place" || action === "update_place") {
@@ -218,44 +271,82 @@ Deno.serve(async (req: Request) => {
       const description = asText(placeIn.description, 4000);
       const lat = asCoord(placeIn.lat, -90, 90);
       const lng = asCoord(placeIn.lng, -180, 180);
+      const recorded_at = asDate(placeIn.recorded_at);
       if (!CATEGORIES.has(category) || !title || lat == null || lng == null) {
         return json(req, { error: "Vyplňte kategorii, název a klepněte do mapy." }, 400);
       }
-      const photo = decodeMedia((body.photo as MediaIn) || null, "photo");
-      if (photo && "error" in photo) return json(req, { error: photo.error }, 400);
+      const incomingPhotos = Array.isArray(body.photos) ? body.photos as MediaIn[] : [];
+      if (!incomingPhotos.length && body.photo) incomingPhotos.push(body.photo as MediaIn);
+      const decodedPhotos: { bytes: Uint8Array; mime: string; ext: string }[] = [];
+      for (const item of incomingPhotos) {
+        const photo = decodeMedia(item || null, "photo");
+        if (photo && "error" in photo) return json(req, { error: photo.error }, 400);
+        if (photo && "bytes" in photo) decodedPhotos.push(photo);
+      }
       const audio = decodeMedia((body.audio as MediaIn) || null, "audio");
       if (audio && "error" in audio) return json(req, { error: audio.error }, 400);
-      const clearPhoto = body.clear_photo === true;
       const clearAudio = body.clear_audio === true;
 
       let id: string;
-      let prev: { photo_path: string | null; audio_path: string | null; hidden_at: string | null } | null = null;
+      let prev: { photo_path: string | null; photo_paths: string[] | null; audio_path: string | null; hidden_at: string | null; updated_at: string } | null = null;
+      const row = { category, title, author, description, lat, lng, recorded_at };
       if (action === "create_place") {
-        const { data, error } = await sb.from("places").insert({ category, title, author, description, lat, lng })
-          .select("id, photo_path, audio_path, hidden_at").single();
+        const { data, error } = await sb.from("places").insert(row)
+          .select("id, photo_path, photo_paths, audio_path, hidden_at, updated_at").single();
         if (error || !data) return json(req, { error: "Místo se nepodařilo uložit." }, 500);
         id = data.id;
       } else {
         id = asText(placeIn.id, 64);
         if (!id) return json(req, { error: "Chybí místo." }, 400);
-        const { data: existing } = await sb.from("places").select("id, photo_path, audio_path, hidden_at").eq("id", id).maybeSingle();
+        const { data: existing } = await sb.from("places")
+          .select("id, photo_path, photo_paths, audio_path, hidden_at, updated_at").eq("id", id).maybeSingle();
         if (!existing) return json(req, { error: "Místo neexistuje." }, 404);
-        if (existing.hidden_at && !teacher) return json(req, { error: "Tohle může jen učitel." }, 403);
-        prev = existing;
-        const { error } = await sb.from("places").update({ category, title, author, description, lat, lng }).eq("id", id);
+        if (existing.hidden_at && !teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
+        if (!sameTs(existing.updated_at, placeIn.updated_at)) {
+          return json(req, { error: CONFLICT, code: "conflict", place: await decoratePlace(sb, id, teacher) }, 409);
+        }
+        const stamps = Array.isArray(body.entry_stamps) ? body.entry_stamps as { id?: string; updated_at?: string }[] : [];
+        if (stamps.length) {
+          const { data: ents } = await sb.from("timeline_entries").select("id, updated_at").eq("place_id", id);
+          const map = new Map((ents || []).map((e) => [e.id as string, e.updated_at]));
+          for (const s of stamps) {
+            if (!s.id) continue;
+            const cur = map.get(s.id);
+            if (cur && !sameTs(cur, s.updated_at)) {
+              return json(req, { error: CONFLICT, code: "conflict", place: await decoratePlace(sb, id, teacher) }, 409);
+            }
+          }
+        }
+        prev = existing as typeof prev;
+        const { error } = await sb.from("places").update(row).eq("id", id);
         if (error) return json(req, { error: "Místo se nepodařilo uložit." }, 500);
       }
-      const patch: Record<string, string | null> = {};
-      const stale: string[] = [];
-      if (photo && "bytes" in photo) {
-        const up = await upload(sb, `places/${id}/photo.${photo.ext}`, photo.bytes, photo.mime);
-        if ("error" in up) return json(req, { error: up.error }, 500);
-        if (prev?.photo_path && prev.photo_path !== up.path) stale.push(prev.photo_path);
-        patch.photo_path = up.path;
-      } else if (clearPhoto) {
-        if (prev?.photo_path) stale.push(prev.photo_path);
-        patch.photo_path = null;
+
+      const prevPaths = photoList(prev?.photo_paths, prev?.photo_path);
+      let keep: string[];
+      if (Array.isArray(body.keep_photos)) {
+        const allowed = new Set(prevPaths);
+        keep = (body.keep_photos as unknown[]).filter((p): p is string => typeof p === "string" && allowed.has(p));
+      } else {
+        keep = prevPaths.slice();
       }
+      if (keep.length + decodedPhotos.length > 6) {
+        return json(req, { error: "K místu lze přidat nejvýš 6 fotek." }, 400);
+      }
+      const newPaths: string[] = [];
+      for (let i = 0; i < decodedPhotos.length; i++) {
+        const photo = decodedPhotos[i];
+        const name = `places/${id}/photo-${Date.now()}-${i}.${photo.ext}`;
+        const up = await upload(sb, name, photo.bytes, photo.mime);
+        if ("error" in up) return json(req, { error: up.error }, 500);
+        newPaths.push(up.path);
+      }
+      const finalPaths = keep.concat(newPaths);
+      const stale = prevPaths.filter((p) => !finalPaths.includes(p));
+      const patch: Record<string, unknown> = {
+        photo_paths: finalPaths,
+        photo_path: finalPaths[0] || null,
+      };
       if (audio && "bytes" in audio) {
         const up = await upload(sb, `places/${id}/audio.${audio.ext}`, audio.bytes, audio.mime);
         if ("error" in up) return json(req, { error: up.error }, 500);
@@ -265,7 +356,8 @@ Deno.serve(async (req: Request) => {
         if (prev?.audio_path) stale.push(prev.audio_path);
         patch.audio_path = null;
       }
-      if (Object.keys(patch).length) await sb.from("places").update(patch).eq("id", id);
+      const { error: patchErr } = await sb.from("places").update(patch).eq("id", id);
+      if (patchErr) return json(req, { error: "Místo se nepodařilo uložit." }, 500);
       if (stale.length) await removeFiles(sb, stale);
       return json(req, { ok: true, role, place: await decoratePlace(sb, id, teacher) });
     }
@@ -276,34 +368,35 @@ Deno.serve(async (req: Request) => {
       const author = asText(entryIn.author, 80);
       const source = asText(entryIn.source, 200);
       const text = asText(entryIn.text, 4000);
+      const when_exact = asText(entryIn.when_exact, 80);
       const year = asYear(entryIn.year);
       const sort = Number.isFinite(Number(entryIn.sort)) ? Math.round(Number(entryIn.sort)) : 0;
       if (!placeId || !title || year == null) return json(req, { error: "Vyplňte rok a název zastavení." }, 400);
       const { data: place } = await sb.from("places").select("id, hidden_at").eq("id", placeId).maybeSingle();
       if (!place) return json(req, { error: "Místo neexistuje." }, 404);
-      if (place.hidden_at && !teacher) return json(req, { error: "Tohle může jen učitel." }, 403);
+      if (place.hidden_at && !teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
       const photo = decodeMedia((body.photo as MediaIn) || null, "photo");
       if (photo && "error" in photo) return json(req, { error: photo.error }, 400);
-      const audio = decodeMedia((body.audio as MediaIn) || null, "audio");
-      if (audio && "error" in audio) return json(req, { error: audio.error }, 400);
       const clearPhoto = body.clear_photo === true;
-      const clearAudio = body.clear_audio === true;
       let id: string;
       let prev: { photo_path: string | null; audio_path: string | null; hidden_at: string | null } | null = null;
       if (action === "add_entry") {
         const { data, error } = await sb.from("timeline_entries")
-          .insert({ place_id: placeId, year, title, author, source, text, sort })
+          .insert({ place_id: placeId, year, title, author, source, text, sort, when_exact })
           .select("id, photo_path, audio_path, hidden_at").single();
         if (error || !data) return json(req, { error: "Zastavení se nepodařilo uložit." }, 500);
         id = data.id;
       } else {
         id = asText(entryIn.id, 64);
         if (!id) return json(req, { error: "Chybí zastavení." }, 400);
-        const { data: existing } = await sb.from("timeline_entries").select("id, photo_path, audio_path, hidden_at").eq("id", id).maybeSingle();
+        const { data: existing } = await sb.from("timeline_entries").select("id, photo_path, audio_path, hidden_at, updated_at").eq("id", id).maybeSingle();
         if (!existing) return json(req, { error: "Zastavení neexistuje." }, 404);
-        if (existing.hidden_at && !teacher) return json(req, { error: "Tohle může jen učitel." }, 403);
+        if (existing.hidden_at && !teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
+        if (!sameTs(existing.updated_at, entryIn.updated_at)) {
+          return json(req, { error: CONFLICT, code: "conflict", place: await decoratePlace(sb, placeId, teacher) }, 409);
+        }
         prev = existing;
-        const { error } = await sb.from("timeline_entries").update({ year, title, author, source, text, sort }).eq("id", id);
+        const { error } = await sb.from("timeline_entries").update({ year, title, author, source, text, sort, when_exact }).eq("id", id);
         if (error) return json(req, { error: "Zastavení se nepodařilo uložit." }, 500);
       }
       const patch: Record<string, string | null> = {};
@@ -316,15 +409,6 @@ Deno.serve(async (req: Request) => {
       } else if (clearPhoto) {
         if (prev?.photo_path) stale.push(prev.photo_path);
         patch.photo_path = null;
-      }
-      if (audio && "bytes" in audio) {
-        const up = await upload(sb, `places/${placeId}/timeline/${id}-audio.${audio.ext}`, audio.bytes, audio.mime);
-        if ("error" in up) return json(req, { error: up.error }, 500);
-        if (prev?.audio_path && prev.audio_path !== up.path) stale.push(prev.audio_path);
-        patch.audio_path = up.path;
-      } else if (clearAudio) {
-        if (prev?.audio_path) stale.push(prev.audio_path);
-        patch.audio_path = null;
       }
       if (Object.keys(patch).length) await sb.from("timeline_entries").update(patch).eq("id", id);
       if (stale.length) await removeFiles(sb, stale);

@@ -76,20 +76,29 @@ async function sign(sb: SupabaseClient, path: string | null | undefined): Promis
   const { data } = await sb.storage.from(BUCKET).createSignedUrl(path, 3600);
   return data?.signedUrl ?? null;
 }
+function photoList(paths: unknown, fallback: unknown): string[] {
+  if (Array.isArray(paths)) return paths.filter((p): p is string => typeof p === "string" && !!p);
+  if (typeof fallback === "string" && fallback) return [fallback];
+  return [];
+}
 async function decorate(sb: SupabaseClient, place: Record<string, unknown>, includeHidden: boolean) {
   const entries = ((place.timeline_entries || []) as Record<string, unknown>[])
     .filter((e) => includeHidden || !e.hidden_at)
     .sort((a, b) => Number(a.sort) - Number(b.sort) || Number(a.year) - Number(b.year));
   const out: Record<string, unknown> = { ...place };
-  out.photo_url = await sign(sb, place.photo_path as string);
+  const paths = photoList(place.photo_paths, place.photo_path);
+  out.photos = await Promise.all(paths.map(async (path) => ({ path, url: await sign(sb, path) })));
+  out.photo_url = (out.photos as { url: string | null }[])[0]?.url ?? null;
   out.audio_url = await sign(sb, place.audio_path as string);
   delete out.photo_path;
+  delete out.photo_paths;
   delete out.audio_path;
   out.hidden = !!place.hidden_at;
   out.timeline_entries = await Promise.all(entries.map(async (e) => {
     const ev = { ...e };
     ev.photo_url = await sign(sb, e.photo_path as string);
     ev.audio_url = await sign(sb, e.audio_path as string);
+    ev.when_exact = e.when_exact || "";
     delete ev.photo_path;
     delete ev.audio_path;
     ev.hidden = !!e.hidden_at;
