@@ -1,7 +1,7 @@
 # Stáhne fotky z Commons, zmenší na 800 px (delší strana), uloží jako WebP do img/ a přepíše data.js na lokální cesty.
 import json, re, sys, time, io, urllib.request, unicodedata
 from PIL import Image
-UA = {'User-Agent': 'skolavela.app-priroda/1.0 (https://skolavela.app; ahoj@skolavela.cz)'}
+UA = {'User-Agent': 'velappky-priroda/1.0 (https://velappky.cz; ahoj@skolavela.cz)'}
 src = open('data.js', encoding='utf-8').read(); head = src[:src.index('window.SPECIES')]
 data = json.loads(src[src.index('['):src.rindex(']') + 1])
 def slug(t): return re.sub(r'[^a-z0-9]+', '-', unicodedata.normalize('NFKD', t).encode('ascii', 'ignore').decode().lower()).strip('-')

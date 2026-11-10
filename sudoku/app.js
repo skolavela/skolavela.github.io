@@ -187,7 +187,7 @@ function buildPrint() {
   const mm = { 1: 140, 2: 95, 4: 78, 6: 60 }[per], cls = per > 2 ? 'c2' : 'c1';
   const page = (title, right, sols) => `<section class="pp"><div class="ph"><h1>${title}</h1>${right ? `<span>${right}</span>` : ''}</div><div class="pg ${cls}">` +
     games.map((g, k) => `<figure>${per > 1 ? `<figcaption>${k + 1}.</figcaption>` : ''}${gridSvg(n, g.puzzle, sols ? g.solution : null, mm)}</figure>`).join('') +
-    `</div><div class="pf"><span class="a-sheet__brand">${(window.VELA_ICONS && window.VELA_ICONS.ui_wave) || ''}skolavela.app/sudoku</span></div></section>`;
+    `</div><div class="pf"><span class="a-sheet__brand">${(window.VELA_ICONS && window.VELA_ICONS.ui_wave) || ''}velappky.cz/sudoku</span></div></section>`;
   $('#printout').innerHTML = page(name, '', false) + (S.printSol ? page('Řešení', name, true) : '');
   // náhled = přesně to, co se vytiskne (každá stránka na vlastním listu A4)
   $('#preview').innerHTML = Array.from($('#printout').children, pp => `<div class="a-sheet a-sheet--portrait sd-sheet"><div class="sd-page sd-print">${pp.outerHTML}</div></div>`).join('');

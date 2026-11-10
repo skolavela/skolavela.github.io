@@ -1,6 +1,6 @@
 # Velappky – školní aplikace ZŠ Vela
 
-Rozcestník školních webových aplikací na https://skolavela.app (GitHub Pages, čisté HTML/CSS/JS bez build kroku).
+Rozcestník školních webových aplikací na https://velappky.cz (GitHub Pages, čisté HTML/CSS/JS bez build kroku).
 
 ## Sdílený design (`/assets/`)
 - `velappky.css` – design system pro rozcestník i všechny appky (jediný zdroj barev, rozměrů a komponent)

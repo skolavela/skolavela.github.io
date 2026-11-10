@@ -1,6 +1,6 @@
 # Sestaví ../data.js: pro každý druh najde fotografii z Wikimedia Commons (přes Wikipedii) a uloží autora + licenci.
 import json, re, time, urllib.request, urllib.parse, html
-UA = {'User-Agent': 'skolavela.app-priroda/1.0 (https://skolavela.app)'}
+UA = {'User-Agent': 'velappky-priroda/1.0 (https://velappky.cz)'}
 def get(url, params):
     u = url + '?' + urllib.parse.urlencode(params)
     for i in range(4):

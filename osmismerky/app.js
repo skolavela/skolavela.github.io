@@ -5,7 +5,7 @@ var LV = { '1': { size: 10, count: 10, all8: false }, '2': { size: 15, count: 18
 var st = { lvl: '1', topic: 0, own: '', title: '', size: 10, count: 10, all8: false, dia: true, sol: false, seed: 1 };
 try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); for (var k in sv) st[k] = sv[k]; } catch (e) {}
 if (!st.seed || st.seed === 1) st.seed = Math.floor(Math.random() * 1e6) + 1;
-var BRAND = '<span class="a-sheet__brand">' + ((window.VELA_ICONS && window.VELA_ICONS.ui_wave) || '') + 'skolavela.app</span>';
+var BRAND = '<span class="a-sheet__brand">' + ((window.VELA_ICONS && window.VELA_ICONS.ui_wave) || '') + 'velappky.cz</span>';
 var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
 
 TOPICS.forEach(function (t, i) { var o = document.createElement('option'); o.value = i; o.textContent = t.n; $('topic').appendChild(o); });

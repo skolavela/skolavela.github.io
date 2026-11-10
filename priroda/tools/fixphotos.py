@@ -1,7 +1,7 @@
 # Nahradí kreslené ilustrace fotografiemi (Wikidata P18, jinak hledání na Commons).
 import json, re, sys, time, html, urllib.request, urllib.parse
 sys.path.insert(0, '.')
-UA = {'User-Agent': 'skolavela.app-priroda/1.0 (https://skolavela.app)'}
+UA = {'User-Agent': 'velappky-priroda/1.0 (https://velappky.cz)'}
 def get(url, p):
     for i in range(4):
         try: return json.load(urllib.request.urlopen(urllib.request.Request(url + '?' + urllib.parse.urlencode(p), headers=UA), timeout=30))

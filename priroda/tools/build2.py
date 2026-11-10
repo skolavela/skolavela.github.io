@@ -2,7 +2,7 @@
 # Český název: z české Wikipedie (sitelink na Wikidatech podle P225 = vědecké jméno), jinak vlastní.
 # Foto: Wikidata P18 / obrázek článku / hledání na Commons; jen fotky (ne kresby) s licencí CC/PD.
 import json, re, time, html, sys, urllib.request, urllib.parse
-UA = {'User-Agent': 'skolavela.app-priroda/2.0 (https://skolavela.app; skola vela)'}
+UA = {'User-Agent': 'velappky-priroda/2.0 (https://velappky.cz; skola vela)'}
 def get(url, p):
     p = dict(p, format='json', maxlag=5)
     for i in range(6):
