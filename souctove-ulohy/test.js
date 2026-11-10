@@ -8,7 +8,7 @@ const SIZES = { trojuhelnik: [3, 4, 5], rada: [5, 6, 7, 8] };
 const LIMITS = [20, 100, 1000];
 const DIFFS = ["lehka", "stredni", "narocna"];
 const SOLS = ["jedno", "vice", "mix"];
-const PER = 200; /* 200 místo 1000 kvůli času; u nevyrobitelných max. 40 pokusů × 120 pokusů generátoru */
+const PER = 1000; /* u nevyrobitelných max. 40 pokusů × 120 pokusů generátoru */
 const EARLY_FAIL = 40;
 const ATT = 120;
 
