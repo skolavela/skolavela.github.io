@@ -585,6 +585,11 @@ body.zm-app .v-header__in {
     scrollbar-width: none;
   }
   .zm-legend::-webkit-scrollbar { display: none; }
+  /* legenda má vlastní řádek nad tlačítkem Přidat místo, aby se nikdy nepřekrývaly */
+  .zm-legend { max-width: calc(100% - 16px); flex-wrap: wrap; overflow: visible; touch-action: manipulation; }
+  .zm-legend { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+  .zm-main:has(#panel:not(.is-hidden)) .zm-legend { bottom: calc(50% + 68px); }
+  .zm-main:has(#panel.is-collapsed) .zm-legend { bottom: calc(25% + 68px); }
   .zm-chip {
     flex: 0 0 auto;
     min-height: 28px;
