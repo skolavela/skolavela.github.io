@@ -90,6 +90,15 @@ function asText(v: unknown, max = 2000): string {
   if (v == null) return "";
   return String(v).trim().slice(0, max);
 }
+function asUuid(v: unknown): string {
+  const s = asText(v, 64).toLowerCase();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s) ? s : "";
+}
+function safeStoragePath(v: unknown): string {
+  const s = asText(v, 400);
+  if (!s || s.includes("..") || !/^places\/[A-Za-z0-9._/-]+$/.test(s)) return "";
+  return s;
+}
 function asYear(v: unknown): number | null {
   const n = typeof v === "number" ? v : parseInt(String(v ?? ""), 10);
   if (!Number.isFinite(n) || n < 1 || n > 3000) return null;
@@ -164,16 +173,11 @@ async function decoratePlace(sb: SupabaseClient, id: string, includeHidden: bool
   out.photos = await Promise.all(paths.map(async (path) => ({ path, url: await sign(sb, path) })));
   out.photo_url = (out.photos as { url: string | null }[])[0]?.url ?? null;
   out.audio_url = await sign(sb, data.audio_path as string);
-  delete out.photo_path;
-  delete out.photo_paths;
-  delete out.audio_path;
   out.timeline_entries = await Promise.all(entries.map(async (e) => {
     const ev = { ...e };
     ev.photo_url = await sign(sb, e.photo_path as string);
     ev.audio_url = await sign(sb, e.audio_path as string);
     ev.when_exact = e.when_exact || "";
-    delete ev.photo_path;
-    delete ev.audio_path;
     ev.hidden = !!e.hidden_at;
     return ev;
   }));
@@ -262,6 +266,128 @@ Deno.serve(async (req: Request) => {
       await walk("");
       if (orphans.length) await removeFiles(sb, orphans);
       return json(req, { ok: true, removed: orphans });
+    }
+
+    if (action === "get_media") {
+      if (!teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
+      const path = safeStoragePath(body.path);
+      if (!path) return json(req, { error: "Chybí soubor." }, 400);
+      const { data, error } = await sb.storage.from(BUCKET).download(path);
+      if (error || !data) return json(req, { error: "Soubor se nepodařilo stáhnout." }, 404);
+      const bytes = new Uint8Array(await data.arrayBuffer());
+      const mime = (data as File).type || "application/octet-stream";
+      return new Response(bytes, {
+        status: 200,
+        headers: {
+          ...cors(req),
+          "Content-Type": mime,
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+
+    if (action === "import_place") {
+      if (!teacher) return json(req, { error: "Tohle může jen dospělák." }, 403);
+      const id = asUuid(placeIn.id);
+      if (!id) return json(req, { error: "Chybí místo." }, 400);
+      const category = asText(placeIn.category, 20);
+      const title = asText(placeIn.title, 120);
+      const author = asText(placeIn.author, 80);
+      const description = asText(placeIn.description, 4000);
+      const lat = asCoord(placeIn.lat, -90, 90);
+      const lng = asCoord(placeIn.lng, -180, 180);
+      const recorded_at = asDate(placeIn.recorded_at);
+      if (!CATEGORIES.has(category) || !title || lat == null || lng == null) {
+        return json(req, { error: "Vyplňte kategorii, název a klepněte do mapy." }, 400);
+      }
+      const incomingPhotos = Array.isArray(body.photos) ? body.photos as MediaIn[] : [];
+      if (!incomingPhotos.length && body.photo) incomingPhotos.push(body.photo as MediaIn);
+      const decodedPhotos: { bytes: Uint8Array; mime: string; ext: string }[] = [];
+      for (const item of incomingPhotos) {
+        const photo = decodeMedia(item || null, "photo");
+        if (photo && "error" in photo) return json(req, { error: photo.error }, 400);
+        if (photo && "bytes" in photo) decodedPhotos.push(photo);
+      }
+      if (decodedPhotos.length > 6) return json(req, { error: "K místu lze přidat nejvýš 6 fotek." }, 400);
+      const audio = decodeMedia((body.audio as MediaIn) || null, "audio");
+      if (audio && "error" in audio) return json(req, { error: audio.error }, 400);
+
+      const { data: existing } = await sb.from("places").select("id").eq("id", id).maybeSingle();
+      let skippedPlace = !!existing;
+      if (!existing) {
+        const hidden_at = placeIn.hidden === true ? new Date().toISOString() : null;
+        const { error: insErr } = await sb.from("places").insert({
+          id, category, title, author, description, lat, lng, recorded_at, hidden_at,
+        });
+        if (insErr) return json(req, { error: "Místo se nepodařilo obnovit." }, 500);
+        const newPaths: string[] = [];
+        for (let i = 0; i < decodedPhotos.length; i++) {
+          const photo = decodedPhotos[i];
+          const name = `places/${id}/photo-${Date.now()}-${i}.${photo.ext}`;
+          const up = await upload(sb, name, photo.bytes, photo.mime);
+          if ("error" in up) return json(req, { error: up.error }, 500);
+          newPaths.push(up.path);
+        }
+        const patch: Record<string, unknown> = {
+          photo_paths: newPaths,
+          photo_path: newPaths[0] || null,
+        };
+        if (audio && "bytes" in audio) {
+          const up = await upload(sb, `places/${id}/audio.${audio.ext}`, audio.bytes, audio.mime);
+          if ("error" in up) return json(req, { error: up.error }, 500);
+          patch.audio_path = up.path;
+        }
+        if (newPaths.length || patch.audio_path) {
+          const { error: patchErr } = await sb.from("places").update(patch).eq("id", id);
+          if (patchErr) return json(req, { error: "Místo se nepodařilo obnovit." }, 500);
+        }
+      }
+
+      const incomingEntries = Array.isArray(body.entries) ? body.entries as Record<string, unknown>[] : [];
+      let addedEntries = 0, skippedEntries = 0;
+      for (let i = 0; i < incomingEntries.length; i++) {
+        const e = incomingEntries[i];
+        const eid = asUuid(e.id);
+        const eTitle = asText(e.title, 120);
+        const eYear = asYear(e.year);
+        if (!eTitle || eYear == null) continue;
+        if (eid) {
+          const { data: exEnt } = await sb.from("timeline_entries").select("id").eq("id", eid).maybeSingle();
+          if (exEnt) { skippedEntries++; continue; }
+        }
+        const row: Record<string, unknown> = {
+          place_id: id,
+          year: eYear,
+          title: eTitle,
+          author: asText(e.author, 80),
+          source: asText(e.source, 200),
+          text: asText(e.text, 4000),
+          sort: Number.isFinite(Number(e.sort)) ? Math.round(Number(e.sort)) : i,
+          when_exact: asText(e.when_exact, 80),
+          hidden_at: e.hidden === true ? new Date().toISOString() : null,
+        };
+        if (eid) row.id = eid;
+        const { data: saved, error: eIns } = await sb.from("timeline_entries").insert(row).select("id").single();
+        if (eIns || !saved) return json(req, { error: "Zastavení se nepodařilo obnovit." }, 500);
+        const newId = saved.id as string;
+        const ePhoto = decodeMedia((e.photo as MediaIn) || null, "photo");
+        if (ePhoto && "error" in ePhoto) return json(req, { error: ePhoto.error }, 400);
+        if (ePhoto && "bytes" in ePhoto) {
+          const up = await upload(sb, `places/${id}/timeline/${newId}-photo.${ePhoto.ext}`, ePhoto.bytes, ePhoto.mime);
+          if ("error" in up) return json(req, { error: up.error }, 500);
+          await sb.from("timeline_entries").update({ photo_path: up.path }).eq("id", newId);
+        }
+        addedEntries++;
+      }
+
+      return json(req, {
+        ok: true,
+        role,
+        skipped: skippedPlace,
+        added_entries: addedEntries,
+        skipped_entries: skippedEntries,
+        place: await decoratePlace(sb, id, true),
+      });
     }
 
     if (action === "create_place" || action === "update_place") {

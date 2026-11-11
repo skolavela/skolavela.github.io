@@ -692,3 +692,28 @@ body.zm-app .v-header__in {
 .zm-lightbox__close svg { width: 20px; height: 20px; }
 .zm-lightbox__close:hover { background: rgba(255,255,255,0.24); }
 .p-info h2 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.35; }
+
+.zm-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(20, 20, 22, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+.zm-dialog[hidden] { display: none !important; }
+.zm-dialog__card {
+  width: min(420px, 100%);
+  background: var(--surface);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sheet);
+  padding: 22px 20px 18px;
+}
+.zm-dialog__card p {
+  margin: 0 0 18px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.zm-dialog__btns { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -90,17 +90,12 @@ async function decorate(sb: SupabaseClient, place: Record<string, unknown>, incl
   out.photos = await Promise.all(paths.map(async (path) => ({ path, url: await sign(sb, path) })));
   out.photo_url = (out.photos as { url: string | null }[])[0]?.url ?? null;
   out.audio_url = await sign(sb, place.audio_path as string);
-  delete out.photo_path;
-  delete out.photo_paths;
-  delete out.audio_path;
   out.hidden = !!place.hidden_at;
   out.timeline_entries = await Promise.all(entries.map(async (e) => {
     const ev = { ...e };
     ev.photo_url = await sign(sb, e.photo_path as string);
     ev.audio_url = await sign(sb, e.audio_path as string);
     ev.when_exact = e.when_exact || "";
-    delete ev.photo_path;
-    delete ev.audio_path;
     ev.hidden = !!e.hidden_at;
     return ev;
   }));

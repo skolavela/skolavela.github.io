@@ -123,7 +123,8 @@
     el.textContent = msg;
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.hidden = true; }, ms || 2800);
+    if (ms === 0) return;
+    toastTimer = setTimeout(function () { el.hidden = true; }, ms == null ? 2800 : ms);
   }
 
   function recMaxMs() {
@@ -1006,64 +1007,342 @@
     if (!st.selectedId) showPanel("hidden");
   }
 
-  async function exportJson() {
-    var bundle = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      places: st.places.map(function (p) {
-        return {
-          id: p.id, category: p.category, title: p.title, author: p.author, description: p.description,
-          lat: p.lat, lng: p.lng, hidden: !!p.hidden, recorded_at: p.recorded_at || null,
-          photo_url: p.photo_url || null, audio_url: p.audio_url || null,
-          timeline: entriesOf(p).map(function (e) {
-            return {
-              id: e.id, year: e.year, when_exact: e.when_exact || "", title: e.title,
-              author: e.author || "", source: e.source, text: e.text, sort: e.sort, hidden: !!e.hidden,
-              photo_url: e.photo_url || null
-            };
-          })
-        };
-      })
-    };
-    var blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
-    var a = document.createElement("a");
+  function csCount(n, one, few, many) {
+    if (n === 1) return n + " " + one;
+    if (n >= 2 && n <= 4) return n + " " + few;
+    return n + " " + many;
+  }
+  function todayStamp() {
     var day = new Date();
-    var stamp = day.getFullYear() + "-" + String(day.getMonth() + 1).padStart(2, "0") + "-" + String(day.getDate()).padStart(2, "0");
+    return day.getFullYear() + "-" + String(day.getMonth() + 1).padStart(2, "0") + "-" + String(day.getDate()).padStart(2, "0");
+  }
+  function extFrom(pathOrUrl, mime, fallback) {
+    var map = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "audio/mpeg": "mp3", "audio/mp3": "mp3", "audio/mp4": "m4a", "audio/aac": "aac", "audio/x-m4a": "m4a", "audio/webm": "webm", "audio/ogg": "ogg", "audio/wav": "wav", "audio/x-wav": "wav", "video/webm": "webm" };
+    if (mime && map[String(mime).split(";")[0].trim()]) return map[String(mime).split(";")[0].trim()];
+    var m = String(pathOrUrl || "").split("?")[0].match(/\.([a-z0-9]+)$/i);
+    return (m && m[1].toLowerCase()) || fallback || "bin";
+  }
+  function mediaPathFromUrl(url) {
+    if (!url) return "";
+    try {
+      var u = new URL(url, location.href);
+      var parts = u.pathname.split("/object/sign/zvukova-mapa/");
+      if (parts.length < 2) parts = u.pathname.split("/object/public/zvukova-mapa/");
+      if (parts.length < 2) return "";
+      return decodeURIComponent(parts[1]);
+    } catch (e) { return ""; }
+  }
+  async function blobToPayload(blob) {
+    var buf = await blob.arrayBuffer();
+    var bytes = new Uint8Array(buf);
+    var bin = "";
+    var i;
+    for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return { mime: blob.type || "application/octet-stream", data: btoa(bin) };
+  }
+  async function fetchMediaBlob(url, path) {
+    if (url) {
+      try {
+        var res = await fetch(url);
+        if (res.ok) {
+          var blob = await res.blob();
+          if (blob && blob.size) return blob;
+        }
+      } catch (e) {}
+    }
+    if (path) {
+      var res2 = await fetch(WRITE_URL, {
+        method: "POST",
+        headers: { apikey: SB_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ password: getPassword(), action: "get_media", path: path })
+      });
+      if (res2.ok) return await res2.blob();
+    }
+    return null;
+  }
+  function confirmDialog(message) {
+    return new Promise(function (resolve) {
+      var root = $("zm-confirm");
+      var text = $("zm-confirm-text");
+      var ok = $("zm-confirm-ok");
+      var no = $("zm-confirm-no");
+      if (!root || !text || !ok || !no) {
+        resolve(window.confirm(message));
+        return;
+      }
+      text.textContent = message;
+      root.hidden = false;
+      function done(val) {
+        root.hidden = true;
+        ok.removeEventListener("click", onOk);
+        no.removeEventListener("click", onNo);
+        root.removeEventListener("click", onBg);
+        resolve(val);
+      }
+      function onOk() { done(true); }
+      function onNo() { done(false); }
+      function onBg(e) { if (e.target === root) done(false); }
+      ok.addEventListener("click", onOk);
+      no.addEventListener("click", onNo);
+      root.addEventListener("click", onBg);
+    });
+  }
+  function clickDownload(blob, name) {
+    var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "zvukova-mapa-" + stamp + ".json";
+    a.download = name;
     a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
-    gc("Zvuková mapa: export");
-    toast("Soubor je stažený.");
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+  async function exportJson() {
+    if (!isTeacher()) { toast("Tohle může jen dospělák."); return; }
+    if (typeof JSZip === "undefined") { toast("Zálohu teď nelze připravit."); return; }
+    try {
+      toast("Připravuji zálohu…", 0);
+      await loadPlaces();
+      var jobs = [];
+      st.places.forEach(function (p) {
+        placePhotos(p).forEach(function (ph, i) {
+          jobs.push({ kind: "photo", place: p, index: i, url: ph.url, path: ph.path || "" });
+        });
+        if (p.audio_url || p.audio_path) {
+          jobs.push({ kind: "audio", place: p, url: p.audio_url, path: p.audio_path || mediaPathFromUrl(p.audio_url) });
+        }
+        entriesOf(p).forEach(function (e) {
+          if (e.photo_url || e.photo_path) {
+            jobs.push({ kind: "entry-photo", place: p, entry: e, url: e.photo_url, path: e.photo_path || mediaPathFromUrl(e.photo_url) });
+          }
+        });
+      });
+      var zip = new JSZip();
+      var failed = 0;
+      var media = {};
+      var i;
+      for (i = 0; i < jobs.length; i++) {
+        toast("Stahuji " + (i + 1) + " / " + jobs.length, 0);
+        var job = jobs[i];
+        var blob = await fetchMediaBlob(job.url, job.path);
+        if (!blob || !blob.size) { failed++; continue; }
+        var ext = extFrom(job.path || job.url, blob.type, job.kind === "audio" ? "webm" : "jpg");
+        var rel;
+        if (job.kind === "photo") rel = "photos/" + job.place.id + "-" + job.index + "." + ext;
+        else if (job.kind === "audio") rel = "audio/" + job.place.id + "." + ext;
+        else rel = "photos/entry-" + job.entry.id + "." + ext;
+        zip.file(rel, blob);
+        if (job.kind === "photo") {
+          if (!media[job.place.id]) media[job.place.id] = { photos: [] };
+          if (!media[job.place.id].photos) media[job.place.id].photos = [];
+          media[job.place.id].photos[job.index] = rel;
+        } else if (job.kind === "audio") {
+          if (!media[job.place.id]) media[job.place.id] = { photos: [] };
+          media[job.place.id].audio = rel;
+        } else {
+          if (!media[job.entry.id]) media[job.entry.id] = {};
+          media[job.entry.id].photo = rel;
+        }
+      }
+      var bundle = {
+        version: 2,
+        app: "zvukova-mapa",
+        exportedAt: new Date().toISOString(),
+        places: st.places.map(function (p) {
+          var bag = media[p.id] || {};
+          return {
+            id: p.id,
+            category: p.category,
+            title: p.title,
+            author: p.author || "",
+            description: p.description || "",
+            lat: p.lat,
+            lng: p.lng,
+            hidden: !!p.hidden,
+            updated_at: p.updated_at || null,
+            recorded_at: p.recorded_at || null,
+            photos: placePhotos(p).map(function (ph, idx) {
+              return { path: (bag.photos && bag.photos[idx]) || null, original_path: ph.path || null };
+            }).filter(function (x) { return x.path || x.original_path; }),
+            audio: bag.audio ? { path: bag.audio, original_path: p.audio_path || null } : (p.audio_path ? { path: null, original_path: p.audio_path } : null),
+            timeline: entriesOf(p).map(function (e) {
+              var em = media[e.id] || {};
+              return {
+                id: e.id, year: e.year, when_exact: e.when_exact || "", title: e.title,
+                author: e.author || "", source: e.source || "", text: e.text || "", sort: e.sort,
+                hidden: !!e.hidden, updated_at: e.updated_at || null,
+                photo: em.photo ? { path: em.photo, original_path: e.photo_path || null } : (e.photo_path ? { path: null, original_path: e.photo_path } : null)
+              };
+            })
+          };
+        })
+      };
+      zip.file("data.json", JSON.stringify(bundle, null, 2));
+      toast("Balím zálohu…", 0);
+      var out = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+      clickDownload(out, "zvukova-mapa-zaloha-" + todayStamp() + ".zip");
+      gc("Zvuková mapa: export");
+      var done = "Záloha je stažená. " + csCount(bundle.places.length, "místo", "místa", "míst") + ", " + csCount(jobs.length, "soubor", "soubory", "souborů") + ".";
+      if (failed) done += " " + failed + " soubor" + (failed === 1 ? " se nepodařilo stáhnout." : " se nepodařilo stáhnout.");
+      toast(done, 5000);
+    } catch (err) {
+      if (err && err.code === 401) { lock(); return; }
+      toast((err && err.message) || "Zálohu se nepodařilo stáhnout.");
+    }
+  }
+  async function readBackupFile(file) {
+    var name = (file && file.name || "").toLowerCase();
+    var isZip = name.endsWith(".zip") || (file.type && file.type.indexOf("zip") >= 0);
+    if (isZip) {
+      if (typeof JSZip === "undefined") throw new Error("Tento typ zálohy teď nelze otevřít.");
+      var zip = await JSZip.loadAsync(file);
+      var dataFile = zip.file("data.json") || zip.file(/data\.json$/i)[0];
+      if (!dataFile) throw new Error("V ZIP chybí soubor data.json.");
+      var text = await dataFile.async("string");
+      var data = JSON.parse(text);
+      return { data: data, zip: zip };
+    }
+    var raw = await file.text();
+    return { data: JSON.parse(raw), zip: null };
+  }
+  async function zipFileToPayload(zip, rel) {
+    if (!zip || !rel) return null;
+    var f = zip.file(rel) || zip.file(new RegExp("^" + rel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"))[0];
+    if (!f) return null;
+    var blob = await f.async("blob");
+    if (!blob || !blob.size) return null;
+    var payload = await blobToPayload(blob);
+    if (!payload.mime || payload.mime === "application/octet-stream") {
+      var ext = extFrom(rel, "", "");
+      var mime = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", mp3: "audio/mpeg", m4a: "audio/mp4", aac: "audio/aac", webm: "audio/webm", ogg: "audio/ogg", wav: "audio/wav" }[ext];
+      if (mime) payload.mime = mime;
+    }
+    return payload;
+  }
+  function backupPlaces(data) {
+    var list = (data && data.places) || data;
+    return Array.isArray(list) ? list : [];
+  }
+  function backupEntries(p) {
+    return p.timeline || p.timeline_entries || [];
   }
   async function importJson(file) {
-    var text = await file.text();
-    var data;
-    try { data = JSON.parse(text); } catch (e) { toast("Soubor není platný JSON."); return; }
-    var list = data.places || data;
-    if (!Array.isArray(list) || !list.length) { toast("V souboru nejsou žádná místa."); return; }
-    if (!window.confirm("Importovat " + list.length + " míst na sdílenou mapu? Přidají se jako nová.")) return;
+    if (!isTeacher()) { toast("Tohle může jen dospělák."); return; }
+    var parsed;
+    try { parsed = await readBackupFile(file); }
+    catch (e) { toast(e.message || "Soubor není platná záloha."); return; }
+    var list = backupPlaces(parsed.data);
+    if (!list.length) { toast("V souboru nejsou žádná místa."); return; }
+    try { await loadPlaces(); } catch (e2) {}
+    var havePlace = {};
+    var haveEntry = {};
+    st.places.forEach(function (p) {
+      havePlace[p.id] = true;
+      entriesOf(p).forEach(function (e) { haveEntry[e.id] = true; });
+    });
+    var newPlaces = 0, skipPlaces = 0, newEntries = 0, skipEntries = 0;
+    list.forEach(function (p) {
+      if (p.id && havePlace[p.id]) skipPlaces++;
+      else newPlaces++;
+      backupEntries(p).forEach(function (e) {
+        if (e.id && haveEntry[e.id]) skipEntries++;
+        else newEntries++;
+      });
+    });
+    var totalE = newEntries + skipEntries;
+    var msg = "V záloze je " + csCount(list.length, "místo", "místa", "míst") + (totalE ? " a " + csCount(totalE, "zastavení", "zastavení", "zastavení") : "") + ". ";
+    if (!newPlaces && !newEntries) {
+      msg += "Všechna už na mapě jsou, nic nového se nepřidá. Nic se nemaže.";
+    } else {
+      msg += "Přidám " + csCount(newPlaces, "nové místo", "nová místa", "nových míst");
+      if (newEntries) msg += " a " + csCount(newEntries, "zastavení", "zastavení", "zastavení");
+      msg += ". ";
+      if (skipPlaces || skipEntries) {
+        msg += (skipPlaces ? csCount(skipPlaces, "místo", "místa", "míst") : "") + (skipPlaces && skipEntries ? " a " : "") + (skipEntries ? csCount(skipEntries, "zastavení", "zastavení", "zastavení") : "") + " už na mapě je, ta přeskočím. ";
+      }
+      msg += "Nic se nemaže.";
+    }
+    var ok = await confirmDialog(msg);
+    if (!ok) return;
     try {
-      var n = 0;
+      var addedP = 0, skippedP = 0, addedE = 0, skippedE = 0;
+      var zip = parsed.zip;
+      var isV2 = parsed.data && Number(parsed.data.version) >= 2;
       for (var i = 0; i < list.length; i++) {
+        toast("Nahrávám " + (i + 1) + " / " + list.length, 0);
         var p = list[i];
-        var out = await write({
-          action: "create_place",
-          place: { category: p.category, title: p.title, author: p.author || "", description: p.description || "", lat: p.lat, lng: p.lng, recorded_at: p.recorded_at || null }
-        });
-        var evs = p.timeline || p.timeline_entries || [];
+        var evs = backupEntries(p);
+        var photos = [];
+        var audio = null;
+        if (isV2 && zip) {
+          var phs = Array.isArray(p.photos) ? p.photos : [];
+          for (var k = 0; k < phs.length && photos.length < 6; k++) {
+            var rel = phs[k] && (phs[k].path || phs[k]);
+            if (typeof rel !== "string") continue;
+            var pay = await zipFileToPayload(zip, rel);
+            if (pay) photos.push(pay);
+          }
+          if (p.audio && p.audio.path) audio = await zipFileToPayload(zip, p.audio.path);
+        }
+        var entriesPayload = [];
         for (var j = 0; j < evs.length; j++) {
           var e = evs[j];
-          await write({
-            action: "add_entry",
-            entry: { place_id: out.place.id, year: e.year, when_exact: e.when_exact || "", title: e.title, author: e.author || "", source: e.source || "", text: e.text || "", sort: j }
-          });
+          var ep = {
+            id: e.id || null,
+            year: e.year,
+            when_exact: e.when_exact || "",
+            title: e.title,
+            author: e.author || "",
+            source: e.source || "",
+            text: e.text || "",
+            sort: j,
+            hidden: !!e.hidden
+          };
+          if (isV2 && zip && e.photo && e.photo.path) {
+            var ePay = await zipFileToPayload(zip, e.photo.path);
+            if (ePay) ep.photo = ePay;
+          }
+          entriesPayload.push(ep);
         }
-        n++;
+        if (p.id) {
+          var payload = {
+            action: "import_place",
+            place: {
+              id: p.id, category: p.category, title: p.title, author: p.author || "",
+              description: p.description || "", lat: p.lat, lng: p.lng,
+              recorded_at: p.recorded_at || null, hidden: !!p.hidden
+            },
+            entries: entriesPayload
+          };
+          if (photos.length) payload.photos = photos;
+          if (audio) payload.audio = audio;
+          var out = await write(payload);
+          if (out.skipped) skippedP++;
+          else addedP++;
+          addedE += out.added_entries || 0;
+          skippedE += out.skipped_entries || 0;
+        } else {
+          var created = await write({
+            action: "create_place",
+            place: { category: p.category, title: p.title, author: p.author || "", description: p.description || "", lat: p.lat, lng: p.lng, recorded_at: p.recorded_at || null }
+          });
+          addedP++;
+          for (var j2 = 0; j2 < evs.length; j2++) {
+            var e2 = evs[j2];
+            await write({
+              action: "add_entry",
+              entry: { place_id: created.place.id, year: e2.year, when_exact: e2.when_exact || "", title: e2.title, author: e2.author || "", source: e2.source || "", text: e2.text || "", sort: j2 }
+            });
+            addedE++;
+          }
+        }
       }
       gc("Zvuková mapa: import");
       await refresh();
-      toast("Importováno: " + n + " míst.");
+      var done;
+      if (!addedP && !addedE) done = "Nic nového se nepřidalo, " + csCount(skippedP, "místo", "místa", "míst") + " už na mapě je.";
+      else {
+        done = "Přidáno " + csCount(addedP, "místo", "místa", "míst") + (addedE ? " a " + csCount(addedE, "zastavení", "zastavení", "zastavení") : "") + ".";
+        if (skippedP || skippedE) done += " " + (skippedP ? csCount(skippedP, "místo", "místa", "míst") : "") + (skippedP && skippedE ? " a " : "") + (skippedE ? csCount(skippedE, "zastavení", "zastavení", "zastavení") : "") + " už tam bylo.";
+      }
+      toast(done, 5000);
     } catch (err) {
       if (err.code === 401) { lock(); return; }
       toast(err.message || "Import se nezdařil.");
