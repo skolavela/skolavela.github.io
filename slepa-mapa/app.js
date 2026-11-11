@@ -351,8 +351,8 @@ function renderTask() {
         if (bad) { fb = 'To je ' + BYKEY[bad.dataset.k].name + '.'; fs = 'bad'; } else { fb = 'Správně, to je ' + it.name + '.'; fs = 'ok'; }
       }
       task.innerHTML = `
-        <div class="sm-row"><p class="sm-q">Najdi <b>${esc(it.akuzativ || it.name)}</b>.</p>
-        <p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
+        <p class="sm-q">Najdi <b>${esc(it.akuzativ || it.name)}</b>.</p>
+        <div class="sm-row sm-row--fix"><p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
         <button class="c-btn c-btn--primary sm-next" type="button" id="next"${Q.answered ? '' : ' hidden'}>Další</button></div>`;
     } else {
       if (!Q.opts) Q.opts = optionsFor(it);
@@ -362,7 +362,7 @@ function renderTask() {
         if (pick === it.key) { fb = 'Správně, to je ' + it.name + '.'; fs = 'ok'; } else { fb = 'Na mapě je ' + it.name + '.'; fs = 'bad'; }
       }
       task.innerHTML = `
-        <div class="sm-row"><p class="sm-q">Co je to? <span class="sm-kind" style="display:inline">${esc(LBY[it.layer].kind)}</span></p>
+        <div class="sm-row sm-row--fix"><p class="sm-q">Co je to? <span class="sm-kind" style="display:inline">${esc(LBY[it.layer].kind)}</span></p>
         <p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
         <button class="c-btn c-btn--primary sm-next" type="button" id="next"${Q.answered ? '' : ' hidden'}>Další</button></div>
         <div class="a-choices sm-choices">${Q.opts.map((o, i) => {
