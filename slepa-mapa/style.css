@@ -6,6 +6,8 @@ html { scrollbar-gutter: stable; } /* objevení posuvníku nesmí měnit šířk
 }
 .sm-w { width: 100%; max-width: 760px; }
 .sm-modes { flex: 0 1 360px; }
+.sm-tright { display: flex; align-items: center; gap: 12px; }
+.sm-quit { min-height: 36px; padding: 0 12px; font-size: 14px; }
 .sm-count { font-size: 15px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; min-height: 20px; }
 
 /* Mapa */

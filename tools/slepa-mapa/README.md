@@ -58,3 +58,11 @@ velikost výstupu (limit 300 kB) a u každého pohoří vzdálenost bodu Data200
   není, vezme místo nejdál od měst. Na konci vypíše posuny a KONTROLU DVOJIC pohoří - krajské město, které
   podmínku nesplňují. Žádné ručně psané souřadnice.
 - Sousední státy: Natural Earth převedený do Křováku (proj4 řetězec v `build.mjs`).
+
+## Testy (headless Chrome)
+
+Potřebují `puppeteer-core` a Chrome; appka musí běžet na `http://127.0.0.1:8765` (nebo `B=https://velappky.cz`).
+
+- `test/kvizy.js` dohraje celé kvízy (Najdi a Co to je; 10, 20, Vše; různé vrstvy; náhodné chyby, ťuknutí mimo,
+  Enter i tlačítko Další; i dítě, které odpovídá pořád špatně) až na obrazovku Hotovo. Skončí chybou, když se kvíz zacyklí.
+- `test/ukoncit.js` tlačítko Ukončit (bez odpovědi rovnou na úvod, s odpovědí dotaz Ukončit/Pokračovat) a výběr kraje Praha v Prohlížení na telefonu.

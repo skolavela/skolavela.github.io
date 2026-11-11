@@ -202,7 +202,7 @@ function startQuiz(items) {
   const pool = items || shuffle(activeItems().slice());
   const n = items ? pool.length : (S.count === 'all' ? pool.length : Math.min(+S.count, pool.length));
   const qs = pool.slice(0, n);
-  Q = { queue: qs.map(i => i.key), pos: 0, first: new Map(), answered: false, total: qs.length, opts: null };
+  Q = { queue: qs.map(i => i.key), pos: 0, first: new Map(), answered: false, total: qs.length, opts: null, back: {} };
   view = 'quiz'; gcEvent('slepa-mapa-start', 'Slepá mapa: start ' + S.mode);
   renderAll();
 }
@@ -211,7 +211,8 @@ function answer(ok, wrongKey) {
   const it = current(); if (!it || Q.answered) return;
   Q.answered = true;
   if (!Q.first.has(it.key)) Q.first.set(it.key, ok);
-  if (!ok) { Q.queue.splice(Math.min(Q.pos + 4, Q.queue.length), 0, it.key); } // chyba se vrátí za 3 otázky
+  // chyba se vrátí za 3 otázky, ale každá otázka nejvýš dvakrát => kvíz vždy skončí
+  if (!ok) { Q.back[it.key] = (Q.back[it.key] || 0) + 1; if (Q.back[it.key] <= 2) Q.queue.splice(Math.min(Q.pos + 4, Q.queue.length), 0, it.key); }
   setState(it.key, 'ok');
   if (wrongKey) setState(wrongKey, 'bad');
   renderTask();
@@ -242,11 +243,12 @@ function segDist(px, py, ax, ay, bx, by) {
   let t = l ? ((px - ax) * dx + (py - ay) * dy) / l : 0; t = Math.max(0, Math.min(1, t));
   return Math.hypot(px - ax - t * dx, py - ay - t * dy);
 }
-function pickAt(clientX, clientY) {
-  const m = svg.getScreenCTM(); if (!m) return null;
+// Všechny prvky pod prstem, seřazené od nejpravděpodobnějšího (kraj pod prstem je poslední).
+function pickAll(clientX, clientY) {
+  const m = svg.getScreenCTM(); if (!m) return [];
   const p = svg.createSVGPoint(); p.x = clientX; p.y = clientY;
   const q = p.matrixTransform(m.inverse());
-  let best = null, bestScore = Infinity;
+  const cands = [];
   for (const it of ITEMS) {
     if (!S.layers[it.layer]) continue;
     let dpx, lim, bias;
@@ -259,18 +261,28 @@ function pickAt(clientX, clientY) {
       for (const sb of it.subs) for (let i = 1; i < sb.pts.length; i++) { const a = sb.pts[i - 1], b = sb.pts[i]; d = Math.min(d, segDist(q.x, q.y, a[0], a[1], b[0], b[1])); }
       dpx = d / U; lim = 12; bias = 0;
     } else continue;
-    if (dpx <= lim && dpx - bias < bestScore) { bestScore = dpx - bias; best = it.key; }
+    if (dpx <= lim) cands.push([it.key, dpx - bias]);
   }
-  if (best) return best;
+  const out = cands.sort((a, b) => a[1] - b[1]).map(c => c[0]);
   if (S.layers.kraje) {
     const els = document.elementsFromPoint ? document.elementsFromPoint(clientX, clientY) : [];
     const k = els.find(e => e.classList && e.classList.contains('kraj'));
-    if (k) return k.dataset.k;
+    if (k) out.push(k.dataset.k);
   }
-  return null;
+  return out;
 }
+function pickAt(clientX, clientY) { return pickAll(clientX, clientY)[0] || null; }
+// Najdi: když je hledaný prvek mezi prvky pod prstem, platí (malý kraj Praha nebo kraj pod městem/řekou jde vždy trefit).
+// Prohlížení: další ťuknutí na stejné místo přepne na další prvek pod prstem.
+let lastTap = null;
 svg.addEventListener('click', (e) => {
-  const key = pickAt(e.clientX, e.clientY);
+  const all = pickAll(e.clientX, e.clientY);
+  let key = all[0] || null;
+  if (view === 'quiz' && S.mode === 'najdi' && Q && !Q.answered && all.includes(Q.queue[Q.pos])) key = Q.queue[Q.pos];
+  if (view === 'browse' && all.length > 1 && lastTap && Math.hypot(e.clientX - lastTap[0], e.clientY - lastTap[1]) < 8 && all.includes(browseSel)) {
+    key = all[(all.indexOf(browseSel) + 1) % all.length];
+  }
+  lastTap = [e.clientX, e.clientY];
   if (key) { onPick(key); return; }
   if (view === 'quiz' && S.mode === 'najdi' && !Q.answered) {
     const fb = $('fb'); if (fb) { fb.textContent = LBY[current().layer].tap; fb.removeAttribute('data-s'); }
@@ -327,6 +339,7 @@ const BTN_SHEET = '<button class="c-btn c-btn--secondary" type="button" id="toSh
 
 function renderTask() {
   const cnt = $('count');
+  $('quit').hidden = view !== 'quiz';
   if (view === 'setup') {
     const n = activeItems().length;
     cnt.textContent = `${n} ${n >= 5 ? 'prvků' : 'prvky'}`;
@@ -432,6 +445,12 @@ function switchMode(m) {
   view = S.mode === 'prohl' ? 'browse' : 'setup';
   clearStates(); renderAll();
 }
+// Ukončit (jako v Přírodě): zpět na úvod appky; když už dítě odpovídalo, nejdřív se zeptá
+$('quit').onclick = () => {
+  if (view !== 'quiz') return;
+  if (Q && Q.first.size > 0) { askMode = S.mode; renderTask(); const k = $('quitYes'); if (k) k.focus({ preventScroll: true }); return; }
+  switchMode(S.mode);
+};
 document.querySelectorAll('#modes button').forEach(b => b.onclick = () => {
   if (view === 'quiz' && Q && Q.first.size > 0) {
     if (b.dataset.m === S.mode && !askMode) return;
@@ -642,5 +661,5 @@ buildMap();
 view = S.mode === 'prohl' ? 'browse' : 'setup';
 if ('ResizeObserver' in window) new ResizeObserver(() => rescale()).observe(svg);
 route();
-window.SlepaMapa = { ITEMS, S, sheetScene, sheetOverlaps, renderSheet, pickAt, applyLayers, get view() { return view; }, get Q() { return Q; } };
+window.SlepaMapa = { pickAll, ITEMS, S, sheetScene, sheetOverlaps, renderSheet, pickAt, applyLayers, get view() { return view; }, get Q() { return Q; } };
 })();

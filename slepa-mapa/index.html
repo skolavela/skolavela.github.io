@@ -9,9 +9,9 @@
 <meta name="description" content="Slepá mapa Česka: kraje, krajská města, řeky a pohoří. Hledání na mapě, poznávání a pracovní list k tisku.">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/velappky.css?v=202611111100">
-<link rel="stylesheet" href="style.css?v=202611111215">
+<link rel="stylesheet" href="style.css?v=202611111240">
 <script src="slepa-mapa.data.js?v=202611111230" defer></script>
-<script src="app.js?v=202611111215" defer></script>
+<script src="app.js?v=202611111240" defer></script>
 </head>
 <body class="is-app">
 
@@ -40,7 +40,7 @@
       <button type="button" data-m="coto" aria-pressed="false">Co to je</button>
       <button type="button" data-m="prohl" aria-pressed="false">Prohlížení</button>
     </div>
-    <span class="sm-count" id="count"></span>
+    <span class="sm-tright"><span class="sm-count" id="count"></span><button class="c-btn c-btn--secondary sm-quit" type="button" id="quit" hidden>Ukončit</button></span>
   </div>
   <div class="a-card sm-mapcard" id="mapcard">
     <svg class="sm-map" id="map" viewBox="0 0 1000 580" role="group" aria-label="Slepá mapa Česka"></svg>
