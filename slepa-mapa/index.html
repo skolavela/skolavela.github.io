@@ -9,18 +9,17 @@
 <meta name="description" content="Slepá mapa Česka: kraje, krajská města, řeky a pohoří. Hledání na mapě, poznávání a pracovní list k tisku.">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/velappky.css?v=202611111100">
-<link rel="stylesheet" href="style.css?v=202611111205">
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-<script src="slepa-mapa.data.js?v=202611111130" defer></script>
-<script src="app.js?v=202611111205" defer></script>
+<link rel="stylesheet" href="style.css?v=202611111215">
+<script src="slepa-mapa.data.js?v=202611111215" defer></script>
+<script src="app.js?v=202611111215" defer></script>
 </head>
 <body class="is-app">
 
 <header class="v-header">
   <div class="v-header__in">
     <div class="a-titlebar">
-      <a class="a-back" href="/">
-        <span data-icon="ui_back"></span><span class="a-back__label">Velappky</span>
+      <a class="a-back" href="/#/zemepis" data-back-fixed aria-label="Zpět: Zeměpis">
+        <span data-icon="ui_back"></span><span class="a-back__label">Zeměpis</span>
       </a>
       <div class="a-name">
         <span class="v-icon tone-yellow" data-icon="slepamapa"></span>
@@ -45,7 +44,7 @@
   </div>
   <div class="a-card sm-mapcard" id="mapcard">
     <svg class="sm-map" id="map" viewBox="0 0 1000 580" role="group" aria-label="Slepá mapa Česka"></svg>
-    <p class="c-meta sm-attr">Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno. Sousední státy: Natural Earth.</p>
+    <p class="c-meta sm-attr" id="attr">Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno. Sousední státy: Natural Earth.</p>
   </div>
   <section class="a-card sm-w sm-task" id="task" aria-label="Zadání"></section>
   <p class="sr-only" id="live" role="status" aria-live="polite"></p>
@@ -57,8 +56,8 @@
       <span data-icon="ui_back" style="width:17px;height:17px;display:inline-flex"></span><span>Zpět na mapu</span>
     </a>
     <div class="c-field">
-      <span class="c-label">Na listu</span>
-      <div class="sm-switches" id="sheetLayers"></div>
+      <span class="c-label" id="lbl-kind">Na listu</span>
+      <div class="c-seg" role="group" aria-labelledby="lbl-kind" id="sheetKind"></div>
     </div>
     <div class="c-field">
       <label class="c-label" for="seed">Číslo listu</label>
@@ -72,12 +71,12 @@
     <button class="c-switch" type="button" role="switch" aria-checked="false" id="showSol">
       <span>Řešení</span><span class="c-track" aria-hidden="true"></span>
     </button>
-    <button class="c-btn c-btn--secondary" type="button" id="pdf">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 19.5h14"/></svg>
-      <span>Uložit PDF</span>
+    <button class="c-btn c-btn--secondary" type="button" id="print">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v6H7z"/></svg>
+      <span>Vytisknout / uložit PDF</span>
     </button>
     <p class="c-meta" id="sheetInfo"></p>
-    <p class="c-meta">Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno. Sousední státy: Natural Earth.</p>
+    <p class="c-meta">Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno.</p>
   </section>
   <section class="a-stage" aria-label="Náhled listu">
     <div class="a-sheet sm-sheet" id="sheet"></div>
@@ -89,7 +88,10 @@
   <div class="v-footer__bar">
     <div class="v-footer__in">
       <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
-      <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      <nav class="p-flinks" aria-label="Patička">
+        <a href="o-aplikaci.html">O aplikaci</a>
+        <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      </nav>
     </div>
   </div>
 </footer>

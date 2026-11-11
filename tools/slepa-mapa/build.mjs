@@ -41,7 +41,7 @@ const SOUSEDE = { DEU: 'Německo', POL: 'Polsko', SVK: 'Slovensko', AUT: 'Rakous
 
 // KE KONTROLE - 4. pád (koho, co) pro zadání "Najdi …", vyplněno ručně
 const AKUZATIV = {
-  'Hlavní město Praha': 'Hlavní město Prahu', 'Středočeský kraj': 'Středočeský kraj', 'Jihočeský kraj': 'Jihočeský kraj',
+  'Hlavní město Praha': 'hlavní město Prahu', 'Středočeský kraj': 'Středočeský kraj', 'Jihočeský kraj': 'Jihočeský kraj',
   'Plzeňský kraj': 'Plzeňský kraj', 'Karlovarský kraj': 'Karlovarský kraj', 'Ústecký kraj': 'Ústecký kraj',
   'Liberecký kraj': 'Liberecký kraj', 'Královéhradecký kraj': 'Královéhradecký kraj', 'Pardubický kraj': 'Pardubický kraj',
   'Kraj Vysočina': 'Kraj Vysočina', 'Jihomoravský kraj': 'Jihomoravský kraj', 'Olomoucký kraj': 'Olomoucký kraj',
@@ -83,11 +83,11 @@ await ms(`-i ${SRC}/HYDRO/WatrcrsL.shp encoding=utf8 ${INIT} -filter "${rekyExpr
 // ---------- 3. krajská města: bod s největším počtem obyvatel pro dané jméno ----------
 await ms(`-i ${SRC}/POP/BuiltupP.shp encoding=utf8 ${INIT} -filter "${MESTA.map(n => 'NAMN1==' + q(n)).join(' || ')}" -o ${TMP}/mesta.json format=geojson`);
 
-// ---------- 4. pohoří: vnitřní bod geomorfologické jednotky Data200 ----------
+// ---------- 4. pohoří: vnitřní bod (mapshaper -points inner) plochy geomorfologické jednotky Data200 ----------
 for (const lvl of ['5A', '6A', '7A']) {
   const names = Object.entries(POHORI).filter(([, v]) => v[0] === lvl).map(([n]) => 'NAMN1==' + q(upper(n)));
   await ms(`-i ${SRC}/NAME/GName${lvl}.shp encoding=utf8 ${INIT} -filter "${names.join(' || ')}" -dissolve NAMN1 ` +
-    `-points inner -o ${TMP}/pohori${lvl}.json format=geojson`);
+    `-o ${TMP}/pohoriPlochy${lvl}.json format=geojson -points inner -o ${TMP}/pohori${lvl}.json format=geojson`);
 }
 
 // ---------- 5. sousední státy (Natural Earth, WGS84 -> Křovák) ----------
@@ -177,6 +177,18 @@ if (wdPts.length) {
   await ms(`-i ${TMP}/wd.json -proj ${q(KROVAK)} -o ${TMP}/wd-k.json format=geojson`);
   for (const f of readGJ('wd-k.json').features) wdK[f.properties.id] = f.geometry.coordinates;
 }
+// Bod pohoří nesmí zasahovat do zóny krajského města: na mapě široké 375 px musí být středy aspoň 44 px od sebe
+// (dvě dotykové zóny 22 px). Když vnitřní bod podmínku nesplní, skript hledá na mřížce uvnitř plochy pohoří
+// (aspoň EDGE jednotek od okraje) nejbližší místo, které ji splní; když žádné není, vezme místo nejdál od měst.
+const PHONE_W = 375, MIN_PX = 44, EDGE = 4;
+const MIN_U = MIN_PX * VBW / PHONE_W;
+const mestaPts = mesta.map(c => [c.x, c.y, c.name]);
+const plochy = ['5A', '6A', '7A'].flatMap(l => readGJ(`pohoriPlochy${l}.json`).features);
+const ringsOf = (g) => (g.type === 'Polygon' ? [g.coordinates] : g.coordinates).flat(1).map(r => r.map(p => T(p)));
+function inside(rings, x, y) { let c = false; for (const r of rings) for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function edgeDist(rings, x, y) { let d = Infinity; for (const r of rings) for (let i = 1; i < r.length; i++) { const [ax, ay] = r[i - 1], [bx, by] = r[i]; const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy; let t = l ? ((x - ax) * dx + (y - ay) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); d = Math.min(d, Math.hypot(x - ax - t * dx, y - ay - t * dy)); } return d; }
+const cityMin = (x, y) => Math.min(...mestaPts.map(([cx, cy]) => Math.hypot(cx - x, cy - y)));
+const posun = [];
 const wdReport = [];
 const pohori = Object.entries(POHORI).map(([n, [lvl, qid]]) => {
   const f = pohF.find(f => f.properties.NAMN1 === upper(n));
@@ -185,8 +197,27 @@ const pohori = Object.entries(POHORI).map(([n, [lvl, qid]]) => {
   if (!c) { missing.push('pohoří: ' + n); return null; }
   const w = wdK[qid];
   wdReport.push(`  ${n.padEnd(26)} ${zdroj.padEnd(16)} Wikidata ${qid.padEnd(9)} ${w ? (Math.hypot(w[0] - c[0], w[1] - c[1]) / 1000).toFixed(1) + ' km' : 'bez souřadnic'}`);
-  return { id: slug(n), name: n, akuzativ: AKUZATIV[n], ...pt(c) };
+  let [x, y] = T(c);
+  const pl = plochy.find(p => p.properties.NAMN1 === upper(n));
+  if (pl && cityMin(x, y) < MIN_U) {
+    const rings = ringsOf(pl.geometry);
+    let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    for (const r of rings) for (const [px, py] of r) { bx0 = Math.min(bx0, px); by0 = Math.min(by0, py); bx1 = Math.max(bx1, px); by1 = Math.max(by1, py); }
+    let ok = null, okD = Infinity, far = null, farD = -1;
+    for (let gx = bx0; gx <= bx1; gx += 1) for (let gy = by0; gy <= by1; gy += 1) {
+      if (!inside(rings, gx, gy) || edgeDist(rings, gx, gy) < EDGE) continue;
+      const cm = cityMin(gx, gy);
+      if (cm >= MIN_U) { const d = Math.hypot(gx - x, gy - y); if (d < okD) { okD = d; ok = [gx, gy]; } }
+      if (cm > farD) { farD = cm; far = [gx, gy]; }
+    }
+    const nw = ok || far;
+    if (nw) { posun.push(`  ${n}: posunuto o ${(Math.hypot(nw[0] - x, nw[1] - y) * (1 / S) / 1000).toFixed(1)} km uvnitř plochy${ok ? '' : ' (podmínku nejde splnit, vybráno místo nejdál od měst)'}`); [x, y] = nw; }
+  }
+  return { id: slug(n), name: n, akuzativ: AKUZATIV[n], x: r1(x), y: r1(y) };
 }).filter(Boolean);
+// kontrola dvojic pohoří - krajské město
+const pary = [];
+for (const p of pohori) for (const c of mesta) { const px = Math.hypot(p.x - c.x, p.y - c.y) * PHONE_W / VBW; if (px < MIN_PX) pary.push(`  ${p.name} - ${c.name}: ${px.toFixed(1)} px`); }
 
 const sousF = readGJ('sousede.json').features;
 const neighbors = Object.entries(SOUSEDE).map(([a3, n]) => {
@@ -202,6 +233,9 @@ const MAP = { viewBox: `0 0 ${VBW} ${VBH}`, rotace: +(theta * 180 / Math.PI).toF
 const all = [...kraje, ...mesta, ...reky, ...pohori];
 const header = `/* Slepá mapa - mapová data. GENEROVÁNO: tools/slepa-mapa/build.mjs (${new Date().toISOString().slice(0, 10)}).
    Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno. Sousední státy: Natural Earth (public domain).
+   Kraje: hranice krajů ČÚZK Data200 (PolbndRegDA). Řeky: vodní toky ČÚZK Data200 (WatrcrsL), oříznuté na ČR.
+   Krajská města: sídla ČÚZK Data200 (BuiltupP). Pohoří: středy ploch pohoří, ČÚZK Data200 (geomorfologické jednotky
+   GName5A/6A/7A, vnitřní bod mapshaper -points inner; když je bod blízko krajského města, posunutý uvnitř plochy dál od něj).
    S-JTSK (Křovák) otočený o ${(theta * 180 / Math.PI).toFixed(2)}° tak, aby byl sever nahoře; 1 jednotka = ${(1 / S).toFixed(0)} m.
    Ručně neupravovat. */
 // KE KONTROLE - 4. pád (akuzativ) pro zadání "Najdi …":
@@ -222,4 +256,8 @@ console.log(`  otočení ${(theta * 180 / Math.PI).toFixed(2)}°, 1 jednotka = $
 console.log(`  soubor  ${path.relative(path.join(DIR, '..', '..'), OUT)} ${(size / 1024).toFixed(1)} kB` + (size > 300 * 1024 ? '  PŘEKROČENO 300 kB!' : ''));
 console.log('POHOŘÍ - poloha bodu a kontrola proti Wikidatům (CC0):');
 console.log(wdReport.join('\n'));
+console.log('POHOŘÍ - posun od krajských měst:');
+console.log(posun.length ? posun.join('\n') : '  žádný');
+console.log(`KONTROLA DVOJIC pohoří - krajské město (min. ${MIN_PX} px při šířce mapy ${PHONE_W} px):`);
+console.log(pary.length ? pary.join('\n') : '  všechny dvojice splňují');
 if (missing.length || size > 300 * 1024) process.exitCode = 1;

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>O aplikaci - Slepá mapa - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611111100">
+<link rel="stylesheet" href="style.css?v=202611111215">
+</head>
+<body class="is-app">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/slepa-mapa/">
+        <span data-icon="ui_back"></span><span class="a-back__label">Slepá mapa</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-yellow" data-icon="slepamapa"></span>
+        <h1>O aplikaci</h1>
+        <span class="a-name__sub">Slepá mapa</span>
+      </div>
+    </div>
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
+</header>
+
+<main class="a-single p-info">
+  <p class="p-info__lead">Slepá mapa Česka na procvičování kraje, krajských měst, řek a pohoří.</p>
+  <p>Hodí se do vlastivědy ve 4. a 5. třídě a do zeměpisu na druhém stupni. Dá se používat na tabletu, na počítači i na telefonu, nic se neinstaluje ani neukládá na server.</p>
+
+  <h2>Co je na mapě</h2>
+  <ul>
+    <li>14 krajů,</li>
+    <li>13 krajských měst (Praha je kraj i město),</li>
+    <li>12 řek: Labe, Vltava, Morava, Odra, Dyje, Ohře, Jizera, Sázava, Berounka, Otava, Lužnice, Svratka,</li>
+    <li>13 pohoří: Krkonoše, Jizerské hory, Lužické hory, Krušné hory, Český les, Šumava, Novohradské hory, Brdy, Českomoravská vrchovina, Orlické hory, Hrubý Jeseník, Moravskoslezské Beskydy, Bílé Karpaty.</li>
+  </ul>
+  <p>Sousední státy (Německo, Polsko, Slovensko, Rakousko) jsou jen šedý podklad.</p>
+
+  <h2>Tři režimy</h2>
+  <ol>
+    <li><strong>Najdi</strong>: aplikace napíše, co hledat, a dítě na to ťukne na mapě. Při chybě uvidí, na co ťuklo a kde je správná odpověď.</li>
+    <li><strong>Co to je</strong>: na mapě se zvýrazní jeden prvek a dítě vybírá ze čtyř názvů.</li>
+    <li><strong>Prohlížení</strong>: mapa s popisky. Ťuknutím na prvek se ukáže jeho název.</li>
+  </ol>
+  <p>Vrstvy (kraje, města, řeky, pohoří) a počet otázek se volí před začátkem. Otázka, na kterou dítě odpoví špatně, se vrátí o tři otázky později. Na konci je přehled chyb a jde procvičit jen je.</p>
+
+  <h2>Pracovní list</h2>
+  <p>Černobílý list na A4 na šířku: slepá mapa s očíslovanými prvky a pod ní řádky na odpovědi. Na list jdou vybrat kraje, města, řeky, pohoří nebo mix 20 prvků. Číslo listu určuje výběr i pořadí čísel, takže stejné číslo dá vždy stejný list. Přepínač Řešení vypíše správné názvy. List se vytiskne nebo uloží jako PDF přes tisk v prohlížeči.</p>
+
+  <h2>Zdroje dat</h2>
+  <ul>
+    <li>Kraje, státní hranice, řeky a krajská města: ČÚZK, Data200, licence CC BY 4.0. Data jsou upravená a zjednodušená pro malé měřítko, řeky jsou oříznuté na území Česka.</li>
+    <li>Polohy pohoří: středy ploch pohoří (geomorfologických celků) z dat ČÚZK Data200. Pokud by bod ležel příliš blízko krajského města, je posunutý uvnitř plochy pohoří dál od něj, aby šly oba prvky na mapě trefit zvlášť.</li>
+    <li>Sousední státy: Natural Earth (volné dílo).</li>
+  </ul>
+  <p>Mapa je v souřadnicovém systému S-JTSK, otočená tak, aby byl sever nahoře.</p>
+</main>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <nav class="p-flinks" aria-label="Patička">
+        <a href="o-aplikaci.html">O aplikaci</a>
+        <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611111130"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
+<script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

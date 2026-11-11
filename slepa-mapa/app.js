@@ -10,6 +10,7 @@ const SVGNS = 'http://www.w3.org/2000/svg';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const SRC = 'Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno. Sousední státy: Natural Earth.';
+const SRC_SHEET = 'Mapové podklady: ČÚZK, Data200, CC BY 4.0, zjednodušeno.'; // list je bez sousedních států
 
 // ---------- vrstvy a prvky ----------
 const LAYERS = [
@@ -59,7 +60,7 @@ function shuffle(a, rnd) { rnd = rnd || Math.random; for (let i = a.length - 1; 
 // ---------- nastavení ----------
 const KEY = 'slepa-mapa.v1';
 const newSeed = () => String(Math.floor(Math.random() * 9000) + 1000);
-const DEF = { mode: 'najdi', layers: { kraje: true, mesta: false, reky: false, pohori: false }, count: '10', sol: false, seed: newSeed() };
+const DEF = { mode: 'najdi', layers: { kraje: true, mesta: false, reky: false, pohori: false }, count: '10', sol: false, seed: newSeed(), sheet: 'kraje' };
 let S = JSON.parse(JSON.stringify(DEF));
 try {
   const o = JSON.parse(localStorage.getItem(KEY) || '{}');
@@ -68,6 +69,7 @@ try {
   if (!LAYERS.some(l => S.layers[l.key])) S.layers.kraje = true;
   if (['10', '20', 'all'].includes(o.count)) S.count = o.count;
   if (typeof o.sol === 'boolean') S.sol = o.sol;
+  if (['kraje', 'mesta', 'reky', 'pohori', 'mix'].includes(o.sheet)) S.sheet = o.sheet;
   if (o.seed && /^\d{1,9}$/.test(o.seed)) S.seed = o.seed;
 } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -156,30 +158,39 @@ function setFocusRing(key, on) {
     if (on) { const ol = document.createElementNS(SVGNS, 'path'); ol.setAttribute('class', 'ol'); ol.setAttribute('data-s', 'focus'); ol.setAttribute('d', el.getAttribute('d')); ols.appendChild(ol); }
   }
 }
+// Popisky v Prohlížení: min. 13 px (na telefonu 11 px). Popisek, který by se překryl s jiným, se nezobrazí;
+// ťuknutý prvek má popisek vždy (kreslí se první).
 function renderLabels() {
   const g = svg.querySelector('.lbls'); if (!g) return;
-  if (!(view === 'browse')) { g.innerHTML = ''; return; }
-  const fs = (px) => (px * U).toFixed(2);
+  g.innerHTML = '';
+  if (view !== 'browse') return;
   const narrow = svg.getBoundingClientRect().width < 560;
-  const F = narrow ? 10 : 13;
-  let s = '';
-  const cl = (x, txt, size, anchor) => { const w = txt.length * size * 0.56; const lo = anchor === 'middle' ? w / 2 + 4 * U : 4 * U, hi = anchor === 'middle' ? 1000 - w / 2 - 4 * U : 1000 - w - 4 * U; return Math.max(lo, Math.min(hi, x)).toFixed(1); };
-  for (const it of activeItems()) {
-    if (it.layer === 'kraje') {
-      if (it.id === 'hlavni-mesto-praha' && S.layers.mesta) continue;
-      const nm = narrow ? it.name.replace(/ kraj$/, '').replace(/^Kraj /, '').replace('Hlavní město ', '') : it.name;
-      let ly = it.ly;
-      if (S.layers.mesta && M.layers.mesta.some(c => Math.hypot(c.x - it.lx, c.y - it.ly) < 22 * U)) ly += 17 * U;
-      s += `<text class="lbl k" x="${cl(it.lx, nm, (F - 1) * U, 'middle')}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${fs(F - 1)}" style="stroke-width:${fs(3)}">${esc(nm)}</text>`;
-    } else if (it.layer === 'mesta') {
-      s += `<text class="lbl" x="${cl(it.x + 8 * U, it.name, F * U, 'start')}" y="${it.y}" dominant-baseline="central" font-size="${fs(F)}" style="stroke-width:${fs(3)}">${esc(it.name)}</text>`;
-    } else if (it.layer === 'pohori') {
-      s += `<text class="lbl h" x="${cl(it.x, it.name, (F - 1) * U, 'middle')}" y="${(it.y + 15 * U).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${fs(F - 1)}" style="stroke-width:${fs(3)}">${esc(it.name)}</text>`;
-    } else {
-      s += `<text class="lbl r" x="${cl(it.mx, it.name, (F - 1) * U, 'middle')}" y="${(it.my - 9 * U).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${fs(F - 1)}" style="stroke-width:${fs(3)}">${esc(it.name)}</text>`;
-    }
+  const F = narrow ? 11 : 13, fs = (F * U).toFixed(2), pad = 2 * U;
+  const cl = (x, w, anchor) => { const lo = anchor === 'middle' ? w / 2 + 4 * U : 4 * U, hi = anchor === 'middle' ? 1000 - w / 2 - 4 * U : 1000 - w - 4 * U; return Math.max(lo, Math.min(hi, x)); };
+  const prio = { mesta: 0, pohori: 1, reky: 2, kraje: 3 };
+  const list = activeItems().slice().sort((a, b) => (b.key === browseSel) - (a.key === browseSel) || prio[a.layer] - prio[b.layer]);
+  const boxes = [];
+  // značky bodů jsou taky překážky pro popisky jiných prvků
+  const marks = activeItems().filter(i => i.layer === 'mesta' || i.layer === 'pohori').map(i => ({ key: i.key, x: i.x - 6 * U, y: i.y - 7 * U, w: 12 * U, h: 13 * U }));
+  const hit = (b, ignore) => boxes.some(o => b.x < o.x + o.w + pad && b.x + b.w + pad > o.x && b.y < o.y + o.h + pad && b.y + b.h + pad > o.y) ||
+    marks.some(o => o.key !== ignore && b.x < o.x + o.w && b.x + b.w > o.x && b.y < o.y + o.h && b.y + b.h > o.y);
+  for (const it of list) {
+    const t = document.createElementNS(SVGNS, 'text');
+    let nm = it.name, x, y, anchor = 'middle', cls = 'lbl';
+    if (it.layer === 'kraje') { cls += ' k'; if (narrow) nm = nm.replace(/ kraj$/, '').replace(/^Kraj /, '').replace('Hlavní město ', ''); x = it.lx; y = it.ly; }
+    else if (it.layer === 'mesta') { cls += ' m'; x = it.x + 8 * U; y = it.y; anchor = 'start'; }
+    else if (it.layer === 'pohori') { cls += ' h'; x = it.x; y = it.y + 15 * U; }
+    else { cls += ' r'; x = it.mx; y = it.my - 10 * U; }
+    t.setAttribute('class', cls); t.setAttribute('font-size', fs); t.setAttribute('text-anchor', anchor); t.setAttribute('dominant-baseline', 'central');
+    t.setAttribute('style', `stroke-width:${(3 * U).toFixed(2)}`); t.textContent = nm;
+    t.setAttribute('x', x); t.setAttribute('y', y);
+    g.appendChild(t);
+    let bb = t.getBBox();
+    const nx = cl(x, bb.width, anchor); if (nx !== x) { t.setAttribute('x', nx.toFixed(1)); bb = t.getBBox(); }
+    const box = { x: bb.x, y: bb.y, w: bb.width, h: bb.height };
+    if (it.key !== browseSel && hit(box, it.key)) { t.remove(); continue; }
+    boxes.push(box);
   }
-  g.innerHTML = s;
 }
 
 // ---------- stav hry ----------
@@ -214,7 +225,7 @@ function next() {
 }
 function onPick(key) {
   if (view === 'browse') {
-    clearStates(); setState(key, 'hl'); browseSel = key; renderTask(); live(BYKEY[key].name);
+    clearStates(); setState(key, 'hl'); browseSel = key; renderLabels(); renderTask(); live(BYKEY[key].name);
     return;
   }
   if (view !== 'quiz' || S.mode !== 'najdi' || Q.answered) return;
@@ -340,10 +351,18 @@ function renderTask() {
       <div class="c-field"><div class="sm-switches sm-switches--4" role="group" aria-label="Vrstvy na mapě">${switchesHTML('ly')}</div><p class="sm-hint" aria-live="polite"></p></div>`;
     bindSwitches(task, () => { if (browseSel && !S.layers[BYKEY[browseSel].layer]) { browseSel = null; clearStates(); } applyLayers(); renderTask(); });
     $('toSheet').onclick = openSheet;
+  } else if (view === 'quiz' && askMode) {
+    task.innerHTML = `
+      <p class="sm-q">Ukončit procvičování?</p>
+      <div class="sm-row sm-row--fix"><p class="sm-fb">Rozpracované otázky se neuloží.</p>
+      <div class="sm-btns sm-btns--ask"><button class="c-btn c-btn--primary" type="button" id="quitYes">Ukončit</button><button class="c-btn c-btn--secondary" type="button" id="quitNo">Pokračovat</button></div></div>`;
+    $('quitYes').onclick = () => switchMode(askMode);
+    $('quitNo').onclick = () => { askMode = null; renderTask(); };
   } else if (view === 'quiz') {
     const it = current();
     const done = Q.pos + 1;
-    cnt.textContent = `${Math.min(done, Q.queue.length)} / ${Q.queue.length}`;
+    // počítadlo: původní počet otázek; vrácené otázky se do jmenovatele nepočítají
+    cnt.textContent = `${new Set(Q.queue.slice(0, Q.pos + 1)).size} / ${Q.total}`;
     if (S.mode === 'najdi') {
       let fb = '', fs = '';
       if (Q.answered) {
@@ -406,10 +425,21 @@ function renderAll() {
   applyLayers();
   renderTask();
 }
-document.querySelectorAll('#modes button').forEach(b => b.onclick = () => {
-  S.mode = b.dataset.m; save(); Q = null; browseSel = null;
+// přepnutí režimu ukončí kvíz a vyčistí mapu; když už dítě odpovídalo, nejdřív se zeptá
+let askMode = null;
+function switchMode(m) {
+  askMode = null; S.mode = m; save(); Q = null; browseSel = null;
   view = S.mode === 'prohl' ? 'browse' : 'setup';
-  renderAll();
+  clearStates(); renderAll();
+}
+document.querySelectorAll('#modes button').forEach(b => b.onclick = () => {
+  if (view === 'quiz' && Q && Q.first.size > 0) {
+    if (b.dataset.m === S.mode && !askMode) return;
+    askMode = b.dataset.m; renderTask();
+    const k = $('quitYes'); if (k) k.focus({ preventScroll: true });
+    return;
+  }
+  switchMode(b.dataset.m);
 });
 
 // mapa max. 60 % výšky okna a na tabletu/počítači tak, aby se vešlo i zadání
@@ -420,171 +450,167 @@ function fitMap() {
   const taskH = 146; // pevná rezerva pro kartu zadání => mapa má ve všech stavech stejnou velikost
   const avail = window.innerHeight - top - 12 - taskH - 12;
   const h = Math.max(300, Math.min(window.innerHeight * 0.68, avail));
-  const pad = 12;
-  card.style.maxWidth = Math.min(1200, Math.round((h - pad) * 1000 / 580 + pad)) + 'px';
+  const pad = 12, attrH = $('attr') ? $('attr').offsetHeight : 0;
+  card.style.maxWidth = Math.min(1200, Math.round((h - pad - attrH) * 1000 / 580 + pad)) + 'px';
   rescale();
 }
 let rt = 0;
 window.addEventListener('resize', () => { cancelAnimationFrame(rt); rt = requestAnimationFrame(fitMap); });
 
 // ---------- pracovní list ----------
+// A4 na šířku, mapa přes celou šířku tiskové plochy, pod ní řádky na odpovědi ve 4 sloupcích.
+// List je černobílý na bílém: bez sousedních států; nečíslované vrstvy jen jako světle šedé čáry.
 const PW = 297, PH = 210, MX = 12;
+const SHEETS = [['kraje', 'Kraje'], ['mesta', 'Města'], ['reky', 'Řeky'], ['pohori', 'Pohoří'], ['mix', 'Mix']];
+const MIX_N = 20, MIX_MIN = 3;
+const R = 2.3;                                   // poloměr kroužku s číslem (mm)
+const SYM = { mesta: 1.3, pohori: 2.1 };         // poloměr značky bodu (mm)
+function inPoly(subs, x, y) { let c = false; for (const sb of subs) { const r = sb.pts; for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } } return c; }
+// bod na řece v poměru t délky (z geometrie dat, nezávisle na DOM)
+function riverAt(it, t) {
+  if (!it.segs) { it.segs = []; let L = 0; for (const sb of it.subs) for (let i = 1; i < sb.pts.length; i++) { const a = sb.pts[i - 1], b = sb.pts[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); it.segs.push([a, b, L, l]); L += l; } it.len = L; }
+  const want = Math.max(0, Math.min(it.len, it.len * t));
+  for (const [a, b, L0, l] of it.segs) if (want <= L0 + l || it.segs[it.segs.length - 1][2] === L0) { const f = l ? (want - L0) / l : 0; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; }
+  return it.segs[0][0];
+}
+const KSUBS = Object.fromEntries(M.layers.kraje.map(k => ['kraje:' + k.id, parseD(k.d)]));
+
+function sheetItems() {
+  const kind = S.sheet;
+  const rnd = mulberry32(hashSeed(S.seed + '|' + kind));
+  if (kind !== 'mix') return shuffle(ITEMS.filter(i => i.layer === kind), rnd);
+  // Mix: 20 prvků, z každé vrstvy aspoň 3; výběr i pořadí určuje číslo listu
+  const pick = [];
+  const rest = [];
+  for (const l of LAYERS) { const a = shuffle(ITEMS.filter(i => i.layer === l.key), rnd); pick.push(...a.slice(0, MIX_MIN)); rest.push(...a.slice(MIX_MIN)); }
+  pick.push(...shuffle(rest, rnd).slice(0, MIX_N - pick.length));
+  return shuffle(pick, rnd);
+}
 function sheetScene() {
-  const layers = activeLayers();
-  const items = ITEMS.filter(i => S.layers[i.layer]);
-  const rnd = mulberry32(hashSeed(S.seed + '|' + layers.join(',')));
-  const order = shuffle(items.slice(), rnd);
-  const n = order.length;
-  const cols = n <= 8 ? 4 : n <= 15 ? 5 : 6;
-  const rows = Math.ceil(n / cols), RH = rows <= 4 ? 7 : rows <= 6 ? 6.2 : 5.6;
-  const footY = PH - 8;
-  const listTop = footY - 6 - rows * RH;
-  const mapTop = 21, mapBot = listTop - 3;
-  // mapa oříznutá na ČR (+ malý okraj), co největší
-  const bx = BB.x0 - 8, by = BB.y0 - 8, bw = BB.x1 - BB.x0 + 16, bh = BB.y1 - BB.y0 + 16;
+  const order = sheetItems();
+  const n = order.length, cols = 4;
+  const rows = Math.ceil(n / cols), RH = rows <= 4 ? 6.5 : 6;
+  const footY = PH - 7, listBot = footY - 6.5, listTop = listBot - rows * RH;
+  const mapTop = 6, mapBot = listTop - 1.5;
+  const bx = BB.x0 - 3, by = BB.y0 - 3, bw = BB.x1 - BB.x0 + 6, bh = BB.y1 - BB.y0 + 6;
   const k = Math.min((PW - 2 * MX) / bw, (mapBot - mapTop) / bh);
-  const mw = bw * k, mh = bh * k, mx = (PW - mw) / 2, my = mapTop + (mapBot - mapTop - mh) / 2;
+  const mw = bw * k, mh = bh * k, mx = (PW - mw) / 2, my = mapTop;
   const T = (x, y) => [mx + (x - bx) * k, my + (y - by) * k];
-  // čísla
-  const marks = order.map((it, i) => {
-    let x, y, ax, ay;
-    if (it.layer === 'kraje') { [x, y] = T(it.lx, it.ly); ax = x; ay = y; }
-    else if (it.layer === 'reky') { [ax, ay] = T(it.mx, it.my); x = ax; y = ay - 3.4; }
-    else if (it.layer === 'mesta') { [ax, ay] = T(it.x, it.y); x = ax + 3.2; y = ay - 3.2; }
-    else { [ax, ay] = T(it.x, it.y); x = ax + 4; y = ay + 1; }
-    return { it, n: i + 1, x, y, ax, ay };
-  });
-  // rozestrčení překrývajících se kroužků (a od bodů měst/hor)
-  const R = 2.3, anchors = marks.filter(m => m.it.layer === 'mesta' || m.it.layer === 'pohori').map(m => [m.ax, m.ay]);
-  for (let iter = 0; iter < 60; iter++) {
-    let moved = false;
-    for (let i = 0; i < marks.length; i++) {
-      for (let j = i + 1; j < marks.length; j++) {
-        const a = marks[i], b = marks[j]; let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
-        if (d < 2 * R + 0.6) { if (d < 1e-3) { dx = 1; dy = 0; d = 1; } const p = (2 * R + 0.6 - d) / 2; a.x -= dx / d * p; a.y -= dy / d * p; b.x += dx / d * p; b.y += dy / d * p; moved = true; }
+  const kind = S.sheet;
+  const what = { kraje: 'kraje', mesta: 'krajská města', reky: 'řeky', pohori: 'pohoří', mix: 'kraje, města, řeky a pohoří' }[kind];
+  const title = 'Slepá mapa Česka';
+  const sub = 'Napiš ke každému číslu název.';
+  const sub2 = what.charAt(0).toUpperCase() + what.slice(1) + '.';
+  const titleBox = [MX - 1, mapTop, MX + 60, mapTop + 18];
+  const numbered = new Set(order.map(i => i.key));
+  // značky bodů na listu: číslované body (u vrstvy Města/Pohoří všechny body vrstvy)
+  const syms = ITEMS.filter(i => (i.layer === 'mesta' || i.layer === 'pohori') && numbered.has(i.key)).map(i => { const [x, y] = T(i.x, i.y); return { key: i.key, x, y, r: SYM[i.layer] }; });
+  // rozmístění kroužků: nejdřív body, pak řeky, nakonec kraje
+  const placed = [];
+  const okAt = (x, y, selfKey) => {
+    if (x - R < MX || x + R > PW - MX || y - R < mapTop || y + R > mapBot) return false;
+    if (x + R > titleBox[0] && x - R < titleBox[2] && y + R > titleBox[1] && y - R < titleBox[3]) return false;
+    for (const p of placed) if (Math.hypot(p.x - x, p.y - y) < 2 * R + 0.5) return false;
+    for (const sy of syms) if (Math.hypot(sy.x - x, sy.y - y) < R + sy.r + 0.4) return false;
+    return true;
+  };
+  const prio = { mesta: 0, pohori: 1, reky: 2, kraje: 3 };
+  const marks = [];
+  const conflicts = [];
+  const dirs = [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]].map(([a, b]) => { const l = Math.hypot(a, b); return [a / l, b / l]; });
+  for (const it of order.slice().sort((a, b) => prio[a.layer] - prio[b.layer])) {
+    let pos = null, lead = null;
+    if (it.layer === 'mesta' || it.layer === 'pohori') {
+      const [ax, ay] = T(it.x, it.y), base = SYM[it.layer] + R + 0.5;
+      for (const d of [base, base + 2, 7, 9.5, 12, 15]) {
+        for (const [ux, uy] of dirs) { const x = ax + ux * d, y = ay + uy * d; if (okAt(x, y)) { pos = [x, y]; if (d > base + 2.1) lead = [ax + ux * SYM[it.layer], ay + uy * SYM[it.layer], x - ux * R, y - uy * R]; break; } }
+        if (pos) break;
       }
-      for (const [px, py] of anchors) {
-        const m = marks[i]; let dx = m.x - px, dy = m.y - py, d = Math.hypot(dx, dy);
-        if (d < R + 1.6) { if (d < 1e-3) { dx = 1; dy = -1; d = 1.41; } const p = R + 1.6 - d; m.x += dx / d * p; m.y += dy / d * p; moved = true; }
+      if (!pos) { pos = [ax + base, ay - base]; conflicts.push(it.name); }
+    } else if (it.layer === 'reky') {
+      const step = 2 / Math.max(1, (it.len || (riverAt(it, 0), it.len)));
+      const ts = [0.5]; for (let i = 1; i <= 8; i++) ts.push(0.5 + i * 0.05, 0.5 - i * 0.05);
+      outer: for (const off of [0, R + 0.9, -(R + 0.9), 2 * R + 1.5, -(2 * R + 1.5)]) for (const t of ts) {
+        const p = riverAt(it, t), q = riverAt(it, Math.min(1, t + step));
+        const [x0, y0] = T(p[0], p[1]), [x1, y1] = T(q[0], q[1]); const dl = Math.hypot(x1 - x0, y1 - y0) || 1;
+        const nx = -(y1 - y0) / dl, ny = (x1 - x0) / dl, x = x0 + nx * off, y = y0 + ny * off;
+        if (okAt(x, y)) { pos = [x, y]; if (Math.abs(off) > R + 1) lead = [x0, y0, x - nx * Math.sign(off) * R, y - ny * Math.sign(off) * R]; break outer; }
       }
+      if (!pos) { const p = riverAt(it, .5); pos = T(p[0], p[1]); conflicts.push(it.name); }
+    } else {
+      const subs = KSUBS[it.key];
+      const [cx, cy] = T(it.lx, it.ly);
+      const inK = (x, y) => inPoly(subs, bx + (x - mx) / k, by + (y - my) / k) && [[R, 0], [-R, 0], [0, R], [0, -R]].every(([a, b]) => inPoly(subs, bx + (x + a - mx) / k, by + (y + b - my) / k));
+      search: for (let rr = 0; rr <= 16; rr += 1.2) {
+        const steps = rr ? Math.max(8, Math.round(rr * 4)) : 1;
+        for (let i = 0; i < steps; i++) { const a = i / steps * Math.PI * 2, x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr; if (inK(x, y) && okAt(x, y)) { pos = [x, y]; break search; } }
+      }
+      if (!pos) { pos = [cx, cy]; conflicts.push(it.name); }
     }
-    if (!moved) break;
+    placed.push({ x: pos[0], y: pos[1] });
+    marks.push({ it, x: pos[0], y: pos[1], lead });
   }
+  const num = new Map(order.map((it, i) => [it.key, i + 1]));
+  marks.forEach(m => { m.n = num.get(m.it.key); });
   const colW = (PW - 2 * MX) / cols;
   const list = order.map((it, i) => ({ it, n: i + 1, x: MX + Math.floor(i / rows) * colW, y: listTop + (i % rows) * RH + RH / 2, w: colW - 6 }));
-  const title = 'Slepá mapa Česka';
-  const what = LAYERS.filter(l => S.layers[l.key]).map(l => l.label.toLowerCase()).join(', ');
-  const sub = `Napiš ke každému číslu správný název (${what}).`;
-  return { k, mx, my, mw, mh, T, vb: [bx, by, bw, bh], marks, list, title, sub, footY, layers, n };
+  return { k, mx, my, mw, mh, T, vb: [bx, by, bw, bh], marks, list, title, sub, sub2, titleBox, footY, n, numbered, syms, conflicts, mapBot, listTop };
+}
+// kontrola překryvů (pro testy): kroužky navzájem a kroužky se značkami
+function sheetOverlaps(sc) {
+  const out = [];
+  for (let i = 0; i < sc.marks.length; i++) {
+    const a = sc.marks[i];
+    for (let j = i + 1; j < sc.marks.length; j++) { const b = sc.marks[j]; if (Math.hypot(a.x - b.x, a.y - b.y) < 2 * R) out.push(`${a.n}x${b.n}`); }
+    for (const sy of sc.syms) if (Math.hypot(sy.x - a.x, sy.y - a.y) < R + sy.r) out.push(`${a.n}x${BYKEY[sy.key].name}`);
+  }
+  return out.concat(sc.conflicts.map(c => 'nelze umístit: ' + c));
 }
 const footerText = () => `Slepá mapa č. ${S.seed}`;
-// List je černobílý (tisk) na bílém pozadí: kraje bílé s černými hranicemi, bez sousedních států
-const C = { kraj: '#FFFFFF', kb: '#000000', border: '#000000', river: '#000000', text: '#000000', text2: '#333333', line: '#9A9A9A', mount: '#000000', accent: '#000000', rule: '#BBBBBB' };
+const C = { ink: '#000000', grey: '#A6A6A6', text2: '#333333', line: '#9A9A9A', rule: '#BBBBBB' };
 
 function sheetSVG(sc) {
   const FONT = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif";
+  const kind = S.sheet, f2 = (v) => v.toFixed(2);
   let s = `<svg xmlns="${SVGNS}" viewBox="0 0 ${PW} ${PH}" font-family="${FONT}" role="img" aria-label="Náhled pracovního listu">`;
   s += `<rect width="${PW}" height="${PH}" fill="#fff"/>`;
-  s += `<text x="${MX}" y="13.5" font-size="5.5" font-weight="700" fill="${C.text}">${esc(sc.title)}</text>`;
-  s += `<text x="${MX}" y="18.8" font-size="3.4" fill="${C.text2}">${esc(sc.sub)}</text>`;
-  // mapa (vnořené svg ořízne sousedy)
-  s += `<svg x="${sc.mx}" y="${sc.my}" width="${sc.mw}" height="${sc.mh}" viewBox="${sc.vb.map(v => v.toFixed(1)).join(' ')}">`;
+  s += `<svg x="${f2(sc.mx)}" y="${f2(sc.my)}" width="${f2(sc.mw)}" height="${f2(sc.mh)}" viewBox="${sc.vb.map(v => v.toFixed(1)).join(' ')}">`;
   const sw = (mm) => (mm / sc.k).toFixed(2);
-  s += `<path d="${M.obrys}" fill="#fff"/>`;
-  if (S.layers.kraje) s += `<g fill="${C.kraj}" stroke="${C.kb}" stroke-width="${sw(.25)}" stroke-linejoin="round">` + M.layers.kraje.map(k => `<path d="${k.d}" fill-rule="evenodd"/>`).join('') + '</g>';
-  else s += `<path d="${M.obrys}" fill="${C.kraj}"/>`;
-  s += `<path d="${M.obrys}" fill="none" stroke="${C.border}" stroke-width="${sw(.6)}" stroke-linejoin="round"/>`;
-  if (S.layers.reky) s += `<g fill="none" stroke="${C.river}" stroke-width="${sw(.4)}" stroke-linecap="round" stroke-linejoin="round">` + M.layers.reky.map(r => `<path d="${r.d}"/>`).join('') + '</g>';
+  const kOn = kind === 'kraje' || kind === 'mix';
+  s += `<g fill="#fff" stroke="${kOn ? C.ink : C.grey}" stroke-width="${sw(kOn ? .25 : .22)}" stroke-linejoin="round">` + M.layers.kraje.map(k => `<path d="${k.d}" fill-rule="evenodd"/>`).join('') + '</g>';
+  const dash = `stroke-dasharray="${sw(1.4)} ${sw(.8)}"`;
+  const rBlack = M.layers.reky.filter(r => kind === 'reky' || sc.numbered.has('reky:' + r.id));
+  const rGrey = M.layers.reky.filter(r => !rBlack.includes(r));
+  if (rGrey.length) s += `<g fill="none" stroke="${C.grey}" stroke-width="${sw(.3)}" ${dash} stroke-linecap="round" stroke-linejoin="round">` + rGrey.map(r => `<path d="${r.d}"/>`).join('') + '</g>';
+  if (rBlack.length) s += `<g fill="none" stroke="${C.ink}" stroke-width="${sw(.4)}" ${dash} stroke-linecap="round" stroke-linejoin="round">` + rBlack.map(r => `<path d="${r.d}"/>`).join('') + '</g>';
+  s += `<path d="${M.obrys}" fill="none" stroke="${C.ink}" stroke-width="${sw(.6)}" stroke-linejoin="round"/>`;
   s += '</svg>';
-  if (S.layers.pohori) for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); s += `<path d="M${x.toFixed(2)} ${(y - 1.9).toFixed(2)}l2 3.3h-4z" fill="${C.mount}" stroke="#fff" stroke-width=".3" stroke-linejoin="round"/>`; }
-  if (S.layers.mesta) for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); s += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.15" fill="${C.text}" stroke="#fff" stroke-width=".35"/>`; }
+  s += `<text x="${MX}" y="${f2(sc.titleBox[1] + 5.5)}" font-size="5.5" font-weight="700" fill="${C.ink}">${esc(sc.title)}</text>`;
+  s += `<text x="${MX}" y="${f2(sc.titleBox[1] + 11)}" font-size="3.4" fill="${C.text2}">${esc(sc.sub)}</text>`;
+  s += `<text x="${MX}" y="${f2(sc.titleBox[1] + 15.5)}" font-size="3.4" fill="${C.text2}">${esc(sc.sub2)}</text>`;
+  for (const sy of sc.syms) {
+    if (sy.key.startsWith('pohori:')) s += `<path d="M${f2(sy.x)} ${f2(sy.y - 1.9)}l2 3.3h-4z" fill="${C.ink}" stroke="#fff" stroke-width=".3" stroke-linejoin="round"/>`;
+    else s += `<circle cx="${f2(sy.x)}" cy="${f2(sy.y)}" r="1.15" fill="${C.ink}" stroke="#fff" stroke-width=".35"/>`;
+  }
   for (const m of sc.marks) {
-    s += `<circle cx="${m.x.toFixed(2)}" cy="${m.y.toFixed(2)}" r="2.3" fill="#fff" stroke="${C.text}" stroke-width=".25"/>`;
-    s += `<text x="${m.x.toFixed(2)}" y="${(m.y + .05).toFixed(2)}" font-size="${m.n > 9 ? 2.5 : 2.8}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="${C.text}">${m.n}</text>`;
+    if (m.lead) s += `<line x1="${f2(m.lead[0])}" y1="${f2(m.lead[1])}" x2="${f2(m.lead[2])}" y2="${f2(m.lead[3])}" stroke="${C.ink}" stroke-width=".2"/>`;
+    s += `<circle cx="${f2(m.x)}" cy="${f2(m.y)}" r="${R}" fill="#fff" stroke="${C.ink}" stroke-width=".25"/>`;
+    s += `<text x="${f2(m.x)}" y="${f2(m.y + .05)}" font-size="${m.n > 9 ? 2.5 : 2.8}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="${C.ink}">${m.n}</text>`;
   }
   for (const L of sc.list) {
-    s += `<text x="${L.x.toFixed(2)}" y="${L.y.toFixed(2)}" font-size="3.4" font-weight="700" dominant-baseline="central" fill="${C.text}">${L.n}.</text>`;
-    if (S.sol) { const fit = L.it.name.length * 1.9 > L.w - 6 ? ` textLength="${(L.w - 6).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''; s += `<text x="${(L.x + 6).toFixed(2)}" y="${L.y.toFixed(2)}" font-size="3.4" font-weight="600" dominant-baseline="central" fill="${C.accent}"${fit}>${esc(L.it.name)}</text>`; }
-    else s += `<line x1="${(L.x + 6).toFixed(2)}" y1="${(L.y + 1.6).toFixed(2)}" x2="${(L.x + L.w).toFixed(2)}" y2="${(L.y + 1.6).toFixed(2)}" stroke="${C.line}" stroke-width=".3"/>`;
+    s += `<text x="${f2(L.x)}" y="${f2(L.y)}" font-size="3.4" font-weight="700" dominant-baseline="central" fill="${C.ink}">${L.n}.</text>`;
+    if (S.sol) { const fit = L.it.name.length * 1.9 > L.w - 6 ? ` textLength="${(L.w - 6).toFixed(1)}" lengthAdjust="spacingAndGlyphs"` : ''; s += `<text x="${f2(L.x + 6)}" y="${f2(L.y)}" font-size="3.4" font-weight="600" dominant-baseline="central" fill="${C.ink}"${fit}>${esc(L.it.name)}</text>`; }
+    else s += `<line x1="${f2(L.x + 6)}" y1="${f2(L.y + 1.6)}" x2="${f2(L.x + L.w)}" y2="${f2(L.y + 1.6)}" stroke="${C.line}" stroke-width=".3"/>`;
   }
   const fy = sc.footY;
-  s += `<line x1="${MX}" y1="${fy - 4}" x2="${PW - MX}" y2="${fy - 4}" stroke="${C.rule}" stroke-width=".3"/>`;
-  s += `<text x="${MX}" y="${fy + .6}" font-size="3.4" font-weight="600" dominant-baseline="central" fill="${C.text}">${esc(footerText())}</text>`;
-  s += `<text x="${PW / 2}" y="${fy + .6}" font-size="2.6" text-anchor="middle" dominant-baseline="central" fill="${C.text2}">${esc(SRC)}</text>`;
-  s += `<path d="${wavePath(PW - MX - 29, fy + .6).map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('')}" fill="none" stroke="${C.accent}" stroke-width=".55" stroke-linecap="round"/>`;
-  s += `<text x="${PW - MX}" y="${fy + .6}" font-size="3.4" font-weight="700" text-anchor="end" dominant-baseline="central" fill="${C.text}">velappky.cz</text>`;
+  s += `<line x1="${MX}" y1="${fy - 3.5}" x2="${PW - MX}" y2="${fy - 3.5}" stroke="${C.rule}" stroke-width=".3"/>`;
+  s += `<text x="${MX}" y="${f2(fy + .4)}" font-size="3.2" font-weight="600" dominant-baseline="central" fill="${C.ink}">${esc(footerText())}</text>`;
+  s += `<text x="${PW / 2}" y="${f2(fy + .4)}" font-size="2.5" text-anchor="middle" dominant-baseline="central" fill="${C.text2}">${esc(SRC_SHEET)}</text>`;
+  s += `<path d="${wavePath(PW - MX - 28, fy + .4).map((p, i) => (i ? 'L' : 'M') + f2(p[0]) + ' ' + f2(p[1])).join('')}" fill="none" stroke="${C.ink}" stroke-width=".5" stroke-linecap="round"/>`;
+  s += `<text x="${PW - MX}" y="${f2(fy + .4)}" font-size="3.2" font-weight="700" text-anchor="end" dominant-baseline="central" fill="${C.ink}">velappky.cz</text>`;
   return s + '</svg>';
 }
 function wavePath(x0, yc) { const pts = []; for (let i = 0; i <= 40; i++) { const t = i / 40; pts.push([x0 + t * 7.5, yc - Math.sin(t * Math.PI * 6) * 0.75]); } return pts; }
-
-// PDF (jsPDF, vektorově, 1 strana A4 na šířku)
-let fontCache = null;
-async function loadFonts() {
-  if (fontCache !== null) return fontCache;
-  const get = async (u) => {
-    const r = await fetch(u); if (!r.ok) throw new Error('font');
-    const b = new Uint8Array(await r.arrayBuffer());
-    let str = ''; for (let i = 0; i < b.length; i += 0x8000) str += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
-    return btoa(str);
-  };
-  try { fontCache = { r: await get('/bludiste/fonts/LiberationSans-Regular.ttf'), b: await get('/bludiste/fonts/LiberationSans-Bold.ttf') }; }
-  catch (e) { fontCache = false; }
-  return fontCache;
-}
-const deaccent = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const rgb = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-async function makePDF(sc, jsPDFCtor, fonts) {
-  const doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
-  let fam = 'helvetica', txt = deaccent;
-  if (fonts) {
-    doc.addFileToVFS('LS-R.ttf', fonts.r); doc.addFont('LS-R.ttf', 'LS', 'normal');
-    doc.addFileToVFS('LS-B.ttf', fonts.b); doc.addFont('LS-B.ttf', 'LS', 'bold');
-    fam = 'LS'; txt = s => s;
-  }
-  doc.setProperties({ title: footerText(), creator: 'Slepá mapa - velappky.cz' });
-  doc.setLineCap('round'); doc.setLineJoin('round');
-  const fillC = (h) => doc.setFillColor(...rgb(h)), drawC = (h) => doc.setDrawColor(...rgb(h)), textC = (h) => doc.setTextColor(...rgb(h));
-  const P = (subs) => { for (const s of subs) { s.pts.forEach((p, i) => { const [x, y] = sc.T(p[0], p[1]); i ? doc.lineTo(x, y) : doc.moveTo(x, y); }); if (s.closed) doc.close(); } };
-  const cache = new Map(); const sub = (d) => { if (!cache.has(d)) cache.set(d, parseD(d)); return cache.get(d); };
-  const pt = (mm) => mm * 72 / 25.4;
-  // list je čistě černobílý na bílém pozadí: bez sousedních států
-  fillC('#FFFFFF'); P(sub(M.obrys)); doc.fillEvenOdd();
-  if (S.layers.kraje) {
-    fillC(C.kraj); for (const k of M.layers.kraje) { P(sub(k.d)); doc.fillEvenOdd(); }
-    drawC(C.kb); doc.setLineWidth(.25); for (const k of M.layers.kraje) { P(sub(k.d)); doc.stroke(); }
-  } else { fillC(C.kraj); P(sub(M.obrys)); doc.fillEvenOdd(); }
-  drawC(C.border); doc.setLineWidth(.6); P(sub(M.obrys)); doc.stroke();
-  if (S.layers.reky) { drawC(C.river); doc.setLineWidth(.4); for (const r of M.layers.reky) { P(sub(r.d)); doc.stroke(); } }
-  if (S.layers.pohori) { fillC(C.mount); drawC('#FFFFFF'); doc.setLineWidth(.3); for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); doc.triangle(x, y - 1.9, x + 2, y + 1.4, x - 2, y + 1.4, 'FD'); } }
-  if (S.layers.mesta) { fillC(C.text); drawC('#FFFFFF'); doc.setLineWidth(.35); for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); doc.circle(x, y, 1.15, 'FD'); } }
-  doc.setFont(fam, 'bold'); textC(C.text);
-  for (const m of sc.marks) {
-    fillC('#FFFFFF'); drawC(C.text); doc.setLineWidth(.25); doc.circle(m.x, m.y, 2.3, 'FD');
-    doc.setFontSize(pt(m.n > 9 ? 2.5 : 2.8)); doc.text(String(m.n), m.x, m.y + .05, { align: 'center', baseline: 'middle' });
-  }
-  // záhlaví
-  doc.setFont(fam, 'bold'); doc.setFontSize(pt(5.5)); textC(C.text); doc.text(txt(sc.title), MX, 13.5);
-  doc.setFont(fam, 'normal'); doc.setFontSize(pt(3.4)); textC(C.text2); doc.text(txt(sc.sub), MX, 18.8);
-  // seznam
-  for (const L of sc.list) {
-    doc.setFont(fam, 'bold'); doc.setFontSize(pt(3.4)); textC(C.text); doc.text(L.n + '.', L.x, L.y, { baseline: 'middle' });
-    if (S.sol) {
-      textC(C.accent); const nm = txt(L.it.name); let fsz = pt(3.4);
-      doc.setFontSize(fsz); while (doc.getTextWidth(nm) > L.w - 6 && fsz > 6) { fsz -= 0.25; doc.setFontSize(fsz); }
-      doc.text(nm, L.x + 6, L.y, { baseline: 'middle' });
-    }
-    else { drawC(C.line); doc.setLineWidth(.3); doc.line(L.x + 6, L.y + 1.6, L.x + L.w, L.y + 1.6); }
-  }
-  // patička
-  const fy = sc.footY;
-  drawC(C.rule); doc.setLineWidth(.3); doc.line(MX, fy - 4, PW - MX, fy - 4);
-  doc.setFont(fam, 'bold'); doc.setFontSize(pt(3.4)); textC(C.text); doc.text(txt(footerText()), MX, fy + .6, { baseline: 'middle' });
-  doc.text('velappky.cz', PW - MX, fy + .6, { align: 'right', baseline: 'middle' });
-  doc.setFont(fam, 'normal'); doc.setFontSize(pt(2.6)); textC(C.text2); doc.text(txt(SRC), PW / 2, fy + .6, { align: 'center', baseline: 'middle' });
-  drawC(C.accent); doc.setLineWidth(.55); const w = wavePath(PW - MX - 29, fy + .6);
-  w.forEach((p, i) => i ? doc.lineTo(p[0], p[1]) : doc.moveTo(p[0], p[1])); doc.stroke();
-  return doc;
-}
 
 let scene = null;
 function renderSheet() {
@@ -592,9 +618,8 @@ function renderSheet() {
   $('sheet').innerHTML = sheetSVG(scene);
   $('seed').value = S.seed;
   $('showSol').setAttribute('aria-checked', String(!!S.sol));
-  $('sheetLayers').innerHTML = switchesHTML('sl') + '<p class="sm-hint" aria-live="polite" style="grid-column:1/-1"></p>';
-  bindSwitches($('sheetLayers'), () => { renderSheet(); });
-  $('sheetInfo').textContent = `${scene.n} ${scene.n >= 5 ? 'prvků' : 'prvky'} · A4 na šířku · ${footerText()}`;
+  document.querySelectorAll('#sheetKind button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === S.sheet)));
+  $('sheetInfo').textContent = `${scene.n} prvků · A4 na šířku · ${footerText()}`;
 }
 function openSheet() { location.hash = 'list'; }
 function route() {
@@ -605,23 +630,17 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 $('toMap').onclick = (e) => { e.preventDefault(); if (history.length > 1 && location.hash === '#list') history.back(); else { location.hash = ''; } };
+$('sheetKind').innerHTML = SHEETS.map(([v, t]) => `<button type="button" data-s="${v}" aria-pressed="false">${t}</button>`).join('');
+document.querySelectorAll('#sheetKind button').forEach(b => b.onclick = () => { S.sheet = b.dataset.s; save(); renderSheet(); });
 $('seed').oninput = (e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 9); S.seed = v || '1'; save(); scene = sheetScene(); $('sheet').innerHTML = sheetSVG(scene); $('sheetInfo').textContent = `${scene.n} prvků · A4 na šířku · ${footerText()}`; };
 $('newSheet').onclick = () => { S.seed = newSeed(); save(); renderSheet(); };
 $('showSol').onclick = () => { S.sol = !S.sol; save(); renderSheet(); };
-$('pdf').onclick = async () => {
-  gcEvent('slepa-mapa-pdf', 'Slepá mapa: export PDF');
-  const btn = $('pdf'); btn.disabled = true; const lbl = btn.querySelector('span'), o = lbl.textContent; lbl.textContent = 'Připravuji…';
-  try {
-    if (!window.jspdf) throw new Error('jspdf');
-    (await makePDF(scene || sheetScene(), window.jspdf.jsPDF, await loadFonts())).save(`slepa-mapa-${S.seed}${S.sol ? '-reseni' : ''}.pdf`);
-  } catch (e) { alert('PDF se nepodařilo vytvořit. Zkuste to prosím znovu.'); }
-  btn.disabled = false; lbl.textContent = o;
-};
+$('print').onclick = () => { gcEvent('slepa-mapa-tisk', 'Slepá mapa: tisk listu'); window.print(); };
 
 // ---------- start ----------
 buildMap();
 view = S.mode === 'prohl' ? 'browse' : 'setup';
 if ('ResizeObserver' in window) new ResizeObserver(() => rescale()).observe(svg);
 route();
-window.SlepaMapa = { ITEMS, S, sheetScene, makePDF, pickAt, applyLayers, get view() { return view; }, get Q() { return Q; } };
+window.SlepaMapa = { ITEMS, S, sheetScene, sheetOverlaps, renderSheet, pickAt, applyLayers, get view() { return view; }, get Q() { return Q; } };
 })();
