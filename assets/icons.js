@@ -112,6 +112,19 @@
       '<path d="M29 21.2c1.3-1.3 1.3-3.5 0-4.8M32.4 23.2c2.5-2.5 2.5-6.6 0-9.1" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round"/>'
     ),
 
+    zemepis: svg(
+      '<circle cx="24" cy="24" r="19" fill="currentColor"/>' +
+      '<path d="M24 5.6c-5.4 4.8-8.2 11-8.2 18.4s2.8 13.6 8.2 18.4c5.4-4.8 8.2-11 8.2-18.4S29.4 10.4 24 5.6z" fill="none" stroke="#FFFFFF" stroke-width="2.4"/>' +
+      '<path d="M24 5v38M5 24h38M8.3 14.5h31.4M8.3 33.5h31.4" fill="none" stroke="#FFFFFF" stroke-width="2.4"/>'
+    ),
+    slepamapa: svg(
+      '<path d="M5 10l12.5-4.5V40L5 44.5z" fill="currentColor"/>' +
+      '<path d="M17.5 5.5l13 4.5v34.5l-13-4.5z" fill="currentColor" opacity="0.55"/>' +
+      '<path d="M30.5 10L43 5.5V40l-12.5 4.5z" fill="currentColor"/>' +
+      '<path d="M24 12.5c-4.4 0-7.8 3.4-7.8 7.6 0 5.6 7.8 14.4 7.8 14.4s7.8-8.8 7.8-14.4c0-4.2-3.4-7.6-7.8-7.6z" fill="#FFFFFF"/>' +
+      '<circle cx="24" cy="20.2" r="2.9" fill="currentColor"/>'
+    ),
+
     /* ---- Náhradní ikony, když nová položka ještě nemá vlastní ---- */
     slozka: svg(
       '<path d="M5 13a5 5 0 0 1 5-5h9l4 5h15a5 5 0 0 1 5 5v17a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5z" fill="currentColor"/>' +

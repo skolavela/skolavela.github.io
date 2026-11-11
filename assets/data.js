@@ -68,6 +68,16 @@ window.VELAPPKY = [
     ]
   },
   {
+    type: "folder", id: "zemepis", name: "Zeměpis", icon: "zemepis", tone: "yellow",
+    items: [
+      /* Zatím neveřejné (čeká na kontrolu), appka běží na /slepa-mapa/:
+      { type: "app", id: "slepamapa", name: "Slepá mapa", short: "Kraje, řeky, hory a města",
+        url: "/slepa-mapa/", icon: "slepamapa", tone: "yellow", grades: ["1", "2"],
+        keywords: "slepá mapa, Česko, ČR, kraje, řeky, pohoří, krajská města, vlastivěda, zeměpis" }
+      */
+    ]
+  },
+  {
     type: "folder", id: "prijimacky", name: "Přijímačky", icon: "prijimacky", tone: "navy",
     items: [
       { type: "app", id: "prijimacky", name: "Nanečisto", short: "Čeština a matematika",

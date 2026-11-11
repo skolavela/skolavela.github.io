@@ -1,0 +1,113 @@
+/* Slepá mapa - styly navíc ke společnému assets/velappky.css */
+.sm-game {
+  max-width: 1128px; margin: 0 auto; width: 100%; padding: 20px 24px 48px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.sm-w { width: 100%; max-width: 760px; }
+.sm-modes { flex: 0 1 360px; }
+.sm-count { font-size: 15px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; min-height: 20px; }
+
+/* Mapa */
+.sm-mapcard { width: 100%; max-width: 1080px; padding: 12px; }
+.sm-map { display: block; width: 100%; height: auto; overflow: hidden; border-radius: 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; --u: 1; }
+.sm-map .nb { fill: var(--stage); stroke: #FFFFFF; stroke-width: calc(var(--u) * 1px); }
+.sm-map .base { fill: #FFFFFF; }
+.sm-map .kraj { fill: var(--fill); stroke: #FFFFFF; stroke-width: calc(var(--u) * 1.5px); stroke-linejoin: round; transition: fill .15s ease; }
+.sm-map .border { fill: none; stroke: var(--text-3); stroke-width: calc(var(--u) * 1.5px); stroke-linejoin: round; pointer-events: none; }
+.sm-map .ol { fill: none; stroke-width: calc(var(--u) * 2.5px); stroke-linejoin: round; pointer-events: none; }
+.sm-map .reka .vis { fill: none; stroke: #0372B6; stroke-width: calc(var(--u) * 2px); stroke-linecap: round; stroke-linejoin: round; }
+.sm-map .reka .hit { fill: none; stroke: transparent; stroke-width: calc(var(--u) * 24px); stroke-linecap: round; stroke-linejoin: round; pointer-events: stroke; }
+.sm-map .pt .hit { fill: transparent; pointer-events: all; }
+.sm-map .pt .ring { fill: none; stroke: none; }
+.sm-map .mesto .halo { fill: #FFFFFF; }
+.sm-map .mesto .vis { fill: var(--text); }
+.sm-map .hora .vis { fill: #8A6A00; stroke: #FFFFFF; stroke-width: 1.5px; stroke-linejoin: round; }
+.sm-map .ft { cursor: pointer; outline: none; }
+.sm-map .ft:focus { outline: none; }
+
+/* Neaktivní vrstvy: šedě, neklikací */
+.sm-map .off { pointer-events: none; }
+.sm-map .off .ft { cursor: default; }
+.sm-map .off .reka .vis { stroke: #C7C7CC; stroke-width: calc(var(--u) * 1.5px); }
+.sm-map .off .mesto .vis { fill: #AEAEB2; }
+.sm-map .off .hora .vis { fill: #C7C7CC; }
+.sm-map .off .hit { pointer-events: none; }
+@media (hover: hover) {
+  .sm-map .on .kraj:hover { fill: rgba(118, 118, 128, 0.22); }
+  .sm-map .on .reka:hover .vis { stroke-width: calc(var(--u) * 3.5px); }
+}
+
+/* Stavy: zvýraznění (žlutá), správně (zelená), špatně (růžová), fokus (modrá) */
+.sm-map .kraj[data-s="hl"]  { fill: #FBF1CC; }
+.sm-map .kraj[data-s="ok"]  { fill: #E2F2E5; }
+.sm-map .kraj[data-s="bad"] { fill: #FCE4EA; }
+.sm-map .ol[data-s="hl"]  { stroke: #8A6A00; }
+.sm-map .ol[data-s="ok"]  { stroke: #1E7A32; }
+.sm-map .ol[data-s="bad"] { stroke: #C8174A; }
+.sm-map .ol[data-s="focus"] { stroke: var(--accent); stroke-width: calc(var(--u) * 3px); stroke-dasharray: calc(var(--u) * 6px) calc(var(--u) * 4px); }
+.sm-map .reka[data-s] .vis { stroke-width: calc(var(--u) * 4.5px); }
+.sm-map .reka[data-s="hl"] .vis  { stroke: #E0B000; }
+.sm-map .reka[data-s="ok"] .vis  { stroke: #1E7A32; }
+.sm-map .reka[data-s="bad"] .vis { stroke: #C8174A; }
+.sm-map .reka.focus .hit { stroke: rgba(3, 114, 182, 0.22); }
+.sm-map .pt[data-s] .ring { stroke-width: 3px; }
+.sm-map .pt[data-s="hl"] .ring  { fill: #FBF1CC; stroke: #8A6A00; }
+.sm-map .pt[data-s="ok"] .ring  { fill: #E2F2E5; stroke: #1E7A32; }
+.sm-map .pt[data-s="bad"] .ring { fill: #FCE4EA; stroke: #C8174A; }
+.sm-map .pt.focus .ring { stroke: var(--accent); stroke-width: 2.5px; stroke-dasharray: 4 3; }
+.sm-map .pt[data-s="ok"] .vis  { fill: #1E7A32; }
+.sm-map .pt[data-s="bad"] .vis { fill: #C8174A; }
+.sm-map .mesto[data-s="hl"] .vis { fill: #8A6A00; }
+
+/* Popisky (jen Prohlížení) */
+.sm-map .lbl { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; fill: var(--text); stroke: #FFFFFF; stroke-width: 3px; stroke-linejoin: round; paint-order: stroke; pointer-events: none; }
+.sm-map .lbl.k { fill: var(--text-2); font-weight: 500; }
+.sm-map .lbl.r { fill: #025A91; font-style: italic; font-weight: 500; }
+.sm-map .lbl.h { fill: #6B5200; }
+
+/* Karta se zadáním */
+.sm-task { display: flex; flex-direction: column; gap: 14px; }
+.sm-task h2 { margin: 0; font-size: 22px; font-weight: 700; }
+.sm-q { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.25; }
+.sm-q b { font-weight: 800; }
+.sm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sm-fb { margin: 0; min-height: 22px; font-size: 17px; font-weight: 600; color: var(--text-2); }
+.sm-fb[data-s="ok"] { color: #1E7A32; }
+.sm-fb[data-s="bad"] { color: #C8174A; }
+.sm-next { min-width: 140px; }
+.sm-next[hidden] { display: inline-flex; visibility: hidden; }
+.sm-big { margin: 0; font-size: 30px; font-weight: 700; line-height: 1.2; min-height: 36px; }
+.sm-big.is-empty { font-size: 17px; font-weight: 500; color: var(--text-2); }
+.sm-kind { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.sm-switches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.sm-setup { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px 28px; align-items: start; }
+.sm-setup .c-btns { margin-top: 4px; }
+.sm-hint { margin: 0; font-size: 13px; color: #C8174A; min-height: 0; }
+.sm-misses { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.sm-misses li { padding: 6px 12px; border-radius: 999px; background: #FCE4EA; color: #C8174A; font-size: 15px; font-weight: 600; }
+.sm-task .a-choice:disabled { cursor: default; }
+.sm-task .a-choice:disabled:not([data-state]) { opacity: .6; }
+.sm-key { display: inline-block; min-width: 1.4em; color: var(--text-3); font-weight: 600; }
+
+/* Pracovní list */
+.sm-sheetview[hidden] { display: none; }
+.sm-game[hidden] { display: none; }
+.sm-sheet { padding: 0; display: block; }
+.sm-sheet svg { display: block; width: 100%; height: 100%; }
+
+@media (max-width: 699px) {
+  .sm-setup { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 599px) {
+  .sm-game { padding: 12px 12px 40px; gap: 12px; }
+  .sm-mapcard { padding: 6px; border-radius: 14px; }
+  .sm-map { border-radius: 8px; }
+  .sm-q { font-size: 19px; }
+  .sm-big { font-size: 24px; }
+  .sm-modes { flex: 1 1 auto; }
+  .sm-next { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-map * { transition: none !important; }
+}
+.sm-task > .sm-row .c-meta { flex: 1 1 260px; }

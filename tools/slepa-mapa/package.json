@@ -1,0 +1,8 @@
+{
+  "name": "velappky-slepa-mapa-build",
+  "private": true,
+  "type": "module",
+  "description": "Převod mapových podkladů (ČÚZK Data200, Natural Earth, Wikidata) na slepa-mapa.data.js",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": { "mapshaper": "^0.6.102" }
+}
