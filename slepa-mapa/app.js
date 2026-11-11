@@ -49,6 +49,8 @@ for (const it of ITEMS) {
   } else { it.cx = it.x; it.cy = it.y; }
 }
 
+const BB = (() => { let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (const sb of parseD(M.obrys)) for (const [x, y] of sb.pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); } return { x0, y0, x1, y1 }; })();
+
 // ---------- náhoda ----------
 function hashSeed(s) { let h = 1779033703 ^ s.length; for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); } return (h >>> 0) || 1; }
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -316,19 +318,16 @@ function renderTask() {
   const cnt = $('count');
   if (view === 'setup') {
     const n = activeItems().length;
-    cnt.textContent = '';
+    cnt.textContent = `${n} ${n >= 5 ? 'prvků' : 'prvky'}`;
     task.innerHTML = `
-      <div class="sm-setup">
-        <div class="c-field"><span class="c-label">Co procvičit</span><div class="sm-switches">${switchesHTML('ly')}</div><p class="sm-hint" aria-live="polite"></p></div>
-        <div class="c-field">
-          <span class="c-label" id="lbl-cnt">Počet otázek</span>
+      <div class="c-field"><div class="sm-switches sm-switches--4" role="group" aria-label="Co procvičit">${switchesHTML('ly')}</div><p class="sm-hint" aria-live="polite"></p></div>
+      <div class="sm-row sm-row--ctl">
+        <div class="sm-cnt"><span class="c-label" id="lbl-cnt">Otázek</span>
           <div class="c-seg" role="group" aria-labelledby="lbl-cnt" id="cnt">
             ${[['10', '10'], ['20', '20'], ['all', 'Vše']].map(([v, t]) => `<button type="button" data-c="${v}" aria-pressed="${S.count === v}">${t}</button>`).join('')}
-          </div>
-          <div class="c-btns"><button class="c-btn c-btn--primary" type="button" id="start">Začít</button>${BTN_SHEET}</div>
-        </div>
-      </div>
-      <p class="c-meta">Vybráno ${n} ${n >= 5 ? 'prvků' : 'prvky'}. ${SRC}</p>`;
+          </div></div>
+        <div class="sm-btns"><button class="c-btn c-btn--primary" type="button" id="start">Začít</button>${BTN_SHEET}</div>
+      </div>`;
     bindSwitches(task, () => { applyLayers(); renderTask(); });
     task.querySelectorAll('#cnt button').forEach(b => b.onclick = () => { S.count = b.dataset.c; save(); renderTask(); });
     $('start').onclick = () => startQuiz();
@@ -337,11 +336,8 @@ function renderTask() {
     cnt.textContent = '';
     const it = browseSel && BYKEY[browseSel];
     task.innerHTML = `
-      <div class="sm-setup">
-        <div><p class="sm-kind">${it ? esc(LBY[it.layer].kind) : '&nbsp;'}</p><p class="sm-big${it ? '' : ' is-empty'}" aria-live="polite">${it ? esc(it.name) : 'Ťukni na mapu a uvidíš název.'}</p></div>
-        <div class="c-field"><span class="c-label">Na mapě</span><div class="sm-switches">${switchesHTML('ly')}</div><p class="sm-hint" aria-live="polite"></p></div>
-      </div>
-      <div class="sm-row"><p class="c-meta">${SRC}</p>${BTN_SHEET}</div>`;
+      <div class="sm-row"><div><p class="sm-kind">${it ? esc(LBY[it.layer].kind) : '&nbsp;'}</p><p class="sm-big${it ? '' : ' is-empty'}" aria-live="polite">${it ? esc(it.name) : 'Ťukni na mapu a uvidíš název.'}</p></div>${BTN_SHEET}</div>
+      <div class="c-field"><div class="sm-switches sm-switches--4" role="group" aria-label="Vrstvy na mapě">${switchesHTML('ly')}</div><p class="sm-hint" aria-live="polite"></p></div>`;
     bindSwitches(task, () => { if (browseSel && !S.layers[BYKEY[browseSel].layer]) { browseSel = null; clearStates(); } applyLayers(); renderTask(); });
     $('toSheet').onclick = openSheet;
   } else if (view === 'quiz') {
@@ -355,8 +351,8 @@ function renderTask() {
         if (bad) { fb = 'To je ' + BYKEY[bad.dataset.k].name + '.'; fs = 'bad'; } else { fb = 'Správně, to je ' + it.name + '.'; fs = 'ok'; }
       }
       task.innerHTML = `
-        <p class="sm-q">Najdi <b>${esc(it.akuzativ || it.name)}</b>.</p>
-        <div class="sm-row"><p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
+        <div class="sm-row"><p class="sm-q">Najdi <b>${esc(it.akuzativ || it.name)}</b>.</p>
+        <p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
         <button class="c-btn c-btn--primary sm-next" type="button" id="next"${Q.answered ? '' : ' hidden'}>Další</button></div>`;
     } else {
       if (!Q.opts) Q.opts = optionsFor(it);
@@ -366,13 +362,13 @@ function renderTask() {
         if (pick === it.key) { fb = 'Správně, to je ' + it.name + '.'; fs = 'ok'; } else { fb = 'Na mapě je ' + it.name + '.'; fs = 'bad'; }
       }
       task.innerHTML = `
-        <p class="sm-q">Co je to? <span class="sm-kind" style="display:inline">${esc(LBY[it.layer].kind)}</span></p>
-        <div class="a-choices">${Q.opts.map((o, i) => {
+        <div class="sm-row"><p class="sm-q">Co je to? <span class="sm-kind" style="display:inline">${esc(LBY[it.layer].kind)}</span></p>
+        <p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
+        <button class="c-btn c-btn--primary sm-next" type="button" id="next"${Q.answered ? '' : ' hidden'}>Další</button></div>
+        <div class="a-choices sm-choices">${Q.opts.map((o, i) => {
           let st = ''; if (Q.answered) { if (o.key === it.key) st = 'correct'; else if (o.key === Q.pick) st = 'wrong'; }
           return `<button class="a-choice" type="button" data-k="${o.key}"${st ? ` data-state="${st}"` : ''}${Q.answered ? ' disabled' : ''}><span class="sm-key" aria-hidden="true">${i + 1}</span>${esc(o.name)}</button>`;
-        }).join('')}</div>
-        <div class="sm-row"><p class="sm-fb" id="fb"${fs ? ` data-s="${fs}"` : ''}>${esc(fb)}</p>
-        <button class="c-btn c-btn--primary sm-next" type="button" id="next"${Q.answered ? '' : ' hidden'}>Další</button></div>`;
+        }).join('')}</div>`;
       task.querySelectorAll('.a-choice').forEach(b => b.onclick = () => {
         if (Q.answered) return;
         Q.pick = b.dataset.k; const ok = Q.pick === it.key;
@@ -421,11 +417,11 @@ function fitMap() {
   const card = $('mapcard');
   if (window.innerWidth < 600 || $('game').hidden) { card.style.maxWidth = ''; rescale(); return; }
   const top = card.getBoundingClientRect().top + window.scrollY;
-  const taskH = task.offsetHeight;
-  const avail = window.innerHeight - top - 16 - taskH - 16;
-  const h = Math.max(260, Math.min(window.innerHeight * 0.6, avail));
-  const pad = 24;
-  card.style.maxWidth = Math.min(1080, Math.round((h - pad) * 1000 / 580 + pad)) + 'px';
+  const taskH = 146; // pevná rezerva pro kartu zadání => mapa má ve všech stavech stejnou velikost
+  const avail = window.innerHeight - top - 12 - taskH - 12;
+  const h = Math.max(300, Math.min(window.innerHeight * 0.68, avail));
+  const pad = 12;
+  card.style.maxWidth = Math.min(1200, Math.round((h - pad) * 1000 / 580 + pad)) + 'px';
   rescale();
 }
 let rt = 0;
@@ -439,14 +435,16 @@ function sheetScene() {
   const rnd = mulberry32(hashSeed(S.seed + '|' + layers.join(',')));
   const order = shuffle(items.slice(), rnd);
   const n = order.length;
-  const cols = n <= 12 ? 3 : n <= 16 ? 4 : 5;
-  const rows = Math.ceil(n / cols), RH = n > 40 ? 5.6 : n > 30 ? 6 : 7;
-  const footY = PH - 9;
-  const listTop = footY - 7 - rows * RH;
-  const mapTop = 27, mapBot = listTop - 5;
-  const k = Math.min((PW - 2 * MX) / 1000, (mapBot - mapTop) / 580);
-  const mw = 1000 * k, mh = 580 * k, mx = (PW - mw) / 2, my = mapTop + (mapBot - mapTop - mh) / 2;
-  const T = (x, y) => [mx + x * k, my + y * k];
+  const cols = n <= 8 ? 4 : n <= 15 ? 5 : 6;
+  const rows = Math.ceil(n / cols), RH = rows <= 4 ? 7 : rows <= 6 ? 6.2 : 5.6;
+  const footY = PH - 8;
+  const listTop = footY - 6 - rows * RH;
+  const mapTop = 21, mapBot = listTop - 3;
+  // mapa oříznutá na ČR (+ malý okraj), co největší
+  const bx = BB.x0 - 8, by = BB.y0 - 8, bw = BB.x1 - BB.x0 + 16, bh = BB.y1 - BB.y0 + 16;
+  const k = Math.min((PW - 2 * MX) / bw, (mapBot - mapTop) / bh);
+  const mw = bw * k, mh = bh * k, mx = (PW - mw) / 2, my = mapTop + (mapBot - mapTop - mh) / 2;
+  const T = (x, y) => [mx + (x - bx) * k, my + (y - by) * k];
   // čísla
   const marks = order.map((it, i) => {
     let x, y, ax, ay;
@@ -477,29 +475,30 @@ function sheetScene() {
   const title = 'Slepá mapa Česka';
   const what = LAYERS.filter(l => S.layers[l.key]).map(l => l.label.toLowerCase()).join(', ');
   const sub = `Napiš ke každému číslu správný název (${what}).`;
-  return { k, mx, my, mw, mh, T, marks, list, title, sub, footY, layers, n };
+  return { k, mx, my, mw, mh, T, vb: [bx, by, bw, bh], marks, list, title, sub, footY, layers, n };
 }
 const footerText = () => `Slepá mapa č. ${S.seed}`;
-const C = { stage: '#E8E8ED', kraj: '#EFEFF0', border: '#8E8E93', river: '#0372B6', text: '#1D1D1F', text2: '#6E6E73', line: '#C7C7CC', mount: '#8A6A00', accent: '#0372B6' };
+// List je černobílý (tisk): sousedé velmi světle šedí, kraje bílé s černými hranicemi
+const C = { stage: '#F2F2F2', kraj: '#FFFFFF', kb: '#000000', border: '#000000', river: '#000000', text: '#000000', text2: '#333333', line: '#9A9A9A', mount: '#000000', accent: '#000000', rule: '#BBBBBB' };
 
 function sheetSVG(sc) {
   const FONT = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif";
   let s = `<svg xmlns="${SVGNS}" viewBox="0 0 ${PW} ${PH}" font-family="${FONT}" role="img" aria-label="Náhled pracovního listu">`;
   s += `<rect width="${PW}" height="${PH}" fill="#fff"/>`;
-  s += `<text x="${MX}" y="16" font-size="6" font-weight="700" fill="${C.text}">${esc(sc.title)}</text>`;
-  s += `<text x="${MX}" y="22.5" font-size="3.6" fill="${C.text2}">${esc(sc.sub)}</text>`;
+  s += `<text x="${MX}" y="13.5" font-size="5.5" font-weight="700" fill="${C.text}">${esc(sc.title)}</text>`;
+  s += `<text x="${MX}" y="18.8" font-size="3.4" fill="${C.text2}">${esc(sc.sub)}</text>`;
   // mapa (vnořené svg ořízne sousedy)
-  s += `<svg x="${sc.mx}" y="${sc.my}" width="${sc.mw}" height="${sc.mh}" viewBox="0 0 1000 580">`;
+  s += `<svg x="${sc.mx}" y="${sc.my}" width="${sc.mw}" height="${sc.mh}" viewBox="${sc.vb.map(v => v.toFixed(1)).join(' ')}">`;
   const sw = (mm) => (mm / sc.k).toFixed(2);
   s += `<g fill="${C.stage}" stroke="#fff" stroke-width="${sw(.3)}">` + (M.podklad ? `<path d="${M.podklad}"/>` : '') + M.neighbors.map(n => `<path d="${n.d}"/>`).join('') + '</g>';
   s += `<path d="${M.obrys}" fill="#fff"/>`;
-  if (S.layers.kraje) s += `<g fill="${C.kraj}" stroke="#fff" stroke-width="${sw(.45)}" stroke-linejoin="round">` + M.layers.kraje.map(k => `<path d="${k.d}" fill-rule="evenodd"/>`).join('') + '</g>';
+  if (S.layers.kraje) s += `<g fill="${C.kraj}" stroke="${C.kb}" stroke-width="${sw(.25)}" stroke-linejoin="round">` + M.layers.kraje.map(k => `<path d="${k.d}" fill-rule="evenodd"/>`).join('') + '</g>';
   else s += `<path d="${M.obrys}" fill="${C.kraj}"/>`;
-  s += `<path d="${M.obrys}" fill="none" stroke="${C.border}" stroke-width="${sw(.4)}" stroke-linejoin="round"/>`;
-  if (S.layers.reky) s += `<g fill="none" stroke="${C.river}" stroke-width="${sw(.5)}" stroke-linecap="round" stroke-linejoin="round">` + M.layers.reky.map(r => `<path d="${r.d}"/>`).join('') + '</g>';
+  s += `<path d="${M.obrys}" fill="none" stroke="${C.border}" stroke-width="${sw(.6)}" stroke-linejoin="round"/>`;
+  if (S.layers.reky) s += `<g fill="none" stroke="${C.river}" stroke-width="${sw(.4)}" stroke-linecap="round" stroke-linejoin="round">` + M.layers.reky.map(r => `<path d="${r.d}"/>`).join('') + '</g>';
   s += '</svg>';
-  if (S.layers.pohori) for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); s += `<path d="M${x.toFixed(2)} ${(y - 1.7).toFixed(2)}l1.7 2.9h-3.4z" fill="${C.mount}" stroke="#fff" stroke-width=".3" stroke-linejoin="round"/>`; }
-  if (S.layers.mesta) for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); s += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.05" fill="${C.text}" stroke="#fff" stroke-width=".35"/>`; }
+  if (S.layers.pohori) for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); s += `<path d="M${x.toFixed(2)} ${(y - 1.9).toFixed(2)}l2 3.3h-4z" fill="${C.mount}" stroke="#fff" stroke-width=".3" stroke-linejoin="round"/>`; }
+  if (S.layers.mesta) for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); s += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.15" fill="${C.text}" stroke="#fff" stroke-width=".35"/>`; }
   for (const m of sc.marks) {
     s += `<circle cx="${m.x.toFixed(2)}" cy="${m.y.toFixed(2)}" r="2.3" fill="#fff" stroke="${C.text}" stroke-width=".25"/>`;
     s += `<text x="${m.x.toFixed(2)}" y="${(m.y + .05).toFixed(2)}" font-size="${m.n > 9 ? 2.5 : 2.8}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="${C.text}">${m.n}</text>`;
@@ -510,7 +509,7 @@ function sheetSVG(sc) {
     else s += `<line x1="${(L.x + 6).toFixed(2)}" y1="${(L.y + 1.6).toFixed(2)}" x2="${(L.x + L.w).toFixed(2)}" y2="${(L.y + 1.6).toFixed(2)}" stroke="${C.line}" stroke-width=".3"/>`;
   }
   const fy = sc.footY;
-  s += `<line x1="${MX}" y1="${fy - 4}" x2="${PW - MX}" y2="${fy - 4}" stroke="#d2d2d7" stroke-width=".3"/>`;
+  s += `<line x1="${MX}" y1="${fy - 4}" x2="${PW - MX}" y2="${fy - 4}" stroke="${C.rule}" stroke-width=".3"/>`;
   s += `<text x="${MX}" y="${fy + .6}" font-size="3.4" font-weight="600" dominant-baseline="central" fill="${C.text}">${esc(footerText())}</text>`;
   s += `<text x="${PW / 2}" y="${fy + .6}" font-size="2.6" text-anchor="middle" dominant-baseline="central" fill="${C.text2}">${esc(SRC)}</text>`;
   s += `<path d="${wavePath(PW - MX - 29, fy + .6).map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('')}" fill="none" stroke="${C.accent}" stroke-width=".55" stroke-linecap="round"/>`;
@@ -558,20 +557,20 @@ async function makePDF(sc, jsPDFCtor, fonts) {
   fillC('#FFFFFF'); P(sub(M.obrys)); doc.fillEvenOdd();
   if (S.layers.kraje) {
     fillC(C.kraj); for (const k of M.layers.kraje) { P(sub(k.d)); doc.fillEvenOdd(); }
-    drawC('#FFFFFF'); doc.setLineWidth(.45); for (const k of M.layers.kraje) { P(sub(k.d)); doc.stroke(); }
+    drawC(C.kb); doc.setLineWidth(.25); for (const k of M.layers.kraje) { P(sub(k.d)); doc.stroke(); }
   } else { fillC(C.kraj); P(sub(M.obrys)); doc.fillEvenOdd(); }
-  drawC(C.border); doc.setLineWidth(.4); P(sub(M.obrys)); doc.stroke();
-  if (S.layers.reky) { drawC(C.river); doc.setLineWidth(.5); for (const r of M.layers.reky) { P(sub(r.d)); doc.stroke(); } }
-  if (S.layers.pohori) { fillC(C.mount); drawC('#FFFFFF'); doc.setLineWidth(.3); for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); doc.triangle(x, y - 1.7, x + 1.7, y + 1.2, x - 1.7, y + 1.2, 'FD'); } }
-  if (S.layers.mesta) { fillC(C.text); drawC('#FFFFFF'); doc.setLineWidth(.35); for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); doc.circle(x, y, 1.05, 'FD'); } }
+  drawC(C.border); doc.setLineWidth(.6); P(sub(M.obrys)); doc.stroke();
+  if (S.layers.reky) { drawC(C.river); doc.setLineWidth(.4); for (const r of M.layers.reky) { P(sub(r.d)); doc.stroke(); } }
+  if (S.layers.pohori) { fillC(C.mount); drawC('#FFFFFF'); doc.setLineWidth(.3); for (const p of M.layers.pohori) { const [x, y] = sc.T(p.x, p.y); doc.triangle(x, y - 1.9, x + 2, y + 1.4, x - 2, y + 1.4, 'FD'); } }
+  if (S.layers.mesta) { fillC(C.text); drawC('#FFFFFF'); doc.setLineWidth(.35); for (const c of M.layers.mesta) { const [x, y] = sc.T(c.x, c.y); doc.circle(x, y, 1.15, 'FD'); } }
   doc.setFont(fam, 'bold'); textC(C.text);
   for (const m of sc.marks) {
     fillC('#FFFFFF'); drawC(C.text); doc.setLineWidth(.25); doc.circle(m.x, m.y, 2.3, 'FD');
     doc.setFontSize(pt(m.n > 9 ? 2.5 : 2.8)); doc.text(String(m.n), m.x, m.y + .05, { align: 'center', baseline: 'middle' });
   }
   // záhlaví
-  doc.setFont(fam, 'bold'); doc.setFontSize(pt(6)); textC(C.text); doc.text(txt(sc.title), MX, 16);
-  doc.setFont(fam, 'normal'); doc.setFontSize(pt(3.6)); textC(C.text2); doc.text(txt(sc.sub), MX, 22.5);
+  doc.setFont(fam, 'bold'); doc.setFontSize(pt(5.5)); textC(C.text); doc.text(txt(sc.title), MX, 13.5);
+  doc.setFont(fam, 'normal'); doc.setFontSize(pt(3.4)); textC(C.text2); doc.text(txt(sc.sub), MX, 18.8);
   // seznam
   for (const L of sc.list) {
     doc.setFont(fam, 'bold'); doc.setFontSize(pt(3.4)); textC(C.text); doc.text(L.n + '.', L.x, L.y, { baseline: 'middle' });
@@ -584,7 +583,7 @@ async function makePDF(sc, jsPDFCtor, fonts) {
   }
   // patička
   const fy = sc.footY;
-  drawC('#D2D2D7'); doc.setLineWidth(.3); doc.line(MX, fy - 4, PW - MX, fy - 4);
+  drawC(C.rule); doc.setLineWidth(.3); doc.line(MX, fy - 4, PW - MX, fy - 4);
   doc.setFont(fam, 'bold'); doc.setFontSize(pt(3.4)); textC(C.text); doc.text(txt(footerText()), MX, fy + .6, { baseline: 'middle' });
   doc.text('velappky.cz', PW - MX, fy + .6, { align: 'right', baseline: 'middle' });
   doc.setFont(fam, 'normal'); doc.setFontSize(pt(2.6)); textC(C.text2); doc.text(txt(SRC), PW / 2, fy + .6, { align: 'center', baseline: 'middle' });
