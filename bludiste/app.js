@@ -41,9 +41,25 @@ function generateMaze(cols, rows, seed) {
     const n = (y + d[2]) * cols + x + d[1];
     walls[c] &= ~d[0]; walls[n] &= ~d[3]; seen[n] = 1; stack.push(n);
   }
-  const start = 0, end = cols - 1;
-  walls[start] &= ~N; walls[end] &= ~N; // vstup vlevo nahoře, výstup vpravo nahoře
-  return { cols, rows, walls, start, end };
+  // vstup a výstup kdekoli po obvodu, odvozené z čísla bludiště (vlastní RNG, chodby se tím nemění)
+  const [a, b] = openings(cols, rows, seed);
+  walls[a.c] &= ~a.d; walls[b.c] &= ~b.d;
+  return { cols, rows, walls, start: a.c, end: b.c, startSide: a.d, endSide: b.d };
+}
+// obvod po směru hodinových ručiček: nahoře → vpravo → dole → vlevo; k = 0 … 2·(cols+rows)-1
+function perimeterCell(cols, rows, k) {
+  if (k < cols) return { c: k, d: N };
+  k -= cols; if (k < rows) return { c: k * cols + cols - 1, d: E };
+  k -= rows; if (k < cols) return { c: (rows - 1) * cols + (cols - 1 - k), d: S };
+  k -= cols; return { c: (rows - 1 - k) * cols, d: W };
+}
+// start a cíl jsou od sebe po obvodu aspoň 3/8 obvodu (zpravidla na jiné straně)
+function openings(cols, rows, seed) {
+  const P = 2 * (cols + rows), r = mulberry32(hashSeed(seed) ^ 0x51ed270b);
+  const i = (r() * P) | 0;
+  const off = Math.round((r() - .5) * P / 4);
+  const j = ((i + Math.floor(P / 2) + off) % P + P) % P;
+  return [perimeterCell(cols, rows, i), perimeterCell(cols, rows, j)];
 }
 function solveMaze(m) {
   const { cols, rows, walls } = m, prev = new Int32Array(cols * rows).fill(-1);
@@ -67,7 +83,7 @@ function solveMaze(m) {
 
 // ---------- Layout / geometry in mm ----------
 const PRESETS = { easy: 12, medium: 24, hard: 42, expert: 70 };
-const PRESET_NAMES = { easy: 'Lehké', medium: 'Střední', hard: 'Těžké', expert: 'Expert' };
+const PRESET_NAMES = { easy: 'Lehké', medium: 'Střední', hard: 'Těžké', expert: 'Nejtěžší' };
 function pageSize(o) { return o === 'portrait' ? [210, 297] : [297, 210]; }
 function gridFor(size, orient) {
   const [W_, H_] = pageSize(orient);
@@ -80,7 +96,7 @@ function buildScene(st) {
   const [PW, PH] = pageSize('landscape');
   const [cols, rows] = gridFor(st.size, 'landscape');
   const maze = generateMaze(cols, rows, st.seed);
-  const top = 22, bottom = 22, side = 12;
+  const top = 16, bottom = 30, side = 16; // místo pro šipky startu a cíle na všech stranách + patička
   const cell = Math.min((PW - 2 * side) / cols, (PH - top - bottom) / rows);
   const ox = (PW - cell * cols) / 2, oy = top + ((PH - top - bottom) - cell * rows) / 2;
   const rnd = mulberry32(hashSeed(st.seed) ^ 0x9e3779b9);
@@ -123,25 +139,30 @@ function buildScene(st) {
       if (!has && run >= 0) { lines.push(seg(x, run, x, y)); run = -1; }
     }
   }
-  // arrows & icons
-  const deco = [];
-  const ax1 = ox + cell / 2, ax2 = ox + (cols - .5) * cell;
-  const ah = Math.min(3, Math.max(1.6, cell * .5));
-  deco.push([[ax1, oy - 12], [ax1, oy - 2]], [[ax1 - ah, oy - 2 - ah], [ax1, oy - 2], [ax1 + ah, oy - 2 - ah]]);
-  deco.push([[ax2, oy - 2], [ax2, oy - 12]], [[ax2 - ah, oy - 12 + ah], [ax2, oy - 12], [ax2 + ah, oy - 12 + ah]]);
-  if (false) {
-    const fx = ax1 + 4.5, fy = oy - 13; // flag
-    deco.push([[fx, fy + 9], [fx, fy]], [[fx, fy], [fx + 6, fy + 1.6], [fx, fy + 3.6]]);
-    const sx = ax2 - 8, sy = oy - 8, R = 4, r = 1.7, star = []; // star
-    for (let i = 0; i <= 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R; star.push([sx + Math.cos(a) * rr, sy + Math.sin(a) * rr]); }
-    deco.push(star);
-  }
+  // šipky: start míří do bludiště, cíl ven; u každé jeden malý popisek
+  const deco = [], labels = [];
+  const ah = Math.min(2.6, Math.max(1.6, cell * .5)), GAP = 1.5, LEN = 8;
+  const UV = { [N]: [0, -1], [S]: [0, 1], [E]: [1, 0], [W]: [-1, 0] };
+  const edgeOf = (c, d) => { const u = UV[d], x = ox + (c % cols + .5) * cell, y = oy + (((c / cols) | 0) + .5) * cell; return [x + u[0] * cell / 2, y + u[1] * cell / 2, u]; };
+  const arrow = (c, d, inward, text) => {
+    const [ex, ey, u] = edgeOf(c, d);
+    const near = [ex + u[0] * GAP, ey + u[1] * GAP], far = [ex + u[0] * (GAP + LEN), ey + u[1] * (GAP + LEN)];
+    const tip = inward ? near : far, tail = inward ? far : near;
+    const bx = (tail[0] - tip[0]) / LEN, by = (tail[1] - tip[1]) / LEN, px = -by, py = bx;
+    deco.push([tail, tip], [[tip[0] + bx * ah + px * ah, tip[1] + by * ah + py * ah], tip, [tip[0] + bx * ah - px * ah, tip[1] + by * ah - py * ah]]);
+    const mx = (near[0] + far[0]) / 2, my = (near[1] + far[1]) / 2;
+    if (u[0] === 0) labels.push({ x: mx + ah + 1.5, y: my, text, anchor: 'start' });
+    else labels.push({ x: mx, y: my - ah - 1.5, text, anchor: 'middle' });
+    return near;
+  };
+  const pin = arrow(maze.start, maze.startSide, true, 'Start');
+  const pout = arrow(maze.end, maze.endSide, false, 'Cíl');
   let solution = null;
   const path = solveMaze(maze);
   if (path) {
-    solution = [[ax1, oy - 2]].concat(path.map(c => [ox + (c % cols + .5) * cell, oy + (((c / cols) | 0) + .5) * cell]), [[ax2, oy - 2]]);
+    solution = [pin].concat(path.map(c => [ox + (c % cols + .5) * cell, oy + (((c / cols) | 0) + .5) * cell]), [pout]);
   }
-  return { PW, PH, cols, rows, cell, maze, lines, deco, solution, footerY: PH - 12, path };
+  return { PW, PH, cols, rows, cell, maze, lines, deco, labels, solution, footerY: PH - 12, path };
 }
 
 const THICK = 0.4; // mm, pevná tloušťka čáry
@@ -156,6 +177,7 @@ function renderSVG(st, sc, withSol, preview) {
   if (preview) { // náhled: jen bludiště, oříznuté na obsah, barva čar dle motivu
     let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
     for (const l of sc.lines.concat(sc.deco)) for (const [x, y] of l) { x1 = Math.min(x1, x); y1 = Math.min(y1, y); x2 = Math.max(x2, x); y2 = Math.max(y2, y); }
+    for (const L of sc.labels) { const w = L.text.length * 2.1, l0 = L.anchor === 'middle' ? L.x - w / 2 : L.x; x1 = Math.min(x1, l0); x2 = Math.max(x2, l0 + w); y1 = Math.min(y1, L.y - 2.5); y2 = Math.max(y2, L.y + 2.5); }
     const m = 1; vb = `${x1 - m} ${y1 - m} ${x2 - x1 + 2 * m} ${y2 - y1 + 2 * m}`; ink = 'currentColor';
   }
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" preserveAspectRatio="xMidYMid meet" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif">`;
@@ -163,6 +185,7 @@ function renderSVG(st, sc, withSol, preview) {
   if (withSol && sc.solution) s += `<path d="${toD(sc.solution)}" fill="none" ${preview ? 'style="stroke:var(--doodle)"' : 'stroke="#ff3b30" stroke-opacity=".75"'} stroke-width="${Math.max(.5, sc.cell * .28)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   s += `<path d="${sc.lines.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${t}" stroke-linecap="round" stroke-linejoin="round"/>`;
   s += `<path d="${sc.deco.map(toD).join('')}" fill="none" stroke="${ink}" stroke-width="${Math.max(.4, t * .8)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  for (const L of sc.labels) s += `<text x="${L.x.toFixed(2)}" y="${L.y.toFixed(2)}" font-size="3.6" font-weight="600" text-anchor="${L.anchor}" dominant-baseline="central" fill="${ink}">${esc(L.text)}</text>`;
   if (!preview) {
     const fy = sc.footerY;
     s += `<line x1="12" y1="${fy - 4}" x2="${sc.PW - 12}" y2="${fy - 4}" stroke="#d2d2d7" stroke-width=".3"/>`;
@@ -201,6 +224,8 @@ async function makePDF(st, sc, jsPDFCtor, fonts) {
   };
   doc.setDrawColor(29, 29, 31); doc.setLineWidth(THICK); sc.lines.forEach(poly);
   doc.setLineWidth(Math.max(.4, THICK * .8)); sc.deco.forEach(poly);
+  doc.setFont(fam, 'bold'); doc.setFontSize(10); doc.setTextColor(29, 29, 31);
+  sc.labels.forEach(L => doc.text(txt(L.text), L.x, L.y, { align: L.anchor === 'middle' ? 'center' : 'left', baseline: 'middle' }));
   const fy = sc.footerY;
   doc.setDrawColor(210, 210, 215); doc.setLineWidth(.3); doc.line(12, fy - 4, sc.PW - 12, fy - 4);
   doc.setFont(fam, 'bold'); doc.setFontSize(10); doc.setTextColor(29, 29, 31);
@@ -208,7 +233,7 @@ async function makePDF(st, sc, jsPDFCtor, fonts) {
   return doc;
 }
 
-const API = { footerText, hashSeed, mulberry32, generateMaze, solveMaze, buildScene, renderSVG, makePDF, gridFor, PRESETS };
+const API = { openings, footerText, hashSeed, mulberry32, generateMaze, solveMaze, buildScene, renderSVG, makePDF, gridFor, PRESETS };
 if (typeof module !== 'undefined' && module.exports) { module.exports = API; return; }
 root.Bludiste = API;
 
@@ -239,11 +264,10 @@ $('size').oninput = e => { const v = +e.target.value; const p = Object.keys(PRES
 $('seed').oninput = e => update({ seed: e.target.value || '1', created: Date.now() });
 $('showSol').onclick = () => update({ showSol: !st.showSol });
 $('newMaze').onclick = () => (gcEvent('bludiste-generate', 'Bludiště: nové bludiště'), update)({ seed: newSeed(), created: Date.now() });
-$('print').onclick = () => { gcEvent('bludiste-print', 'Bludiště: tisk'); $('svgWrap').innerHTML = renderSVG(st, scene, false, true); document.body.classList.add('printing'); window.print(); document.body.classList.remove('printing'); render(); };
 $('pdf').onclick = async () => {
   gcEvent('bludiste-pdf', 'Bludiště: export PDF'); const btn = $('pdf'); btn.disabled = true; const lbl = btn.querySelector('span'), o = lbl.textContent; lbl.textContent = 'Připravuji…';
   try { (await makePDF(st, scene, window.jspdf.jsPDF, await loadFonts())).save(`bludiste-${st.seed}.pdf`); }
-  catch (e) { alert('Export PDF selhal: ' + e.message); }
+  catch (e) { alert('PDF se nepodařilo vytvořit. Zkuste to prosím znovu.'); }
   btn.disabled = false; lbl.textContent = o;
 };
 sync(); render();

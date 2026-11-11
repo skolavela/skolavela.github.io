@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/assets/velappky.css?v=202611101155">
 <link rel="stylesheet" href="style.css?v=202611101155">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-<script src="app.js?v=202611102240" defer></script>
+<script src="app.js?v=202611111020" defer></script>
 </head>
 <body class="is-app">
 
@@ -40,7 +40,7 @@
         <button type="button" data-p="easy" aria-pressed="false">Lehké</button>
         <button type="button" data-p="medium" aria-pressed="false">Střední</button>
         <button type="button" data-p="hard" aria-pressed="false">Těžké</button>
-        <button type="button" data-p="expert" aria-pressed="false">Expert</button>
+        <button type="button" data-p="expert" aria-pressed="false">Nejtěžší</button>
       </div>
     </div>
 
@@ -68,23 +68,16 @@
       <span>Zobrazit řešení</span><span class="c-track" aria-hidden="true"></span>
     </button>
 
-    <div class="c-btns">
-      <button class="c-btn c-btn--secondary" type="button" id="pdf">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 19.5h14"/></svg>
-        <span>Uložit PDF</span>
-      </button>
-      <button class="c-btn c-btn--secondary" type="button" id="print">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg>
-        Tisk
-      </button>
-    </div>
+    <button class="c-btn c-btn--secondary" type="button" id="pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 19.5h14"/></svg>
+      <span>Uložit PDF</span>
+    </button>
 
     <p class="c-meta" id="info"></p>
   </section>
 
   <section class="a-stage" aria-label="Náhled listu">
     <div class="a-sheet" id="sheet">
-      <div class="a-sheet__meta"><span>Start ↓</span><span>Cíl ↑</span></div>
       <div class="a-sheet__body" id="svgWrap"></div>
       <div class="a-sheet__meta">
         <span id="mfoot"></span>

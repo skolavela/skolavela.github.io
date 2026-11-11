@@ -17,4 +17,15 @@ for (const [c, r] of [[5,4],[12,7],[24,15],[42,26],[70,43]]) for (let s = 1; s <
   }
 }
 assert.deepStrictEqual(B.generateMaze(30,20,'abc').walls, B.generateMaze(30,20,'abc').walls, 'seed not reproducible');
+// start a cíl: po obvodu, daleko od sebe, deterministické, různé pro různá čísla
+const sides = new Set();
+for (const [c, r] of [[12,7],[24,15],[70,43]]) for (let s = 1; s <= 200; s++) {
+  const m = B.generateMaze(c, r, String(100000 + s)), P = 2 * (c + r);
+  assert(m.start !== m.end, 'start == cíl');
+  assert(B.solveMaze(m), 'unsolvable with openings');
+  const [a, b] = B.openings(c, r, String(100000 + s));
+  assert.deepStrictEqual([a, b], B.openings(c, r, String(100000 + s)), 'openings not reproducible');
+  sides.add(a.d + '-' + b.d);
+}
+assert(sides.size >= 8, 'start/cíl se málo mění: ' + [...sides]);
 console.log('OK: perfect, solvable, reproducible, branching; min dead-end ratio', worst.toFixed(3));
