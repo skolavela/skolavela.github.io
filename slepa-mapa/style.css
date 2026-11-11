@@ -137,3 +137,6 @@ html { scrollbar-gutter: stable; } /* objevení posuvníku nesmí měnit šířk
   .sm-row--fix .sm-fb { white-space: normal; min-height: 44px; display: flex; align-items: center; }
   .sm-choices .a-choice { height: 52px; min-height: 52px; }
 }
+/* náhled listu na bílém, bez šedé scény */
+.sm-sheetview .a-stage { background: var(--surface); box-shadow: var(--shadow-card); }
+.sm-sheet { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12); }

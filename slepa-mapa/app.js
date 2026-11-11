@@ -478,8 +478,8 @@ function sheetScene() {
   return { k, mx, my, mw, mh, T, vb: [bx, by, bw, bh], marks, list, title, sub, footY, layers, n };
 }
 const footerText = () => `Slepá mapa č. ${S.seed}`;
-// List je černobílý (tisk): sousedé velmi světle šedí, kraje bílé s černými hranicemi
-const C = { stage: '#F2F2F2', kraj: '#FFFFFF', kb: '#000000', border: '#000000', river: '#000000', text: '#000000', text2: '#333333', line: '#9A9A9A', mount: '#000000', accent: '#000000', rule: '#BBBBBB' };
+// List je černobílý (tisk) na bílém pozadí: kraje bílé s černými hranicemi, bez sousedních států
+const C = { kraj: '#FFFFFF', kb: '#000000', border: '#000000', river: '#000000', text: '#000000', text2: '#333333', line: '#9A9A9A', mount: '#000000', accent: '#000000', rule: '#BBBBBB' };
 
 function sheetSVG(sc) {
   const FONT = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif";
@@ -490,7 +490,6 @@ function sheetSVG(sc) {
   // mapa (vnořené svg ořízne sousedy)
   s += `<svg x="${sc.mx}" y="${sc.my}" width="${sc.mw}" height="${sc.mh}" viewBox="${sc.vb.map(v => v.toFixed(1)).join(' ')}">`;
   const sw = (mm) => (mm / sc.k).toFixed(2);
-  s += `<g fill="${C.stage}" stroke="#fff" stroke-width="${sw(.3)}">` + (M.podklad ? `<path d="${M.podklad}"/>` : '') + M.neighbors.map(n => `<path d="${n.d}"/>`).join('') + '</g>';
   s += `<path d="${M.obrys}" fill="#fff"/>`;
   if (S.layers.kraje) s += `<g fill="${C.kraj}" stroke="${C.kb}" stroke-width="${sw(.25)}" stroke-linejoin="round">` + M.layers.kraje.map(k => `<path d="${k.d}" fill-rule="evenodd"/>`).join('') + '</g>';
   else s += `<path d="${M.obrys}" fill="${C.kraj}"/>`;
@@ -548,12 +547,7 @@ async function makePDF(sc, jsPDFCtor, fonts) {
   const P = (subs) => { for (const s of subs) { s.pts.forEach((p, i) => { const [x, y] = sc.T(p[0], p[1]); i ? doc.lineTo(x, y) : doc.moveTo(x, y); }); if (s.closed) doc.close(); } };
   const cache = new Map(); const sub = (d) => { if (!cache.has(d)) cache.set(d, parseD(d)); return cache.get(d); };
   const pt = (mm) => mm * 72 / 25.4;
-  // ořez na rámeček mapy
-  doc.saveGraphicsState();
-  doc.rect(sc.mx, sc.my, sc.mw, sc.mh, null); doc.clip(); doc.discardPath();
-  fillC(C.stage); drawC('#FFFFFF'); doc.setLineWidth(.3);
-  for (const d of [M.podklad].concat(M.neighbors.map(n => n.d))) if (d) { P(sub(d)); doc.fillEvenOdd(); P(sub(d)); doc.stroke(); }
-  doc.restoreGraphicsState();
+  // list je čistě černobílý na bílém pozadí: bez sousedních států
   fillC('#FFFFFF'); P(sub(M.obrys)); doc.fillEvenOdd();
   if (S.layers.kraje) {
     fillC(C.kraj); for (const k of M.layers.kraje) { P(sub(k.d)); doc.fillEvenOdd(); }
