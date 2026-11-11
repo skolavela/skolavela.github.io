@@ -179,7 +179,7 @@ if (wdPts.length) {
 }
 // Bod pohoří nesmí zasahovat do zóny krajského města: na mapě široké 375 px musí být středy aspoň 44 px od sebe
 // (dvě dotykové zóny 22 px). Když vnitřní bod podmínku nesplní, skript hledá na mřížce uvnitř plochy pohoří
-// (aspoň EDGE jednotek od okraje) nejbližší místo, které ji splní; když žádné není, vezme místo nejdál od měst.
+// (aspoň 35 % největší možné vzdálenosti od okraje) nejbližší místo, které ji splní; když žádné není, vezme místo nejdál od měst.
 const PHONE_W = 375, MIN_PX = 44, EDGE = 4;
 const MIN_U = MIN_PX * VBW / PHONE_W;
 const mestaPts = mesta.map(c => [c.x, c.y, c.name]);
@@ -203,9 +203,14 @@ const pohori = Object.entries(POHORI).map(([n, [lvl, qid]]) => {
     const rings = ringsOf(pl.geometry);
     let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
     for (const r of rings) for (const [px, py] of r) { bx0 = Math.min(bx0, px); by0 = Math.min(by0, py); bx1 = Math.max(bx1, px); by1 = Math.max(by1, py); }
+    // kandidáti jistě uvnitř: aspoň 35 % největší možné vzdálenosti od okraje plochy (bod nespadne na hranici)
+    const grid = [];
+    for (let gx = bx0; gx <= bx1; gx += 1) for (let gy = by0; gy <= by1; gy += 1) if (inside(rings, gx, gy)) grid.push([gx, gy, edgeDist(rings, gx, gy)]);
+    const maxE = Math.max(...grid.map(g => g[2]));
+    const minE = Math.max(Math.min(EDGE, maxE), maxE * 0.35);
     let ok = null, okD = Infinity, far = null, farD = -1;
-    for (let gx = bx0; gx <= bx1; gx += 1) for (let gy = by0; gy <= by1; gy += 1) {
-      if (!inside(rings, gx, gy) || edgeDist(rings, gx, gy) < EDGE) continue;
+    for (const [gx, gy, e] of grid) {
+      if (e < minE) continue;
       const cm = cityMin(gx, gy);
       if (cm >= MIN_U) { const d = Math.hypot(gx - x, gy - y); if (d < okD) { okD = d; ok = [gx, gy]; } }
       if (cm > farD) { farD = cm; far = [gx, gy]; }

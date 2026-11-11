@@ -54,7 +54,7 @@ velikost výstupu (limit 300 kB) a u každého pohoří vzdálenost bodu Data200
 - Pohoří: středy ploch pohoří, ČÚZK Data200. Bod je vnitřní bod (`mapshaper -points inner`, leží jistě uvnitř
   plochy) geomorfologické jednotky (`GName6A`, Brdy `GName7A`, Českomoravská vrchovina `GName5A`).
   Když je bod blíž krajskému městu než 44 px na mapě široké 375 px (dvě dotykové zóny po 22 px), skript ho posune
-  na mřížce uvnitř plochy (aspoň 4 jednotky od okraje) na nejbližší místo, kde podmínku splní; když takové místo
+  na mřížce uvnitř plochy (aspoň 35 % největší možné vzdálenosti od okraje, aby bod nespadl na hranici) na nejbližší místo, kde podmínku splní; když takové místo
   není, vezme místo nejdál od měst. Na konci vypíše posuny a KONTROLU DVOJIC pohoří - krajské město, které
   podmínku nesplňují. Žádné ručně psané souřadnice.
 - Sousední státy: Natural Earth převedený do Křováku (proj4 řetězec v `build.mjs`).
