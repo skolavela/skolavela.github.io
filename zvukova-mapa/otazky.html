@@ -56,7 +56,7 @@
       <h2>Co napsat do pole Kdo?</h2>
       <p>Třídu nebo křestní jméno, bez příjmení.</p>
     </div>
-    <div>
+    <div id="faq-zaloha" hidden>
       <h2>Jak udělat zálohu a jak ji obnovit?</h2>
       <p>V dospěláckém režimu klikni na Exportovat. Stáhne se soubor ZIP s datem v názvu. Jsou v něm všechna místa včetně skrytých, jejich časové osy, fotky i zvuky. Soubor si ulož na bezpečné místo, třeba do školního úložiště.</p>
       <p>Zálohu obnovíš tlačítkem Importovat, kde vybereš uložený ZIP. Appka vrátí na mapu jen to, co na ní chybí, i s fotkami a zvuky. Místa, která na mapě už jsou, nechá beze změny, takže nic nevznikne dvakrát a nic se nesmaže. Před importem ukáže, kolik míst přidá a kolik přeskočí.</p>
@@ -83,6 +83,7 @@
   </div>
 </footer>
 
+<script>try { if (sessionStorage.getItem("zvukovamapa:dospelak") === "1") document.getElementById("faq-zaloha").hidden = false; } catch (e) {}</script>
 <script src="/assets/icons.js?v=202611111100"></script>
 <script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>

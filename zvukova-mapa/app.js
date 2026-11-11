@@ -182,6 +182,7 @@
     st.role = data.role || "class";
     st.places = data.places || [];
     $("teacher-bar").hidden = !isTeacher();
+    try { if (isTeacher()) sessionStorage.setItem("zvukovamapa:dospelak", "1"); else sessionStorage.removeItem("zvukovamapa:dospelak"); } catch (e) {}
   }
   async function pollRefresh() {
     if (!st.unlocked || document.hidden || st.busy) return;
@@ -1356,6 +1357,7 @@
   }
   function lock() {
     setPassword("");
+    try { sessionStorage.removeItem("zvukovamapa:dospelak"); } catch (e) {}
     st.unlocked = false;
     st.role = "";
     st.places = [];
