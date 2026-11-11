@@ -18,9 +18,11 @@ textarea.c-input { height: auto; min-height: 140px; padding: 10px 12px; line-hei
 .up .out { text-transform: uppercase; }
 
 @media print {
-  @page { size: A4 portrait; margin: 16mm 16mm 18mm; @bottom-right { content: "velappky.cz"; font: 9pt Arial, sans-serif; color: #999; } }
+  @page { size: A4 portrait; margin: 16mm 16mm 18mm; }
+  /* patička listu jako v ostatních appkách: vlnka + velappky.cz vpravo dole (u delšího textu na konci poslední strany) */
+  .s-foot { display: flex !important; margin-top: auto; padding-top: 8mm; justify-content: flex-end; font-size: 8pt; color: #6E6E73; break-inside: avoid; page-break-inside: avoid; }
   body { min-height: 0; }
-  body.print-portrait .a-sheet.s-sheet { display: block; width: auto; height: auto; aspect-ratio: auto; padding: 0; break-inside: auto; }
+  body.print-portrait .a-sheet.s-sheet { display: flex; flex-direction: column; min-height: 262mm; width: auto; height: auto; aspect-ratio: auto; padding: 0; break-inside: auto; }
   #outText p { orphans: 2; widows: 2; }
   .out, .out .s, .out .s.b, .out h2 { color: #000 !important; }
   .out .s { font-weight: 300 !important; }
