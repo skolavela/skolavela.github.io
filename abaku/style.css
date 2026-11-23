@@ -1,0 +1,76 @@
+/* Abaku – styly navíc ke společnému assets/velappky.css */
+@page { size: A4 portrait; margin: 0; }
+
+/* Panel: přepínače více voleb (operace, typy úloh) */
+.ab-toggles { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.ab-toggles button {
+  min-height: 40px; padding: 0 6px; border: 0; border-radius: var(--r-seg);
+  background: var(--fill); font: inherit; font-size: 22px; font-weight: 500; line-height: 1; color: var(--text); cursor: pointer;
+}
+.ab-toggles--text button { font-size: 13px; font-weight: 500; min-height: 36px; }
+.ab-toggles button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ab-toggles button[aria-pressed="false"] { color: var(--text-2); }
+.ab-toggles button:focus-visible, .c-seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.c-seg button:disabled { color: var(--text-3); cursor: not-allowed; }
+.ab-panel { gap: 16px; }
+.p-flinks { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 24px; }
+
+/* Náhled: strany pod sebou */
+.ab-stage { flex-direction: column; align-items: center; }
+.ab-pages { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 20px; }
+.ab-sheet { position: relative; overflow: hidden; padding: 0; max-width: none; }
+
+/* Strana A4 ve skutečné velikosti, v náhledu zmenšená transformací */
+.ab-page {
+  position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; box-sizing: border-box;
+  padding: 13mm 14mm 10mm; display: flex; flex-direction: column;
+  transform-origin: top left; background: #fff; color: #1D1D1F; font-family: var(--font);
+}
+.ab-head { height: 13mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
+.ab-title { font-size: 6mm; font-weight: 700; line-height: 1; }
+.ab-ops { font-size: 4.2mm; font-weight: 600; color: #1D1D1F; letter-spacing: .02em; }
+.ab-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.ab-sec { display: flex; flex-direction: column; }
+.ab-sec + .ab-sec { margin-top: calc(var(--rg) * 0.6); }
+.ab-instr { margin: 0; height: 11mm; display: flex; align-items: center; font-size: 4.2mm; font-weight: 600; }
+.ab-grid { display: grid; column-gap: 10mm; row-gap: var(--rg); padding-top: calc(var(--rg) * 0.3); }
+.ab-grid.cols-2 { grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: none; }
+.ab-item { display: flex; align-items: center; min-width: 0; }
+.ab-num { flex: 0 0 8mm; font-size: 3.6mm; font-weight: 600; color: #6E6E73; }
+.ab-digits { display: inline-flex; align-items: center; flex: 0 0 auto; }
+.ab-box {
+  width: var(--b); height: var(--b); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+  border: .35mm solid #8E8E93; border-radius: calc(var(--b) * .18);
+  font-size: calc(var(--b) * .6); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1;
+}
+.ab-gap {
+  width: var(--g); display: inline-flex; justify-content: center; align-items: center;
+  font-size: calc(var(--b) * .55); font-weight: 700; line-height: 1;
+}
+.ab-yn { margin-left: auto; display: inline-flex; gap: 5mm; padding-right: 2mm; font-size: 4.2mm; }
+.ab-sol { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.ab-note { height: 4.5mm; display: flex; align-items: flex-end; font-size: 3.3mm; color: #1D1D1F; white-space: nowrap; }
+.ab-note b { font-weight: 700; }
+.ab-foot { height: 9mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 3mm; color: #6E6E73; }
+.ab-foot .a-sheet__brand svg { width: 7.5mm; height: 1.9mm; color: var(--accent); }
+
+/* Stránka O aplikaci */
+.p-info { max-width: 36rem; flex: 1 0 auto; }
+.p-info p, .p-info li { margin: 0; font-size: 17px; line-height: 1.47; color: var(--text); }
+.p-info__lead { font-weight: 650; }
+.p-info h2 { margin: 8px 0 0; font-size: 17px; font-weight: 600; line-height: 1.35; }
+.p-info ol, .p-info ul { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.p-info .ab-ex { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+
+@media print {
+  html, body { background: #fff; }
+  .ab-stage { display: block; }
+  .ab-pages { max-width: none; display: block; }
+  .ab-sheet {
+    width: 210mm !important; height: 297mm !important; aspect-ratio: auto; box-shadow: none; padding: 0 !important;
+    overflow: hidden; break-after: page; page-break-after: always; break-inside: avoid;
+  }
+  .ab-sheet:last-child { break-after: auto; page-break-after: auto; }
+  .ab-page { position: relative; transform: none !important; }
+  .ab-box { border-color: #6E6E73; }
+}

@@ -46,6 +46,11 @@ window.VELAPPKY = [
         url: "/souctove-ulohy/", icon: "souctove", tone: "blue", grades: ["1", "2"],
         keywords: "součtový trojúhelník číselná pyramida řada sčítání odčítání pracovní list 1. stupeň" }
       */
+      /* Zatím neveřejné (čeká na kontrolu), appka běží na /abaku/:
+      { type: "app", id: "abaku", name: "Abaku", short: "Pracovní listy k tisku",
+        url: "/abaku/", icon: "abaku", tone: "blue", grades: ["1"],
+        keywords: "abaku hejný řetězec čísel znaménka rovnost sčítání odčítání násobení dělení pracovní list tisk 1. stupeň" }
+      */
     ]
   },
   {

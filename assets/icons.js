@@ -105,6 +105,16 @@
       '<rect x="19.5" y="10" width="9" height="9" rx="2.5" fill="currentColor"/>'
     ),
 
+    abaku: svg(
+      '<rect x="4" y="15" width="12" height="18" rx="3" fill="currentColor"/>' +
+      '<rect x="18" y="15" width="12" height="18" rx="3" fill="currentColor" opacity="0.55"/>' +
+      '<rect x="32" y="15" width="12" height="18" rx="3" fill="currentColor"/>' +
+      '<text x="10" y="29" text-anchor="middle" font-family="' + F + '" font-size="13" font-weight="800" fill="#FFFFFF">1</text>' +
+      '<text x="24" y="29" text-anchor="middle" font-family="' + F + '" font-size="13" font-weight="800" fill="#FFFFFF">2</text>' +
+      '<text x="38" y="29" text-anchor="middle" font-family="' + F + '" font-size="13" font-weight="800" fill="#FFFFFF">3</text>' +
+      '<path d="M14.5 9.5h5M17 7v5M28.5 8.2h5M28.5 10.8h5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'
+    ),
+
     zvukova: svg(
       '<path d="M7 11a5 5 0 0 1 5-5h16.5L34 12v25a5 5 0 0 1-5 5H12a5 5 0 0 1-5-5z" fill="currentColor"/>' +
       '<path d="M20.5 16.5c-3.5 0-6.2 2.7-6.2 6 0 4.5 6.2 11.5 6.2 11.5s6.2-7 6.2-11.5c0-3.3-2.7-6-6.2-6z" fill="#FFFFFF"/>' +

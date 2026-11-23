@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>O aplikaci - Abaku - Velappky</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611231100">
+<link rel="stylesheet" href="style.css?v=202611231100">
+</head>
+<body class="is-app">
+
+<header class="v-header">
+  <div class="v-header__in">
+    <div class="a-titlebar">
+      <a class="a-back" href="/abaku/">
+        <span data-icon="ui_back"></span><span class="a-back__label">Abaku</span>
+      </a>
+      <div class="a-name">
+        <span class="v-icon tone-blue" data-icon="abaku"></span>
+        <h1>O aplikaci</h1>
+        <span class="a-name__sub">Abaku</span>
+      </div>
+    </div>
+    <a class="v-logo v-logo--small" href="/" aria-label="Velappky - úvod">
+      <img src="/assets/vela-logo.png" alt="škola Vela" width="255" height="99">
+    </a>
+  </div>
+</header>
+
+<main class="a-single p-info">
+  <p class="p-info__lead">Generátor pracovních listů s prostředím Abaku z Hejného matematiky.</p>
+  <p>Hodí se pro 1. až 4. ročník. List se vytiskne nebo uloží jako PDF, nic se neinstaluje ani neukládá na server.</p>
+
+  <h2>Co je abaku</h2>
+  <p>Abaku je řada číslic bez znamének. Dítě hledá, kam patří znaménko početní operace a rovná se, aby vznikla pravdivá rovnost.</p>
+  <ul>
+    <li><span class="ab-ex">123</span> je abaku: 1 + 2 = 3.</li>
+    <li><span class="ab-ex">1234</span> je abaku: 12 : 3 = 4.</li>
+    <li><span class="ab-ex">12315</span> je abaku: 12 + 3 = 15.</li>
+    <li><span class="ab-ex">124</span> se sčítáním abaku není.</li>
+  </ul>
+
+  <h2>Pravidla</h2>
+  <ul>
+    <li>Celá řada číslic tvoří jednu rovnost ze tří čísel: první číslo, znaménko, druhé číslo, rovná se, výsledek.</li>
+    <li>Pořadí číslic se nemění, jen se mezi ně doplní znaménka.</li>
+    <li>Nula nikdy nestojí sama a číslo nezačíná nulou. Může být jen uvnitř víceciferného čísla, třeba v 10 nebo 20.</li>
+    <li>Dělí se jen beze zbytku.</li>
+    <li>Při čtení oběma směry se řada smí číst i zprava doleva. Například 321 zprava je 1 + 2 = 3.</li>
+  </ul>
+
+  <h2>Volby</h2>
+  <ul>
+    <li><strong>Operace</strong>: sčítání, odčítání, násobení a dělení, libovolně dohromady.</li>
+    <li><strong>Čísla</strong>: jednociferná, do 20 nebo do 100. Z jednociferných čísel jsou jen řady ze 3 číslic, delší řady potřebují víceciferná čísla.</li>
+    <li><strong>Úlohy</strong>: „Je to abaku?“ (ano, nebo ne; platné a neplatné řady se míchají) a „Doplň znaménka“ (jen platné řady). Jde vybrat jedno nebo obojí.</li>
+    <li><strong>Počet úloh</strong> 8 až 20 na jednu stranu A4.</li>
+  </ul>
+  <p>Na druhé straně je řešení: u platných řad doplněná znaménka, u neplatných „není“. Když se rovnost čte zprava doleva, je pod řadou napsané „zprava“. Číslo listu určuje úlohy, takže stejné číslo se stejnými volbami dá vždy stejný list.</p>
+
+  <h2>Jak se úlohy ověřují</h2>
+  <p>Aplikace u každé řady vyzkouší všechna rozdělení na tři čísla, všechny zvolené operace a povolené směry čtení. Neplatná řada na listu opravdu nemá žádné řešení. Na jednom listu se žádná úloha neopakuje.</p>
+</main>
+
+<footer class="v-footer">
+  <svg class="v-clouds" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 10V6Q2 2 6 5Q10 0 14 5Q18 2 23 6Q27 1 32 5Q36 3 40 6Q44 0 49 5Q53 2 57 6Q61 1 66 5Q70 3 74 6Q78 0 83 5Q87 2 91 6Q95 1 100 5V10Z"/></svg>
+  <div class="v-footer__bar">
+    <div class="v-footer__in">
+      <span>© <a href="https://skolavela.cz">Základní škola Vela s.r.o.</a></span>
+      <nav class="p-flinks" aria-label="Patička">
+        <a href="o-aplikaci.html">O aplikaci</a>
+        <a href="https://tally.so/r/Qo1aeY">Napsat připomínku</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/icons.js?v=202611231100"></script>
+<script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
+<script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
