@@ -23,20 +23,25 @@
 /* Strana A4 ve skutečné velikosti, v náhledu zmenšená transformací */
 .ab-page {
   position: absolute; top: 0; left: 0; width: 210mm; height: 297mm; box-sizing: border-box;
-  padding: 13mm 14mm 10mm; display: flex; flex-direction: column;
+  padding: 12mm 14mm 9mm; display: flex; flex-direction: column;
   transform-origin: top left; background: #fff; color: #1D1D1F; font-family: var(--font);
 }
-.ab-head { height: 13mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
+.ab-head { height: 12mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-start; }
 .ab-title { font-size: 6mm; font-weight: 700; line-height: 1; }
-.ab-ops { font-size: 4.2mm; font-weight: 600; color: #1D1D1F; letter-spacing: .02em; }
+.ab-ops { font-size: 4.2mm; font-weight: 600; letter-spacing: .02em; }
+/* Jméno a datum jen na zadání */
+.ab-name { margin: 0; height: 11mm; flex: 0 0 auto; display: flex; align-items: flex-start; gap: 2mm; font-size: 4.2mm; font-weight: 500; }
+.ab-line { display: inline-block; border-bottom: .3mm solid #1D1D1F; height: 4.6mm; }
+.ab-line--name { width: 80mm; margin-right: 8mm; }
+.ab-line--date { width: 38mm; }
+.ab-sub { margin: 0; height: 8mm; flex: 0 0 auto; font-size: 3.8mm; color: #1D1D1F; }
 .ab-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .ab-sec { display: flex; flex-direction: column; }
-.ab-sec + .ab-sec { margin-top: calc(var(--rg) * 0.6); }
-.ab-instr { margin: 0; height: 11mm; display: flex; align-items: center; font-size: 4.2mm; font-weight: 600; }
-.ab-grid { display: grid; column-gap: 10mm; row-gap: var(--rg); padding-top: calc(var(--rg) * 0.3); }
-.ab-grid.cols-2 { grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: none; }
+.ab-instr { margin: 0; height: 11mm; flex: 0 0 auto; display: flex; align-items: center; font-size: 4.2mm; font-weight: 600; }
+.ab-grid { display: grid; column-gap: 10mm; row-gap: var(--rg); padding-bottom: var(--rg); }
+.ab-grid.cols-2 { grid-template-columns: 1fr 1fr; grid-auto-flow: column; }
 .ab-item { display: flex; align-items: center; min-width: 0; }
-.ab-num { flex: 0 0 8mm; font-size: 3.6mm; font-weight: 600; color: #6E6E73; }
+.ab-num { flex: 0 0 9mm; font-size: var(--fs); font-weight: 600; color: #6E6E73; }
 .ab-digits { display: inline-flex; align-items: center; flex: 0 0 auto; }
 .ab-box {
   width: var(--b); height: var(--b); box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
@@ -44,14 +49,13 @@
   font-size: calc(var(--b) * .6); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1;
 }
 .ab-gap {
-  width: var(--g); display: inline-flex; justify-content: center; align-items: center;
+  width: var(--g); flex: 0 0 auto; display: inline-flex; justify-content: center; align-items: center;
   font-size: calc(var(--b) * .55); font-weight: 700; line-height: 1;
 }
-.ab-yn { margin-left: auto; display: inline-flex; gap: 5mm; padding-right: 2mm; font-size: 4.2mm; }
-.ab-sol { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
-.ab-note { height: 4.5mm; display: flex; align-items: flex-end; font-size: 3.3mm; color: #1D1D1F; white-space: nowrap; }
-.ab-note b { font-weight: 700; }
-.ab-foot { height: 9mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 3mm; color: #6E6E73; }
+.ab-yn { margin-left: auto; display: inline-flex; gap: 5mm; padding: 0 2mm 0 4mm; font-size: var(--fy); }
+.ab-dir { flex: 0 0 auto; width: calc(var(--fs) * 5.04 + 3mm); font-size: var(--fs); font-weight: 600; white-space: nowrap; }
+.ab-mark { margin-left: 3mm; font-size: calc(var(--fs) * 1.1); font-weight: 700; white-space: nowrap; }
+.ab-foot { height: 8mm; flex: 0 0 auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 3mm; color: #6E6E73; }
 .ab-foot .a-sheet__brand svg { width: 7.5mm; height: 1.9mm; color: var(--accent); }
 
 /* Stránka O aplikaci */

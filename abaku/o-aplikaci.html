@@ -7,8 +7,8 @@
 <title>O aplikaci - Abaku - Velappky</title>
 <meta name="theme-color" content="#FFFFFF">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/velappky.css?v=202611231100">
-<link rel="stylesheet" href="style.css?v=202611231100">
+<link rel="stylesheet" href="/assets/velappky.css?v=202611231045">
+<link rel="stylesheet" href="style.css?v=202611231045">
 </head>
 <body class="is-app">
 
@@ -57,9 +57,9 @@
     <li><strong>Operace</strong>: sčítání, odčítání, násobení a dělení, libovolně dohromady.</li>
     <li><strong>Čísla</strong>: jednociferná, do 20 nebo do 100. Z jednociferných čísel jsou jen řady ze 3 číslic, delší řady potřebují víceciferná čísla.</li>
     <li><strong>Úlohy</strong>: „Je to abaku?“ (ano, nebo ne; platné a neplatné řady se míchají) a „Doplň znaménka“ (jen platné řady). Jde vybrat jedno nebo obojí.</li>
-    <li><strong>Počet úloh</strong> 8 až 20 na jednu stranu A4.</li>
+    <li><strong>Počet úloh</strong> 8 až 20 na jednu stranu A4. Čím méně úloh, tím větší rámečky. Mezi rámečky je místo na ručně psaná znaménka.</li>
   </ul>
-  <p>Na druhé straně je řešení: u platných řad doplněná znaménka, u neplatných „není“. Když se rovnost čte zprava doleva, je pod řadou napsané „zprava“. Číslo listu určuje úlohy, takže stejné číslo se stejnými volbami dá vždy stejný list.</p>
+  <p>Na druhé straně je řešení: u platných řad doplněná znaménka, u neplatných „není“. Uvádí se jedno řešení, platí každé, které dává pravdivou rovnost. Když jde řada přečíst jen zprava doleva, je v řešení napsaná obráceně se znaménky a před ní „← zprava“. Číslo listu určuje úlohy, takže stejné číslo se stejnými volbami dá vždy stejný list.</p>
 
   <h2>Jak se úlohy ověřují</h2>
   <p>Aplikace u každé řady vyzkouší všechna rozdělení na tři čísla, všechny zvolené operace a povolené směry čtení. Neplatná řada na listu opravdu nemá žádné řešení. Na jednom listu se žádná úloha neopakuje.</p>
@@ -78,7 +78,7 @@
   </div>
 </footer>
 
-<script src="/assets/icons.js?v=202611231100"></script>
+<script src="/assets/icons.js?v=202611231045"></script>
 <script>document.querySelectorAll("[data-icon]").forEach(function (el) { el.innerHTML = window.VELA_ICONS[el.dataset.icon] || ""; });</script>
 <script data-goatcounter="https://skolavela.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

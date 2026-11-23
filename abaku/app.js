@@ -114,48 +114,71 @@
   $("print").addEventListener("click", function () { gcEvent("abaku-tisk", "Abaku: tisk"); window.print(); });
 
   /* ---------- list ---------- */
-  var PAGE_W = 210, PAGE_H = 297, MX = 14, MT = 13, MB = 10, HEAD = 13, FOOT = 9;
-  var CONTENT_W = PAGE_W - 2 * MX, COL_GAP = 10, LABEL = 8, ANO = 22, GAP_R = 0.55, NOTE = 4.5;
-  var INSTR = 11; /* výška pokynu nad oddílem */
+  var PAGE_W = 210, PAGE_H = 297, MX = 14, MT = 12, MB = 9, HEAD = 12, NAME = 11, SUB = 8, FOOT = 8;
+  var CONTENT_W = PAGE_W - 2 * MX, COL_GAP = 10, LABEL = 9, INSTR = 11, MIN_GAP = 3.5;
+  var B_MAX = 20; /* největší rámeček v mm */
 
-  function rowWidth(len, b) { return len * b + (len - 1) * GAP_R * b; }
-  /* rozměr okének: aby se řádek vešel do sloupce a všechny oddíly na stranu */
-  function layout(sections, len, note) {
-    var avail = PAGE_H - MT - MB - HEAD - FOOT;
-    var out = sections.map(function (sec) {
-      var extra = LABEL + (sec.kind === "ano" ? ANO : 0);
-      var units = len + (len - 1) * GAP_R;
-      var b2 = ((CONTENT_W - COL_GAP) / 2 - extra) / units;
-      var cols = b2 >= 7 ? 2 : 1;
-      var b = cols === 2 ? b2 : (CONTENT_W - extra) / units;
-      return { kind: sec.kind, tasks: sec.tasks, cols: cols, b: Math.min(b, 11.5), rows: Math.ceil(sec.tasks.length / cols) };
-    });
-    var b = Math.min.apply(null, out.map(function (s) { return s.b; }));
-    var rows = out.reduce(function (n, s) { return n + s.rows; }, 0);
-    var minGap = 5;
-    var noteH = note ? NOTE : 0;
-    var maxB = (avail - out.length * INSTR - rows * (minGap + noteH)) / rows;
-    b = Math.max(6, Math.min(b, maxB));
-    var free = avail - out.length * INSTR - rows * (b + noteH);
-    var gap = Math.max(minGap, Math.min(16, free / (rows + out.length)));
-    out.forEach(function (s) { s.b = b; s.gap = gap; });
-    return out;
+  /* Písmo podle velikosti rámečku (mm). */
+  function fSmall(b) { return Math.max(3.6, 0.3 * b); }  /* číslo úlohy, „← zprava“ */
+  function fYn(b) { return Math.max(4.2, 0.36 * b); }    /* ano / ne */
+  /* Odhad šířky textu v mm (systémové písmo, průměrná šířka znaku ~0,56 em). */
+  function textW(chars, f) { return chars * 0.56 * f; }
+
+  /* Šířka řádku úlohy při rámečku b (mm).
+     Zadání: mezera mezi rámečky = rámeček (místo na ruční znaménko). Řešení: mezera 0,55 rámečku. */
+  function itemWidth(kind, len, b, solution, rtl) {
+    var g = solution ? 0.55 * b : b;
+    var w = LABEL + len * b + (len - 1) * g;
+    if (!solution && kind === "ano") w += 4 + textW(5, fYn(b)) + 5 + 2;
+    if (solution && rtl) w += textW(9, fSmall(b)) + 3;
+    if (solution && kind === "ano") w += 3 + textW(4, fSmall(b) * 1.1);
+    return w;
   }
 
-  function boxes(str, b, signs, cls) {
-    var g = GAP_R * b, h = '<span class="ab-digits' + (cls ? " " + cls : "") + '" style="--b:' + b.toFixed(2) + 'mm;--g:' + g.toFixed(2) + 'mm">';
+  /* Rozvržení: pro každý oddíl 1 nebo 2 sloupce, společná velikost rámečku co největší,
+     aby se vše vešlo na šířku i výšku strany a strana byla co nejvíc vyplněná. */
+  function layout(sections, len, solution, rtl) {
+    var avail = PAGE_H - MT - MB - HEAD - FOOT - (solution ? SUB : NAME) - sections.length * INSTR;
+    var best = null, combos = 1 << sections.length, c, i;
+    for (c = 0; c < combos; c++) {
+      var cols = sections.map(function (s, k) { return (c >> k) & 1 ? 2 : 1; });
+      var rows = sections.reduce(function (n, s, k) { return n + Math.ceil(s.tasks.length / cols[k]); }, 0);
+      var b;
+      for (b = B_MAX; b > 4; b -= 0.1) {
+        var okW = sections.every(function (s, k) {
+          var colW = cols[k] === 2 ? (CONTENT_W - COL_GAP) / 2 : CONTENT_W;
+          return itemWidth(s.kind, len, b, solution, rtl) <= colW;
+        });
+        if (okW && rows * (b + MIN_GAP) <= avail) break;
+      }
+      var fill = rows * b; /* čím víc plochy rámečky zaberou, tím líp */
+      if (!best || b > best.b + 0.05 || (Math.abs(b - best.b) <= 0.05 && fill > best.fill))
+        best = { b: b, cols: cols, rows: rows, fill: fill };
+    }
+    var gap = Math.min(Math.max(MIN_GAP, best.b * 1.1), (avail - best.rows * best.b) / best.rows);
+    return sections.map(function (s, k) {
+      return { kind: s.kind, tasks: s.tasks, cols: best.cols[k], rows: Math.ceil(s.tasks.length / best.cols[k]), b: best.b, gap: gap };
+    });
+  }
+
+  function boxes(str, b, gapR, signs) {
+    var h = '<span class="ab-digits" style="--b:' + b.toFixed(2) + 'mm;--g:' + (gapR * b).toFixed(2) + 'mm">';
     for (var i = 0; i < str.length; i++) {
       if (i) h += '<span class="ab-gap">' + (signs && signs[i] ? esc(signs[i]) : "") + "</span>";
       h += '<span class="ab-box">' + str.charAt(i) + "</span>";
     }
     return h + "</span>";
   }
-  /* znaménka do mezer řetězce pro danou rovnost (mezera i je mezi číslicí i-1 a i) */
-  function signsFor(e, n) {
-    var la = String(e.a).length, lb = String(e.b).length, s = {}, op = A.OPS[e.op].sign;
-    if (e.dir === "ltr") { s[la] = op; s[la + lb] = "="; }
-    else { s[n - la] = op; s[n - la - lb] = "="; }
+  /* Znaménka do mezer řetězce čteného zleva (mezera i je mezi číslicí i-1 a i). */
+  function signsLtr(e) {
+    var la = String(e.a).length, lb = String(e.b).length, s = {};
+    s[la] = A.OPS[e.op].sign; s[la + lb] = "=";
     return s;
+  }
+  /* Jedno řešení do listu řešení: přednostně zleva; jen když jde řešit jen zprava, tak zprava. */
+  function pickSolution(t) {
+    var l = t.sol.filter(function (e) { return e.dir === "ltr"; });
+    return l.length ? l[0] : t.sol[0];
   }
 
   function opsLine() {
@@ -174,24 +197,25 @@
   }
 
   function pageHtml(sheet, solution) {
-    var secs = layout(sectionsOf(sheet), sheet.cfg.len, solution), num = 0;
+    var rtl = solution && sheet.tasks.some(function (t) { return t.sol.length && pickSolution(t).dir === "rtl"; });
+    var secs = layout(sectionsOf(sheet), sheet.cfg.len, solution, rtl), num = 0;
     var body = secs.map(function (sec) {
+      var b = sec.b, st = "--fs:" + fSmall(b).toFixed(2) + "mm;--fy:" + fYn(b).toFixed(2) + "mm";
       var items = sec.tasks.map(function (t) {
         num++;
-        var h = '<div class="ab-item"><span class="ab-num">' + num + ".</span>";
+        var h = '<div class="ab-item" style="' + st + '"><span class="ab-num">' + num + ".</span>";
         if (!solution) {
-          h += boxes(t.str, sec.b);
+          h += boxes(t.str, b, 1);
           if (sec.kind === "ano") h += '<span class="ab-yn"><span>ano</span><span>ne</span></span>';
         } else if (!t.sol.length) {
-          h += '<span class="ab-sol">' + boxes(t.str, sec.b) + '<span class="ab-note"><b>není</b></span></span>';
+          if (rtl) h += '<span class="ab-dir"></span>';
+          h += boxes(t.str, b, 0.55) + '<span class="ab-mark">není</span>';
         } else {
-          /* znaménka přímo v řadě (první řešení); pod řadou čtení zprava a další řešení */
-          var e = t.sol[0], parts = [];
-          if (sec.kind === "ano") parts.push("<b>ano</b>");
-          if (e.dir === "rtl" || t.sol.length > 1)
-            parts.push(esc(t.sol.slice(0, 2).map(function (x) { return (x.dir === "rtl" ? "zprava " : "") + A.eqText(x); }).join(", ")) + (t.sol.length > 2 ? " a další" : ""));
-          h += '<span class="ab-sol">' + boxes(t.str, sec.b, signsFor(e, t.str.length), "is-sol")
-            + '<span class="ab-note">' + parts.join(", ") + "</span></span>";
+          var e = pickSolution(t);
+          if (rtl) h += '<span class="ab-dir">' + (e.dir === "rtl" ? "\u2190 zprava" : "") + "</span>";
+          /* čtení zprava: obrácený řetězec, znaménka zleva (2 4 + 8 = 3 2) */
+          h += boxes(e.dir === "rtl" ? t.str.split("").reverse().join("") : t.str, b, 0.55, signsLtr(e));
+          if (sec.kind === "ano") h += '<span class="ab-mark">ano</span>';
         }
         return h + "</div>";
       }).join("");
@@ -200,7 +224,10 @@
         + '<div class="ab-grid cols-' + sec.cols + '" style="grid-template-rows:repeat(' + sec.rows + ',auto)">' + items + "</div></section>";
     }).join("");
     var head = '<div class="ab-head"><span class="ab-title">Abaku' + (solution ? " \u2013 řešení" : "") + "</span>"
-      + '<span class="ab-ops">Znaménka\u2002' + opsLine() + "</span></div>";
+      + '<span class="ab-ops">Znaménka\u2002' + opsLine() + "</span></div>"
+      + (solution
+        ? '<p class="ab-sub">Uvádíme jedno řešení. Platí každé, které dává pravdivou rovnost.</p>'
+        : '<p class="ab-name">Jméno: <span class="ab-line ab-line--name"></span> Datum: <span class="ab-line ab-line--date"></span></p>');
     var foot = '<div class="ab-foot"><span>Abaku č. ' + esc(sheet.cfg.seed) + (solution ? " \u00b7 řešení" : "") + "</span>"
       + '<span class="a-sheet__brand">' + ((window.VELA_ICONS && window.VELA_ICONS.ui_wave) || "") + "velappky.cz</span></div>";
     return '<div class="a-sheet a-sheet--portrait ab-sheet"><div class="ab-page">' + head + '<div class="ab-body">' + body + "</div>" + foot + "</div></div>";
